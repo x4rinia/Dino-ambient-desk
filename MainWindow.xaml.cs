@@ -727,6 +727,18 @@ public partial class MainWindow : Window
 
     private static System.Drawing.Icon CreateCustomTrayIcon()
     {
+        try
+        {
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+            if (File.Exists(iconPath))
+            {
+                return new System.Drawing.Icon(iconPath, new System.Drawing.Size(32, 32));
+            }
+        }
+        catch
+        {
+        }
+
         using var bmp = new Bitmap(32, 32);
         using var g = Graphics.FromImage(bmp);
         g.SmoothingMode = SmoothingMode.AntiAlias;

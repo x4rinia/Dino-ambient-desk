@@ -27,6 +27,18 @@ public partial class SettingsWindow : Window
         ShowInTaskbar = true;
         SettingsWebView.DefaultBackgroundColor = Color.FromArgb(255, 13, 16, 24);
 
+        try
+        {
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app_icon.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri(iconPath));
+            }
+        }
+        catch
+        {
+        }
+
         // Position centered on the Primary Monitor (Hauptmonitor)
         WindowStartupLocation = WindowStartupLocation.Manual;
         double w = Width;
