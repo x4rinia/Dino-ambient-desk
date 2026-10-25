@@ -498,29 +498,43 @@ export const App: React.FC = () => {
             <section
               className="glass-panel"
               style={{
+                position: 'relative',
                 padding: '10px 18px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 10,
+                justifyContent: 'center',
+                minHeight: '44px',
               }}
             >
               <div
                 style={{
-                  fontSize: '1.15rem',
+                  fontSize: '1.18rem',
                   fontWeight: 700,
                   letterSpacing: '0.04em',
                   color: 'var(--text-primary)',
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: 8,
+                  textAlign: 'center',
                 }}
               >
                 <span style={{ color: 'var(--accent-emerald)' }}>🦖</span>
                 <span>{config.modules.header_title?.text?.trim() || 'Dino'}</span>
               </div>
-              <span className="widget-badge" style={{ color: 'var(--accent-blue)' }}>
-                Ambient Deck
+              <span
+                style={{
+                  position: 'absolute',
+                  right: '14px',
+                  bottom: '6px',
+                  fontSize: '0.62rem',
+                  fontWeight: 500,
+                  letterSpacing: '0.03em',
+                  color: 'var(--text-muted, rgba(148, 163, 184, 0.55))',
+                  userSelect: 'none',
+                }}
+              >
+                by x4rinia
               </span>
             </section>
           </DraggableWidgetBox>
@@ -612,12 +626,9 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* L. Dino Companion (4 Variants + Auto-Switch + Draggable Anchor Point) */}
+      {/* L. Dino Companion (Transparent Ankylosaurus with Walking, Jumping, Looking & Tail Wagging) */}
       {config.modules.dino_companion.enabled && (
         <DinoCompanion
-          variant={config.modules.dino_companion.variant || 'ankylosaurus'}
-          autoCycle={config.modules.dino_companion.auto_cycle ?? false}
-          cycleVariants={config.modules.dino_companion.cycle_variants}
           isEditable={isSettingsOpen}
           anchorOffset={getOffset('dino_companion')}
           onAnchorChange={(next) => handleWidgetOffsetChange('dino_companion', next)}

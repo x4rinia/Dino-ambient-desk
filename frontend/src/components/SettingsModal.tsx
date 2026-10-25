@@ -1433,110 +1433,83 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
         </div>
 
-        {/* 5. 4 Dino-Varianten auswählen & Automatischer Wechsel + Ankerpunkt */}
+        {/* 5. Dino-Begleiter (Ankylosaurus) mit Animationen & Ankerpunkt */}
         <div className="settings-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
             <div className="widget-title">
-              <span>5. Dino-Begleiter — 4 Varianten, Automatischer Wechsel & Ankerpunkt</span>
+              <span>5. Dino-Begleiter — Ankylosaurus</span>
             </div>
 
-            <label className="setting-toggle-card" style={{ gap: 8, padding: '5px 10px' }}>
-              <span>🔄 Dinos automatisch durchwechseln (Wechsel aktiv)</span>
+            <label className="setting-toggle-card" style={{ gap: 8, padding: '5px 12px' }}>
+              <span>Dino-Begleiter aktivieren</span>
               <input
                 type="checkbox"
-                checked={config.modules.dino_companion.auto_cycle ?? false}
-                onChange={(e) =>
-                  onUpdateConfig({
-                    ...config,
-                    modules: {
-                      ...config.modules,
-                      dino_companion: {
-                        ...config.modules.dino_companion,
-                        enabled: true,
-                        auto_cycle: e.target.checked,
-                      },
-                    },
-                  })
-                }
+                checked={config.modules.dino_companion?.enabled ?? true}
+                onChange={() => toggleModule('dino_companion')}
               />
             </label>
           </div>
 
           <div
-            className="theme-swatches-grid"
-            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))' }}
+            className="glass-panel"
+            style={{
+              padding: '12px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              background: 'rgba(14, 18, 28, 0.45)',
+            }}
           >
-            {DINO_VARIANTS.map((dv) => {
-              const inCycle = currentCycleVariants.includes(dv.id);
-              const isSelected = currentDinoVariant === dv.id;
-              return (
-                <div
-                  key={dv.id}
-                  className={`theme-swatch-btn ${isSelected ? 'selected' : ''}`}
-                  onClick={() =>
-                    onUpdateConfig({
-                      ...config,
-                      modules: {
-                        ...config.modules,
-                        dino_companion: {
-                          ...config.modules.dino_companion,
-                          enabled: true,
-                          variant: dv.id,
-                        },
-                      },
-                    })
-                  }
-                  style={{
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                    gap: 6,
-                    padding: '9px 12px',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: 600, fontSize: '0.8rem', color: '#f3f5f9' }}>
-                      {dv.label}
-                    </span>
-                    {isSelected && (
-                      <span style={{ fontSize: '0.62rem', color: '#34d399', fontWeight: 700 }}>
-                        Aktiv
-                      </span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: '0.66rem', color: '#94a3b8' }}>{dv.desc}</span>
+            <div
+              style={{
+                width: '74px',
+                height: '66px',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(56, 189, 248, 0.08)',
+                border: '1px solid rgba(56, 189, 248, 0.25)',
+                borderRadius: '12px',
+                padding: '4px',
+              }}
+            >
+              <img
+                src="/dino/look_2.png"
+                alt="Ankylosaurus Dino"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
 
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 7,
-                      fontSize: '0.72rem',
-                      color: inCycle ? '#38bdf8' : '#64748b',
-                      marginTop: 4,
-                      paddingTop: 5,
-                      borderTop: '1px solid rgba(255,255,255,0.08)',
-                      cursor: 'pointer',
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={inCycle}
-                      onChange={(e) => toggleDinoInCycle(dv.id, e)}
-                    />
-                    <span style={{ fontWeight: inCycle ? 600 : 400 }}>
-                      ✓ In Wechsel-Liste {inCycle ? 'aktiv' : 'aus'}
-                    </span>
-                  </label>
-                </div>
-              );
-            })}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f3f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>🛡️ Dein persönlicher Ankylosaurus-Begleiter</span>
+                <span style={{ fontSize: '0.64rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(52, 211, 153, 0.35)' }}>
+                  Lebendig animiert
+                </span>
+              </div>
+              <div style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.4' }}>
+                Läuft sanft um seinen Ankerpunkt hin und her, <strong>schaut nach vorn zu dir</strong>, <strong>wedelt fröhlich mit der Keule</strong> und <strong>springt ab und zu vor Freude hoch</strong>!
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 3 }}>
+                <span style={{ fontSize: '0.65rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                  🐾 Laufen & Schlendern
+                </span>
+                <span style={{ fontSize: '0.65rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                  ✨ Keulen-Wedeln & Glitzern
+                </span>
+                <span style={{ fontSize: '0.65rem', color: '#a78bfa', background: 'rgba(167, 139, 250, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                  👀 Schaut nach vorn
+                </span>
+                <span style={{ fontSize: '0.65rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                  🦘 Freudensprung
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div style={{ fontSize: '0.71rem', color: '#94a3b8', marginTop: 6 }}>
-            ⚓ <strong>Dino-Position (Ankerpunkt):</strong> Solange dieses Einstellungsfenster offen ist, kannst du auch den Dino unten auf dem Monitor an seinem <strong>Ankerpunkt</strong> mit der Maus verschieben. Er läuft um diesen Ankerpunkt herum und läuft niemals aus dem Bild!
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 8 }}>
+            ⚓ <strong>Dino-Position (Ankerpunkt):</strong> Solange dieses Einstellungsfenster geöffnet ist, erscheint am Dino ein <strong>Ankerpunkt</strong>, den du frei mit der Maus auf dem Monitor verschieben kannst. Er läuft und springt um diesen Punkt herum und verlässt niemals den Bildschirm!
           </div>
         </div>
 
