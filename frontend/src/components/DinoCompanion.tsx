@@ -32,12 +32,16 @@ export const DINO_SPRITES = {
 type DinoAction = 'walk' | 'jump' | 'look' | 'tail';
 
 interface DinoCompanionProps {
+  speed?: number;
+  opacity?: number;
   isEditable?: boolean;
   anchorOffset?: WidgetOffset;
   onAnchorChange?: (next: WidgetOffset) => void;
 }
 
 export const DinoCompanion: React.FC<DinoCompanionProps> = ({
+  speed = 100,
+  opacity = 100,
   isEditable = false,
   anchorOffset = { x: 0, y: 0 },
   onAnchorChange,
@@ -145,6 +149,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
 
     let isCancelled = false;
     let actionTimer: any = null;
+    const speedMultiplier = Math.max(0.4, Math.min(2.2, (speed || 100) / 100));
 
     const playSequence = (
       action: DinoAction,
@@ -154,19 +159,20 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       setCurrentAction(action);
       let idx = 0;
       setFrameIndex(idx);
+      const scaledDelays = frameDelays.map((d) => Math.max(50, Math.round(d / speedMultiplier)));
 
       const nextTick = () => {
         if (isCancelled) return;
         idx++;
-        if (idx < frameDelays.length) {
+        if (idx < scaledDelays.length) {
           setFrameIndex(idx);
-          actionTimer = setTimeout(nextTick, frameDelays[idx]);
+          actionTimer = setTimeout(nextTick, scaledDelays[idx]);
         } else {
           onComplete();
         }
       };
 
-      actionTimer = setTimeout(nextTick, frameDelays[0]);
+      actionTimer = setTimeout(nextTick, scaledDelays[0]);
     };
 
     const scheduleNextAction = () => {
@@ -183,7 +189,8 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
         setCurrentAction('walk');
 
         let walkSteps = 0;
-        const maxSteps = 12; // 12 * 140ms ~ 1.7s
+        const maxSteps = 12;
+        const stepInterval = Math.max(60, Math.round(140 / speedMultiplier));
         const walkInterval = setInterval(() => {
           if (isCancelled) {
             clearInterval(walkInterval);
@@ -193,13 +200,13 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           setFrameIndex((prev) => (prev + 1) % 4);
           if (walkSteps >= maxSteps) {
             clearInterval(walkInterval);
-            actionTimer = setTimeout(scheduleNextAction, 1200);
+            actionTimer = setTimeout(scheduleNextAction, Math.max(500, Math.round(1200 / speedMultiplier)));
           }
-        }, 140);
+        }, stepInterval);
       } else if (rand < 0.65) {
         // TAIL WAG: Wedelt mit der Keule (loops 3 times)
         const sequence = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
-        const delays = sequence.map(() => 120);
+        const stepDelay = Math.max(50, Math.round(120 / speedMultiplier));
         setCurrentAction('tail');
         let i = 0;
         setFrameIndex(sequence[0]);
@@ -208,45 +215,47 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           i++;
           if (i < sequence.length) {
             setFrameIndex(sequence[i]);
-            actionTimer = setTimeout(tick, delays[i]);
+            actionTimer = setTimeout(tick, stepDelay);
           } else {
-            actionTimer = setTimeout(scheduleNextAction, 1500);
+            actionTimer = setTimeout(scheduleNextAction, Math.max(600, Math.round(1500 / speedMultiplier)));
           }
         };
-        actionTimer = setTimeout(tick, delays[0]);
+        actionTimer = setTimeout(tick, stepDelay);
       } else if (rand < 0.85) {
         // LOOK FORWARD: Schaut nach vorn zu dir (pauses and smiles with big eyes)
         playSequence(
           'look',
-          [180, 200, 2200, 200], // frame 2 lingers for 2.2 seconds looking forward
+          [180, 200, 2200, 200],
           () => {
-            actionTimer = setTimeout(scheduleNextAction, 1000);
+            actionTimer = setTimeout(scheduleNextAction, Math.max(400, Math.round(1000 / speedMultiplier)));
           }
         );
       } else {
         // JUMP & REJOICE: Springt fröhlich hoch, jubelt mit offenen Armen und freut sich!
         playSequence(
           'jump',
-          [220, 240, 480, 240], // frame 0 crouch -> frame 1 leap -> frame 2 apex cheer (480ms) -> frame 3 landing
+          [220, 240, 480, 240],
           () => {
-            actionTimer = setTimeout(scheduleNextAction, 1400);
+            actionTimer = setTimeout(scheduleNextAction, Math.max(500, Math.round(1400 / speedMultiplier)));
           }
         );
       }
     };
 
     // Initial action
-    actionTimer = setTimeout(scheduleNextAction, 600);
+    actionTimer = setTimeout(scheduleNextAction, Math.max(300, Math.round(600 / speedMultiplier)));
 
     return () => {
       isCancelled = true;
       if (actionTimer) clearTimeout(actionTimer);
     };
-  }, [walkX, isNightMode]);
+  }, [walkX, isNightMode, speed]);
 
   // Current sprite image path
   const currentSpriteSrc =
     DINO_SPRITES[currentAction]?.[frameIndex] || DINO_SPRITES.walk[0];
+
+  const opacityValue = Math.max(0.15, Math.min(1.0, (opacity ?? 100) / 100));
 
   return (
     <div
@@ -311,6 +320,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           alignItems: 'flex-end',
           justifyContent: 'center',
           userSelect: 'none',
+          opacity: opacityValue,
           filter: 'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45))',
         }}
       >

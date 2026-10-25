@@ -104,6 +104,8 @@ export const DEFAULT_CONFIG: AmbientDeckConfig = {
       variant: 'ankylosaurus',
       auto_cycle: false,
       cycle_variants: ['ankylosaurus', 'triceratops', 'stegosaurus', 'brachiosaurus'],
+      speed: 100,
+      opacity: 100,
     },
   },
 };

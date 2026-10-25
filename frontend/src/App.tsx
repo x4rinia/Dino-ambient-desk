@@ -629,6 +629,8 @@ export const App: React.FC = () => {
       {/* L. Dino Companion (Transparent Ankylosaurus with Walking, Jumping, Looking & Tail Wagging) */}
       {config.modules.dino_companion.enabled && (
         <DinoCompanion
+          speed={config.modules.dino_companion?.speed ?? 100}
+          opacity={config.modules.dino_companion?.opacity ?? 100}
           isEditable={isSettingsOpen}
           anchorOffset={getOffset('dino_companion')}
           onAnchorChange={(next) => handleWidgetOffsetChange('dino_companion', next)}

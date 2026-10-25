@@ -111,6 +111,8 @@ export interface DinoCompanionModuleConfig {
   variant: string;
   auto_cycle?: boolean;
   cycle_variants?: DinoVariant[];
+  speed?: number; // 50 to 160 percent (default: 100)
+  opacity?: number; // 20 to 100 percent (default: 100)
 }
 
 export interface ToggleableModuleConfig {

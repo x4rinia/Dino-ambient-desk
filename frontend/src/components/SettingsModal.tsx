@@ -1508,7 +1508,74 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 8 }}>
+          {/* Dino Speed & Opacity Controls */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, marginTop: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
+                <span>🏃 Schnelligkeit / Tempo:</span>
+                <strong style={{ color: '#38bdf8' }}>{config.modules.dino_companion?.speed ?? 100}%</strong>
+              </div>
+              <input
+                type="range"
+                min="50"
+                max="160"
+                step="5"
+                value={config.modules.dino_companion?.speed ?? 100}
+                onChange={(e) =>
+                  onUpdateConfig({
+                    ...config,
+                    modules: {
+                      ...config.modules,
+                      dino_companion: {
+                        ...config.modules.dino_companion,
+                        speed: parseInt(e.target.value, 10),
+                      },
+                    },
+                  })
+                }
+                style={{ width: '100%', accentColor: '#38bdf8' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
+                <span>Gemütlich (50%)</span>
+                <span>Normal (100%)</span>
+                <span>Flink (160%)</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
+                <span>✨ Transparenz / Sichtbarkeit:</span>
+                <strong style={{ color: '#34d399' }}>{config.modules.dino_companion?.opacity ?? 100}%</strong>
+              </div>
+              <input
+                type="range"
+                min="20"
+                max="100"
+                step="5"
+                value={config.modules.dino_companion?.opacity ?? 100}
+                onChange={(e) =>
+                  onUpdateConfig({
+                    ...config,
+                    modules: {
+                      ...config.modules,
+                      dino_companion: {
+                        ...config.modules.dino_companion,
+                        opacity: parseInt(e.target.value, 10),
+                      },
+                    },
+                  })
+                }
+                style={{ width: '100%', accentColor: '#34d399' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
+                <span>Zart dezent (20%)</span>
+                <span>Halbtransparent (60%)</span>
+                <span>Voll sichtbar (100%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 10 }}>
             ⚓ <strong>Dino-Position (Ankerpunkt):</strong> Solange dieses Einstellungsfenster geöffnet ist, erscheint am Dino ein <strong>Ankerpunkt</strong>, den du frei mit der Maus auf dem Monitor verschieben kannst. Er läuft und springt um diesen Punkt herum und verlässt niemals den Bildschirm!
           </div>
         </div>
@@ -1609,15 +1676,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 type="checkbox"
                 checked={config.modules.notes.enabled}
                 onChange={() => toggleModule('notes')}
-              />
-            </label>
-
-            <label className="setting-toggle-card">
-              <span>🦖 Dino-Begleiter unten rechts anzeigen</span>
-              <input
-                type="checkbox"
-                checked={config.modules.dino_companion.enabled}
-                onChange={() => toggleModule('dino_companion')}
               />
             </label>
           </div>

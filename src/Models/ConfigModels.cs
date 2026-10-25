@@ -276,6 +276,12 @@ public class DinoCompanionModuleConfig
 
     [JsonPropertyName("cycle_variants")]
     public List<string> CycleVariants { get; set; } = new() { "ankylosaurus", "triceratops", "stegosaurus", "brachiosaurus" };
+
+    [JsonPropertyName("speed")]
+    public int Speed { get; set; } = 100;
+
+    [JsonPropertyName("opacity")]
+    public int Opacity { get; set; } = 100;
 }
 
 public class ToggleableModuleConfig
