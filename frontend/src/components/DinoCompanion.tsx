@@ -55,7 +55,10 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   const halfTrack = Math.max(120, Math.round(trackWidth / 2));
   const [walkX, setWalkX] = useState<number>(-halfTrack + 40);
   const [direction, setDirection] = useState<1 | -1>(1); // 1 = walking right, -1 = walking left
-  const [hour, setHour] = useState(() => new Date().getHours());
+
+  // Position and direction refs so the animation loop never cancels itself
+  const walkXRef = useRef<number>(-halfTrack + 40);
+  const dirRef = useRef<1 | -1>(1);
 
   // Dragging state for the Dino Anchor Point
   const [dragging, setDragging] = useState(false);
@@ -82,13 +85,6 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       setLiveAnchor(anchorOffset);
     }
   }, [anchorOffset, dragging]);
-
-  useEffect(() => {
-    const clockTimer = setInterval(() => setHour(new Date().getHours()), 30000);
-    return () => clearInterval(clockTimer);
-  }, []);
-
-  const isNightMode = hour >= 23 || hour < 6;
 
   // Clamp anchor offset so the track stays inside the viewport
   const clampAnchor = (raw: WidgetOffset): WidgetOffset => {
@@ -144,17 +140,13 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  // State Scheduler: Moves purposefully across the full track width without rapid turning!
+  // State Scheduler: Moves continuously across the track width without freezing!
   useEffect(() => {
-    if (isNightMode) {
-      setCurrentAction('look');
-      setFrameIndex(2);
-      return;
-    }
-
     let isCancelled = false;
     let actionTimer: any = null;
     const speedMultiplier = Math.max(0.4, Math.min(2.2, (speed || 100) / 100));
+    const currentHalfTrack = Math.max(120, Math.round(trackWidth / 2));
+    const boundaryMargin = 25;
 
     const playSequence = (
       action: DinoAction,
@@ -185,28 +177,27 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     const scheduleNextAction = () => {
       if (isCancelled) return;
 
-      // Check if we hit the boundaries of the walking area:
-      const boundaryMargin = 30;
-      let curDir = direction;
-      if (walkX >= halfTrack - boundaryMargin) {
-        curDir = -1;
+      // Check boundaries using refs
+      if (walkXRef.current >= currentHalfTrack - boundaryMargin) {
+        dirRef.current = -1;
         setDirection(-1);
-      } else if (walkX <= -halfTrack + boundaryMargin) {
-        curDir = 1;
+      } else if (walkXRef.current <= -currentHalfTrack + boundaryMargin) {
+        dirRef.current = 1;
         setDirection(1);
       }
 
-      // 55% chance to WALK forward in current direction (continuous traverse)
-      // 15% chance to WAG TAIL (short pause, keeps direction)
-      // 15% chance to LOOK FORWARD (pauses, looks at user)
-      // 15% chance to JUMP & REJOICE (pauses, jumps happily)
+      // Action choices:
+      // 55% walk stroll in current direction
+      // 15% tail wag (stays in place, maintains direction)
+      // 15% look forward at user (stays in place)
+      // 15% jump & cheer (stays in place)
       const rand = Math.random();
 
       if (rand < 0.55) {
-        // WALK: Take 12-18 steps in the current direction across the track
+        // WALK: Take 10-16 continuous steps across the track
         setCurrentAction('walk');
-        const numSteps = Math.floor(Math.random() * 6 + 12);
-        const stepPx = Math.floor(Math.random() * 3 + 5); // 5 to 7px per step
+        const numSteps = Math.floor(Math.random() * 7 + 10);
+        const stepPx = Math.floor(Math.random() * 3 + 6); // 6 to 8px per step
         let stepCount = 0;
         const stepInterval = Math.max(60, Math.round(130 / speedMultiplier));
 
@@ -218,30 +209,32 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           stepCount++;
           setFrameIndex((prev) => (prev + 1) % 4);
 
-          setWalkX((prevX) => {
-            const nextX = prevX + curDir * stepPx;
-            // Reverse direction if reaching edge during the walk
-            if (nextX >= halfTrack - boundaryMargin) {
-              setDirection(-1);
-              return halfTrack - boundaryMargin;
-            }
-            if (nextX <= -halfTrack + boundaryMargin) {
-              setDirection(1);
-              return -halfTrack + boundaryMargin;
-            }
-            return nextX;
-          });
+          // Update position
+          walkXRef.current += dirRef.current * stepPx;
+
+          // Boundary bounce
+          if (walkXRef.current >= currentHalfTrack - boundaryMargin) {
+            walkXRef.current = currentHalfTrack - boundaryMargin;
+            dirRef.current = -1;
+            setDirection(-1);
+          } else if (walkXRef.current <= -currentHalfTrack + boundaryMargin) {
+            walkXRef.current = -currentHalfTrack + boundaryMargin;
+            dirRef.current = 1;
+            setDirection(1);
+          }
+
+          setWalkX(walkXRef.current);
 
           if (stepCount >= numSteps) {
             clearInterval(walkInterval);
             actionTimer = setTimeout(
               scheduleNextAction,
-              Math.max(400, Math.round(900 / speedMultiplier))
+              Math.max(300, Math.round(800 / speedMultiplier))
             );
           }
         }, stepInterval);
       } else if (rand < 0.70) {
-        // TAIL WAG: Wedelt fröhlich mit der Keule (2 Durchgänge, behält Blickrichtung)
+        // TAIL WAG: Wedelt fröhlich mit der Keule
         const sequence = [0, 1, 2, 3, 0, 1, 2, 3];
         const stepDelay = Math.max(50, Math.round(115 / speedMultiplier));
         setCurrentAction('tail');
@@ -256,41 +249,41 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           } else {
             actionTimer = setTimeout(
               scheduleNextAction,
-              Math.max(400, Math.round(1100 / speedMultiplier))
+              Math.max(400, Math.round(900 / speedMultiplier))
             );
           }
         };
         actionTimer = setTimeout(tick, stepDelay);
       } else if (rand < 0.85) {
-        // LOOK FORWARD: Schaut nach vorn zu dir (pausiert und lächelt neugierig)
-        playSequence('look', [180, 200, 2100, 200], () => {
+        // LOOK FORWARD: Schaut nach vorn zu dir
+        playSequence('look', [180, 200, 2000, 200], () => {
           actionTimer = setTimeout(
             scheduleNextAction,
-            Math.max(400, Math.round(1000 / speedMultiplier))
+            Math.max(400, Math.round(800 / speedMultiplier))
           );
         });
       } else {
-        // JUMP & REJOICE: Springt fröhlich hoch, jubelt mit offenen Armen und freut sich!
-        playSequence('jump', [200, 220, 480, 220], () => {
+        // JUMP & REJOICE: Springt fröhlich hoch und jubelt!
+        playSequence('jump', [200, 220, 460, 220], () => {
           actionTimer = setTimeout(
             scheduleNextAction,
-            Math.max(400, Math.round(1200 / speedMultiplier))
+            Math.max(400, Math.round(900 / speedMultiplier))
           );
         });
       }
     };
 
-    // Initial action
+    // Initial trigger
     actionTimer = setTimeout(
       scheduleNextAction,
-      Math.max(300, Math.round(600 / speedMultiplier))
+      Math.max(200, Math.round(400 / speedMultiplier))
     );
 
     return () => {
       isCancelled = true;
       if (actionTimer) clearTimeout(actionTimer);
     };
-  }, [walkX, direction, isNightMode, speed, halfTrack]);
+  }, [speed, trackWidth]);
 
   // Current sprite image path
   const currentSpriteSrc =
