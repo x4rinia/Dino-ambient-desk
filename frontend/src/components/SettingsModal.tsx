@@ -1508,8 +1508,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Dino Speed & Opacity Controls */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 14, marginTop: 12 }}>
+          {/* Dino Speed, Opacity & Track Width Controls */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14, marginTop: 12 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
                 <span>🏃 Schnelligkeit / Tempo:</span>
@@ -1544,7 +1544,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
-                <span>✨ Transparenz / Sichtbarkeit:</span>
+                <span>✨ Transparenz:</span>
                 <strong style={{ color: '#34d399' }}>{config.modules.dino_companion?.opacity ?? 100}%</strong>
               </div>
               <input
@@ -1568,15 +1568,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 style={{ width: '100%', accentColor: '#34d399' }}
               />
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
-                <span>Zart dezent (20%)</span>
+                <span>Zart (20%)</span>
                 <span>Halbtransparent (60%)</span>
-                <span>Voll sichtbar (100%)</span>
+                <span>Voll (100%)</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
+                <span>📏 Laufbereich-Breite:</span>
+                <strong style={{ color: '#fbbf24' }}>{config.modules.dino_companion?.track_width ?? 480} px</strong>
+              </div>
+              <input
+                type="range"
+                min="300"
+                max="850"
+                step="20"
+                value={config.modules.dino_companion?.track_width ?? 480}
+                onChange={(e) =>
+                  onUpdateConfig({
+                    ...config,
+                    modules: {
+                      ...config.modules,
+                      dino_companion: {
+                        ...config.modules.dino_companion,
+                        track_width: parseInt(e.target.value, 10),
+                      },
+                    },
+                  })
+                }
+                style={{ width: '100%', accentColor: '#fbbf24' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
+                <span>Kompakt (300px)</span>
+                <span>Standard (480px)</span>
+                <span>Breit (850px)</span>
               </div>
             </div>
           </div>
 
           <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 10 }}>
-            ⚓ <strong>Dino-Position (Ankerpunkt):</strong> Solange dieses Einstellungsfenster geöffnet ist, erscheint am Dino ein <strong>Ankerpunkt</strong>, den du frei mit der Maus auf dem Monitor verschieben kannst. Er läuft und springt um diesen Punkt herum und verlässt niemals den Bildschirm!
+            ⚓ <strong>Dino-Laufbereich & Position:</strong> Solange dieses Einstellungsfenster geöffnet ist, siehst du unten auf dem Monitor die <strong>grün gestrichelte Begrenzung</strong> seines gesamten Laufbereichs (von links nach rechts). Du kannst diesen Bereich frei mit der Maus verschieben. Sobald du auf <strong>Speichern</strong> klickst, wird der Rahmen <strong>vollständig unsichtbar</strong>!
           </div>
         </div>
 

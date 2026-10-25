@@ -631,6 +631,7 @@ export const App: React.FC = () => {
         <DinoCompanion
           speed={config.modules.dino_companion?.speed ?? 100}
           opacity={config.modules.dino_companion?.opacity ?? 100}
+          trackWidth={config.modules.dino_companion?.track_width ?? 480}
           isEditable={isSettingsOpen}
           anchorOffset={getOffset('dino_companion')}
           onAnchorChange={(next) => handleWidgetOffsetChange('dino_companion', next)}

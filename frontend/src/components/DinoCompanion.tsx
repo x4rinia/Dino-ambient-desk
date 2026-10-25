@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Anchor } from 'lucide-react';
+import { Anchor, ArrowLeftRight } from 'lucide-react';
 import { WidgetOffset } from '../types';
 
 export const DINO_SPRITES = {
@@ -34,6 +34,7 @@ type DinoAction = 'walk' | 'jump' | 'look' | 'tail';
 interface DinoCompanionProps {
   speed?: number;
   opacity?: number;
+  trackWidth?: number;
   isEditable?: boolean;
   anchorOffset?: WidgetOffset;
   onAnchorChange?: (next: WidgetOffset) => void;
@@ -42,14 +43,18 @@ interface DinoCompanionProps {
 export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   speed = 100,
   opacity = 100,
+  trackWidth = 480,
   isEditable = false,
   anchorOffset = { x: 0, y: 0 },
   onAnchorChange,
 }) => {
   const [currentAction, setCurrentAction] = useState<DinoAction>('walk');
   const [frameIndex, setFrameIndex] = useState(0);
-  const [walkX, setWalkX] = useState(0);
-  const [facingLeft, setFacingLeft] = useState(false);
+
+  // Smooth walking path state: walkX ranges from -halfTrack to +halfTrack
+  const halfTrack = Math.max(120, Math.round(trackWidth / 2));
+  const [walkX, setWalkX] = useState<number>(-halfTrack + 40);
+  const [direction, setDirection] = useState<1 | -1>(1); // 1 = walking right, -1 = walking left
   const [hour, setHour] = useState(() => new Date().getHours());
 
   // Dragging state for the Dino Anchor Point
@@ -62,7 +67,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     baseY: number;
   } | null>(null);
 
-  // Preload all 16 frames on mount for buttery smooth animation
+  // Preload all 16 frames on mount
   useEffect(() => {
     Object.values(DINO_SPRITES).forEach((list) => {
       list.forEach((src) => {
@@ -85,13 +90,13 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
 
   const isNightMode = hour >= 23 || hour < 6;
 
-  // Clamp anchor offset so the Dino stage (180x155) never leaves the viewport
+  // Clamp anchor offset so the track stays inside the viewport
   const clampAnchor = (raw: WidgetOffset): WidgetOffset => {
     const vw = typeof window !== 'undefined' ? window.innerWidth : 720;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 1280;
-    const minX = -Math.max(0, vw - 220);
-    const maxX = 16;
-    const minY = -Math.max(0, vh - 180);
+    const minX = -Math.max(0, vw - trackWidth - 60);
+    const maxX = 20;
+    const minY = -Math.max(0, vh - 220);
     const maxY = 10;
     return {
       x: Math.min(maxX, Math.max(minX, Math.round(raw.x))),
@@ -139,7 +144,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  // State Scheduler: Switches between Walk, Jump (ab und zu springen & freuen), Look Forward (schaut nach vorn), Tail Wag (wedelt mit Keule)
+  // State Scheduler: Moves purposefully across the full track width without rapid turning!
   useEffect(() => {
     if (isNightMode) {
       setCurrentAction('look');
@@ -159,7 +164,9 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       setCurrentAction(action);
       let idx = 0;
       setFrameIndex(idx);
-      const scaledDelays = frameDelays.map((d) => Math.max(50, Math.round(d / speedMultiplier)));
+      const scaledDelays = frameDelays.map((d) =>
+        Math.max(50, Math.round(d / speedMultiplier))
+      );
 
       const nextTick = () => {
         if (isCancelled) return;
@@ -178,35 +185,65 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     const scheduleNextAction = () => {
       if (isCancelled) return;
 
-      // Random choice weighted: 40% walk stroll, 25% tail wag, 20% look forward, 15% jump & cheer
+      // Check if we hit the boundaries of the walking area:
+      const boundaryMargin = 30;
+      let curDir = direction;
+      if (walkX >= halfTrack - boundaryMargin) {
+        curDir = -1;
+        setDirection(-1);
+      } else if (walkX <= -halfTrack + boundaryMargin) {
+        curDir = 1;
+        setDirection(1);
+      }
+
+      // 55% chance to WALK forward in current direction (continuous traverse)
+      // 15% chance to WAG TAIL (short pause, keeps direction)
+      // 15% chance to LOOK FORWARD (pauses, looks at user)
+      // 15% chance to JUMP & REJOICE (pauses, jumps happily)
       const rand = Math.random();
 
-      if (rand < 0.40) {
-        // WALK: Walk stroll left or right for 3-5 seconds
-        const nextWalkX = walkX <= 0 ? Math.floor(Math.random() * 25 + 25) : -Math.floor(Math.random() * 25 + 25);
-        setFacingLeft(nextWalkX < walkX);
-        setWalkX(nextWalkX);
+      if (rand < 0.55) {
+        // WALK: Take 12-18 steps in the current direction across the track
         setCurrentAction('walk');
+        const numSteps = Math.floor(Math.random() * 6 + 12);
+        const stepPx = Math.floor(Math.random() * 3 + 5); // 5 to 7px per step
+        let stepCount = 0;
+        const stepInterval = Math.max(60, Math.round(130 / speedMultiplier));
 
-        let walkSteps = 0;
-        const maxSteps = 12;
-        const stepInterval = Math.max(60, Math.round(140 / speedMultiplier));
         const walkInterval = setInterval(() => {
           if (isCancelled) {
             clearInterval(walkInterval);
             return;
           }
-          walkSteps++;
+          stepCount++;
           setFrameIndex((prev) => (prev + 1) % 4);
-          if (walkSteps >= maxSteps) {
+
+          setWalkX((prevX) => {
+            const nextX = prevX + curDir * stepPx;
+            // Reverse direction if reaching edge during the walk
+            if (nextX >= halfTrack - boundaryMargin) {
+              setDirection(-1);
+              return halfTrack - boundaryMargin;
+            }
+            if (nextX <= -halfTrack + boundaryMargin) {
+              setDirection(1);
+              return -halfTrack + boundaryMargin;
+            }
+            return nextX;
+          });
+
+          if (stepCount >= numSteps) {
             clearInterval(walkInterval);
-            actionTimer = setTimeout(scheduleNextAction, Math.max(500, Math.round(1200 / speedMultiplier)));
+            actionTimer = setTimeout(
+              scheduleNextAction,
+              Math.max(400, Math.round(900 / speedMultiplier))
+            );
           }
         }, stepInterval);
-      } else if (rand < 0.65) {
-        // TAIL WAG: Wedelt mit der Keule (loops 3 times)
-        const sequence = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
-        const stepDelay = Math.max(50, Math.round(120 / speedMultiplier));
+      } else if (rand < 0.70) {
+        // TAIL WAG: Wedelt fröhlich mit der Keule (2 Durchgänge, behält Blickrichtung)
+        const sequence = [0, 1, 2, 3, 0, 1, 2, 3];
+        const stepDelay = Math.max(50, Math.round(115 / speedMultiplier));
         setCurrentAction('tail');
         let i = 0;
         setFrameIndex(sequence[0]);
@@ -217,45 +254,52 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             setFrameIndex(sequence[i]);
             actionTimer = setTimeout(tick, stepDelay);
           } else {
-            actionTimer = setTimeout(scheduleNextAction, Math.max(600, Math.round(1500 / speedMultiplier)));
+            actionTimer = setTimeout(
+              scheduleNextAction,
+              Math.max(400, Math.round(1100 / speedMultiplier))
+            );
           }
         };
         actionTimer = setTimeout(tick, stepDelay);
       } else if (rand < 0.85) {
-        // LOOK FORWARD: Schaut nach vorn zu dir (pauses and smiles with big eyes)
-        playSequence(
-          'look',
-          [180, 200, 2200, 200],
-          () => {
-            actionTimer = setTimeout(scheduleNextAction, Math.max(400, Math.round(1000 / speedMultiplier)));
-          }
-        );
+        // LOOK FORWARD: Schaut nach vorn zu dir (pausiert und lächelt neugierig)
+        playSequence('look', [180, 200, 2100, 200], () => {
+          actionTimer = setTimeout(
+            scheduleNextAction,
+            Math.max(400, Math.round(1000 / speedMultiplier))
+          );
+        });
       } else {
         // JUMP & REJOICE: Springt fröhlich hoch, jubelt mit offenen Armen und freut sich!
-        playSequence(
-          'jump',
-          [220, 240, 480, 240],
-          () => {
-            actionTimer = setTimeout(scheduleNextAction, Math.max(500, Math.round(1400 / speedMultiplier)));
-          }
-        );
+        playSequence('jump', [200, 220, 480, 220], () => {
+          actionTimer = setTimeout(
+            scheduleNextAction,
+            Math.max(400, Math.round(1200 / speedMultiplier))
+          );
+        });
       }
     };
 
     // Initial action
-    actionTimer = setTimeout(scheduleNextAction, Math.max(300, Math.round(600 / speedMultiplier)));
+    actionTimer = setTimeout(
+      scheduleNextAction,
+      Math.max(300, Math.round(600 / speedMultiplier))
+    );
 
     return () => {
       isCancelled = true;
       if (actionTimer) clearTimeout(actionTimer);
     };
-  }, [walkX, isNightMode, speed]);
+  }, [walkX, direction, isNightMode, speed, halfTrack]);
 
   // Current sprite image path
   const currentSpriteSrc =
     DINO_SPRITES[currentAction]?.[frameIndex] || DINO_SPRITES.walk[0];
 
   const opacityValue = Math.max(0.15, Math.min(1.0, (opacity ?? 100) / 100));
+
+  // Dino faces left when walking left (-1), faces right when walking right (1)
+  const isFacingLeft = direction === -1;
 
   return (
     <div
@@ -265,7 +309,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
         position: 'fixed',
         bottom: '12px',
         right: '24px',
-        width: '180px',
+        width: `${trackWidth}px`,
         height: '155px',
         zIndex: isEditable ? 40 : 15,
         cursor: isEditable ? (dragging ? 'grabbing' : 'grab') : 'default',
@@ -277,45 +321,115 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       }}
       title={
         isEditable
-          ? '⚓ Dino-Ankerpunkt: Halte die linke Maustaste gedrückt, um den Dino zu verschieben!'
+          ? '⚓ Dino-Laufbereich: Halte die linke Maustaste gedrückt, um den gesamten Bereich zu verschieben!'
           : 'Dino-Begleiter'
       }
     >
-      {/* Anchor Point Handle (Visible ONLY when Settings is open) */}
+      {/* Visual Guide: Visible ONLY when Settings Window is open (wird beim Speichern unsichtbar!) */}
       {isEditable && (
         <div
           style={{
             position: 'absolute',
-            top: '-6px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'rgba(14, 18, 28, 0.94)',
-            border: '1px solid #34d399',
-            color: '#34d399',
-            padding: '3px 10px',
-            borderRadius: '999px',
-            fontSize: '0.66rem',
-            fontWeight: 700,
-            whiteSpace: 'nowrap',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.7)',
+            inset: 0,
+            border: '2px dashed rgba(52, 211, 153, 0.7)',
+            borderRadius: '16px',
+            background: 'rgba(52, 211, 153, 0.08)',
+            boxShadow: '0 0 24px rgba(52, 211, 153, 0.22)',
             display: 'flex',
-            alignItems: 'center',
-            gap: 5,
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: '7px 10px',
             pointerEvents: 'none',
           }}
         >
-          <Anchor size={11} />
-          <span>⚓ Dino-Ankerpunkt (bleibt im Bild)</span>
+          {/* Top Info Bar */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '0.67rem',
+              fontWeight: 700,
+            }}
+          >
+            <span
+              style={{
+                background: 'rgba(14, 18, 28, 0.92)',
+                color: '#34d399',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(52, 211, 153, 0.45)',
+              }}
+            >
+              ◀ Linke Grenze
+            </span>
+
+            <span
+              style={{
+                background: 'rgba(14, 18, 28, 0.95)',
+                color: '#38bdf8',
+                padding: '3px 12px',
+                borderRadius: '999px',
+                border: '1px solid rgba(56, 189, 248, 0.55)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+              }}
+            >
+              <ArrowLeftRight size={11} color="#38bdf8" />
+              <span>Dino-Laufbereich ({trackWidth}px)</span>
+            </span>
+
+            <span
+              style={{
+                background: 'rgba(14, 18, 28, 0.92)',
+                color: '#34d399',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(52, 211, 153, 0.45)',
+              }}
+            >
+              Rechte Grenze ▶
+            </span>
+          </div>
+
+          {/* Bottom Center Anchor Tip */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <span
+              style={{
+                background: 'rgba(14, 18, 28, 0.92)',
+                color: '#fbbf24',
+                fontSize: '0.63rem',
+                fontWeight: 600,
+                padding: '2px 10px',
+                borderRadius: '6px',
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <Anchor size={10} color="#fbbf24" />
+              <span>Hier mit der Maus ziehen, um den Bereich zu verschieben</span>
+            </span>
+          </div>
         </div>
       )}
 
       {/* Animated Ankylosaurus Dino Actor */}
       <div
         style={{
-          width: '170px',
-          height: '148px',
-          transform: `translate3d(${walkX}px, 0, 0) scaleX(${facingLeft ? -1 : 1})`,
-          transition: currentAction === 'walk' ? 'transform 0.14s ease-out' : 'transform 0.25s ease-out',
+          position: 'absolute',
+          bottom: '0',
+          left: '50%',
+          width: '160px',
+          height: '142px',
+          marginLeft: '-80px',
+          transform: `translate3d(${walkX}px, 0, 0) scaleX(${isFacingLeft ? -1 : 1})`,
+          transition:
+            currentAction === 'walk'
+              ? 'transform 0.12s linear'
+              : 'transform 0.22s ease-out',
           display: 'flex',
           alignItems: 'flex-end',
           justifyContent: 'center',

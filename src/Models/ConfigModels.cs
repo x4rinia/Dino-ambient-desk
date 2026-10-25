@@ -282,6 +282,9 @@ public class DinoCompanionModuleConfig
 
     [JsonPropertyName("opacity")]
     public int Opacity { get; set; } = 100;
+
+    [JsonPropertyName("track_width")]
+    public int TrackWidth { get; set; } = 480;
 }
 
 public class ToggleableModuleConfig
