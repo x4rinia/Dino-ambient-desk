@@ -64,29 +64,46 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
   const upcomingEventsList = useMemo(() => {
     if (!showNextEvent || !events || events.length === 0) return [];
     const nowMs = now.getTime();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
     const upcoming = events
-      .map((e) => ({ ...e, timeMs: new Date(e.start_iso).getTime() }))
-      .filter((e) => !isNaN(e.timeMs) && e.timeMs > nowMs)
+      .map((e) => {
+        const d = new Date(e.start_iso);
+        return { ...e, date: d, timeMs: d.getTime() };
+      })
+      .filter((e) => {
+        if (isNaN(e.timeMs)) return false;
+        const eventDayStart = new Date(e.date.getFullYear(), e.date.getMonth(), e.date.getDate()).getTime();
+        // Bleibt den gesamten Tag über sichtbar; verschwindet erst wenn der Kalendertag vorüber ist
+        return eventDayStart >= startOfToday;
+      })
       .sort((a, b) => a.timeMs - b.timeMs)
       .slice(0, 3);
 
     return upcoming.map((item) => {
-      const diffMin = Math.max(1, Math.ceil((item.timeMs - nowMs) / 60000));
-      let countdownText = `in ${diffMin} Min.`;
-      if (diffMin >= 60 && diffMin < 1440) {
-        const h = Math.floor(diffMin / 60);
-        const m = diffMin % 60;
-        countdownText = m > 0 ? `in ${h}h ${m}m` : `in ${h} Std.`;
-      } else if (diffMin >= 1440) {
-        const d = Math.floor(diffMin / 1440);
-        countdownText = `in ${d} Tg.`;
-      }
-
-      const startDate = new Date(item.timeMs);
+      const diffMs = item.timeMs - nowMs;
+      const startDate = item.date;
       const isSameDay =
         startDate.getDate() === now.getDate() &&
         startDate.getMonth() === now.getMonth() &&
         startDate.getFullYear() === now.getFullYear();
+
+      let countdownText = 'Heute';
+      if (diffMs > 0) {
+        const diffMin = Math.max(1, Math.ceil(diffMs / 60000));
+        if (diffMin < 60) {
+          countdownText = `in ${diffMin} Min.`;
+        } else if (diffMin < 1440) {
+          const h = Math.floor(diffMin / 60);
+          const m = diffMin % 60;
+          countdownText = m > 0 ? `in ${h}h ${m}m` : `in ${h} Std.`;
+        } else {
+          const d = Math.floor(diffMin / 1440);
+          countdownText = `in ${d} Tg.`;
+        }
+      } else if (isSameDay) {
+        countdownText = 'Heute';
+      }
 
       const timeLabel = isSameDay
         ? startDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })

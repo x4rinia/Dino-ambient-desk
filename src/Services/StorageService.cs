@@ -739,9 +739,9 @@ public class StorageService
     public List<CalendarEvent> LoadAllEvents()
     {
         var results = new List<CalendarEvent>();
-        var now = DateTime.Now;
+        var today = DateTime.Today;
 
-        // 1. Load & auto-clean events.json (remove expired & legacy demo events, max 3 active)
+        // 1. Load & auto-clean events.json (keep events of today & future, remove expired days, max 3 active)
         try
         {
             if (File.Exists(EventsJsonPath))
@@ -759,7 +759,7 @@ public class StorageService
                             !ev.Title.Contains("Architecture Review", StringComparison.OrdinalIgnoreCase) &&
                             !ev.Title.Equals("Team Sync", StringComparison.OrdinalIgnoreCase) &&
                             DateTime.TryParse(ev.StartIso, out DateTime dt) &&
-                            dt > now)
+                            dt.Date >= today)
                         .OrderBy(ev => DateTime.Parse(ev.StartIso))
                         .Take(3)
                         .ToList();
@@ -777,13 +777,13 @@ public class StorageService
         {
         }
 
-        // 2. Load synced Google Calendar / iCal .ics cache (only upcoming)
+        // 2. Load synced Google Calendar / iCal .ics cache (keep events of today & future)
         try
         {
             if (File.Exists(GoogleIcsCachePath))
             {
                 var googleEvents = ParseIcsFile(GoogleIcsCachePath, "google")
-                    .Where(ev => DateTime.TryParse(ev.StartIso, out DateTime dt) && dt > now);
+                    .Where(ev => DateTime.TryParse(ev.StartIso, out DateTime dt) && dt.Date >= today);
                 results.AddRange(googleEvents);
             }
         }
@@ -796,12 +796,12 @@ public class StorageService
 
     public List<CalendarEvent> SaveManualEvents(List<CalendarEvent> manualEvents)
     {
-        var now = DateTime.Now;
+        var today = DateTime.Today;
         var active = (manualEvents ?? new List<CalendarEvent>())
             .Where(ev =>
                 !string.IsNullOrWhiteSpace(ev.Title) &&
                 DateTime.TryParse(ev.StartIso, out DateTime dt) &&
-                dt > now)
+                dt.Date >= today)
             .OrderBy(ev => DateTime.Parse(ev.StartIso))
             .Take(3)
             .Select(ev => new CalendarEvent

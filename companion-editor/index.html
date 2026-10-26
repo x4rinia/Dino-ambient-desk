@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Companion Studio — Begleiter & Sprite Editor</title>
+  <style>
+    :root {
+      --bg-dark: #0a0d14;
+      --bg-card: #121824;
+      --bg-card-hover: #1a2234;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: #38bdf8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --danger: #ef4444;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --checker-1: #1e293b;
+      --checker-2: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(18, 24, 36, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      height: 54px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      font-size: 1.4rem;
+    }
+
+    .logo-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .logo-badge {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    }
+
+    button.primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
+    }
+
+    button.blue {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      border: none;
+      color: #fff;
+    }
+
+    button.danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Main Workspace Layout */
+    main {
+      display: grid;
+      grid-template-columns: 260px 1fr 310px;
+      flex: 1;
+      height: calc(100vh - 54px);
+      overflow: hidden;
+    }
+
+    /* Column Panels */
+    .panel {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel:last-child {
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .panel-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-body {
+      padding: 12px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Left Sidebar: Frames List */
+    .drop-zone {
+      border: 2px dashed rgba(56, 189, 248, 0.35);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(56, 189, 248, 0.03);
+      transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--primary);
+    }
+
+    .drop-zone-icon {
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+
+    .drop-zone-text {
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .drop-zone-hint {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .frames-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .frame-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .frame-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .frame-card.active {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: var(--primary);
+    }
+
+    .frame-thumb-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background-image: linear-gradient(45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, var(--checker-1) 75%),
+                        linear-gradient(-45deg, transparent 75%, var(--checker-1) 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+      background-color: var(--checker-2);
+      overflow: hidden;
+    }
+
+    .frame-thumb-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .frame-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .frame-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .frame-dim {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .frame-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .btn-icon {
+      padding: 3px 6px;
+      font-size: 0.7rem;
+      border-radius: 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+    }
+
+    .btn-icon:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Center Panel: Canvas & Tool Bar */
+    .canvas-panel {
+      display: flex;
+      flex-direction: column;
+      background: #080b11;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .canvas-toolbar {
+      height: 48px;
+      background: rgba(18, 24, 36, 0.95);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 12px;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border-right: 1px solid var(--border);
+      padding-right: 12px;
+    }
+
+    .tool-group:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .tool-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-right: 4px;
+    }
+
+    .tool-btn {
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: #cbd5e1;
+    }
+
+    .tool-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .tool-slider-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+    }
+
+    .tool-slider-box input[type="range"] {
+      width: 75px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .canvas-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      padding: 20px;
+      position: relative;
+      background-image: linear-gradient(45deg, #131924 25%, transparent 25%),
+                        linear-gradient(-45deg, #131924 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #131924 75%),
+                        linear-gradient(-45deg, transparent 75%, #131924 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      background-color: #0b0f17;
+    }
+
+    #mainCanvas {
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      image-rendering: pixelated;
+      cursor: crosshair;
+      background-image: linear-gradient(45deg, #242f40 25%, transparent 25%),
+                        linear-gradient(-45deg, #242f40 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #242f40 75%),
+                        linear-gradient(-45deg, transparent 75%, #242f40 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+      background-color: #171f2c;
+    }
+
+    /* Right Sidebar: Preview & Config */
+    .preview-box {
+      background: rgba(10, 14, 22, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .preview-stage {
+      width: 100%;
+      height: 140px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0b0f17;
+      background-image: linear-gradient(45deg, #182232 25%, transparent 25%),
+                        linear-gradient(-45deg, #182232 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #182232 75%),
+                        linear-gradient(-45deg, transparent 75%, #182232 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+    }
+
+    .preview-stage.bg-dark {
+      background: #090d14;
+      background-image: none;
+    }
+
+    .preview-stage.bg-green {
+      background: #10b981;
+      background-image: none;
+    }
+
+    .preview-stage.bg-white {
+      background: #f8fafc;
+      background-image: none;
+    }
+
+    .preview-ground {
+      position: absolute;
+      bottom: 22px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+
+    #previewSprite {
+      position: absolute;
+      bottom: 24px;
+      image-rendering: pixelated;
+      transition: transform 0.05s linear;
+      transform-origin: bottom center;
+    }
+
+    .preview-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input[type="text"], textarea, select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      color: #fff;
+      font-size: 0.78rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--border-focus);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 48px;
+    }
+
+    .emoji-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .emoji-btn {
+      padding: 3px 6px;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+    }
+
+    .emoji-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--primary);
+    }
+
+    /* Modals & Dialogs */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #10b981;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="logo-area">
+      <span class="logo-icon">🐾</span>
+      <span class="logo-title">Dino Companion Studio</span>
+      <span class="logo-badge">Begleiter & Sprite Editor</span>
+    </div>
+
+    <div class="header-actions">
+      <input type="file" id="fileJsonInput" accept=".json,.companion.json" style="display:none;" />
+      <button type="button" onclick="document.getElementById('fileJsonInput').click()">
+        <span>📂</span>
+        <span>Addon laden (.companion.json)</span>
+      </button>
+
+      <button type="button" onclick="resetAll()" class="danger" title="Alles leeren und neu anfangen">
+        <span>🔄</span>
+        <span>Neu</span>
+      </button>
+
+      <button type="button" onclick="exportCompanionJson()" class="primary">
+        <span>💾</span>
+        <span>Als .companion.json speichern</span>
+      </button>
+
+      <button type="button" onclick="downloadAllFramesZip()">
+        <span>📦</span>
+        <span>Frames als PNGs</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 3-Column Studio -->
+  <main>
+    <!-- Left Column: Frames & Layer List -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span>🎞️</span>
+          <span>Frames (max. 8)</span>
+        </span>
+        <span id="frameCountBadge" style="font-size:0.72rem; color:var(--primary); font-weight:700;">0 / 8</span>
+      </div>
+
+      <div class="panel-body">
+        <input type="file" id="fileImageInput" accept="image/png,image/jpeg,image/webp,image/gif" multiple style="display:none;" />
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileImageInput').click()">
+          <div class="drop-zone-icon">🖼️</div>
+          <div class="drop-zone-text">Bilder hierher ziehen</div>
+          <div class="drop-zone-hint">Oder klicken zum Auswählen (PNG, JPG, WebP)</div>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <button type="button" onclick="document.getElementById('fileImageInput').click()" style="flex:1;">
+            <span>➕ Frame laden</span>
+          </button>
+          <button type="button" onclick="duplicateCurrentFrame()" title="Aktuellen Frame duplizieren">
+            <span>📑</span>
+          </button>
+          <button type="button" onclick="deleteCurrentFrame()" class="danger" title="Aktuellen Frame löschen">
+            <span>🗑️</span>
+          </button>
+        </div>
+
+        <div class="frames-list" id="framesList">
+          <!-- Dynamically filled frame cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Center Column: Canvas Editor -->
+    <section class="canvas-panel">
+      <!-- Toolbar -->
+      <div class="canvas-toolbar">
+        <!-- Tool Selection -->
+        <div class="tool-group">
+          <span class="tool-label">Werkzeug:</span>
+          <button type="button" id="toolWand" class="tool-btn active" onclick="setTool('wand')" title="Klicke auf den Hintergrund, um ihn transparent zu machen">
+            <span>🪄 Hintergrund löschen</span>
+          </button>
+          <button type="button" id="toolEraser" class="tool-btn" onclick="setTool('eraser')" title="Pixel manuell wegradieren">
+            <span>🧹 Radiergummi</span>
+          </button>
+          <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Bild im Canvas verschieben">
+            <span>✋ Verschieben</span>
+          </button>
+        </div>
+
+        <!-- Wand Parameters -->
+        <div class="tool-group" id="wandParams">
+          <span class="tool-label">Toleranz:</span>
+          <div class="tool-slider-box">
+            <input type="range" id="toleranceRange" min="0" max="100" value="25" oninput="updateToleranceLabel(this.value)" />
+            <span id="toleranceVal">25%</span>
+          </div>
+
+          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer; margin-left:6px;">
+            <input type="checkbox" id="contiguousWand" checked />
+            <span>Zusammenhängend</span>
+          </label>
+
+          <button type="button" class="tool-btn" onclick="applyMagicWandToAllFrames()" style="background:rgba(16, 185, 129, 0.15); border-color:#10b981; color:#34d399;" title="Entfernt dieselbe Hintergrundfarbe bei allen Frames gleichzeitig!">
+            <span>⚡ Auf alle Frames anwenden</span>
+          </button>
+        </div>
+
+        <!-- Eraser Size -->
+        <div class="tool-group" id="eraserParams" style="display:none;">
+          <span class="tool-label">Pinselgröße:</span>
+          <div class="tool-slider-box">
+            <input type="range" id="eraserSizeRange" min="1" max="40" value="8" oninput="document.getElementById('eraserSizeVal').textContent = this.value + 'px'" />
+            <span id="eraserSizeVal">8px</span>
+          </div>
+        </div>
+
+        <!-- Canvas Resolution -->
+        <div class="tool-group">
+          <span class="tool-label">Größe:</span>
+          <select id="canvasResSelect" onchange="changeCanvasResolution(this.value)">
+            <option value="64">64 × 64 px</option>
+            <option value="80">80 × 80 px</option>
+            <option value="96" selected>96 × 96 px</option>
+            <option value="128">128 × 128 px</option>
+            <option value="160">160 × 160 px</option>
+          </select>
+        </div>
+
+        <!-- Guides & Helpers -->
+        <div class="tool-group">
+          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;">
+            <input type="checkbox" id="guideBaseline" checked onchange="drawActiveFrame()" />
+            <span>Bodenlinie</span>
+          </label>
+          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;">
+            <input type="checkbox" id="guideGrid" checked onchange="drawActiveFrame()" />
+            <span>Gitter</span>
+          </label>
+        </div>
+
+        <!-- Zoom -->
+        <div class="tool-group">
+          <span class="tool-label">Zoom:</span>
+          <button type="button" class="btn-icon" onclick="changeZoom(-1)">➖</button>
+          <span id="zoomLevelText" style="font-size:0.72rem; min-width:38px; text-align:center;">400%</span>
+          <button type="button" class="btn-icon" onclick="changeZoom(1)">➕</button>
+        </div>
+
+        <!-- Undo -->
+        <div class="tool-group">
+          <button type="button" class="tool-btn" onclick="undo()" title="Schritt rückgängig machen (Strg+Z)">
+            <span>↩️ Zurück</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Canvas Viewport -->
+      <div class="canvas-viewport" id="canvasViewport">
+        <canvas id="mainCanvas" width="96" height="96"></canvas>
+      </div>
+
+      <!-- Footer Info Bar -->
+      <div style="background:rgba(18,24,36,0.95); height:28px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:0.7rem; color:var(--text-muted);">
+        <span id="canvasStatusText">Klicke auf den Hintergrund, um die Farbe transparent zu machen.</span>
+        <span id="mouseCoordsText">X: 0, Y: 0</span>
+      </div>
+    </section>
+
+    <!-- Right Column: Live Preview & Metadata -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span>👀</span>
+          <span>Vorschau & Begleiter-Info</span>
+        </span>
+      </div>
+
+      <div class="panel-body">
+        <!-- Live Animation Preview Box -->
+        <div class="preview-box">
+          <div class="preview-stage" id="previewStage">
+            <div class="preview-ground"></div>
+            <img id="previewSprite" src="" alt="Vorschau" />
+          </div>
+
+          <div class="preview-controls">
+            <button type="button" id="btnPlayPause" onclick="togglePlay()" class="primary" style="padding:4px 10px;">
+              <span>⏸️ Pause</span>
+            </button>
+
+            <div style="display:flex; align-items:center; gap:6px; font-size:0.72rem;">
+              <span>Tempo:</span>
+              <input type="range" id="fpsRange" min="1" max="24" value="7" oninput="updateFps(this.value)" style="width:70px;" />
+              <span id="fpsVal">7 FPS</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-size:0.72rem; color:var(--text-muted);">
+            <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+              <input type="checkbox" id="previewWalkMode" checked />
+              <span>Hin- & herlaufen</span>
+            </label>
+
+            <div style="display:flex; gap:4px;">
+              <button type="button" class="btn-icon" onclick="setPreviewBg('check')" title="Transparenz-Karo">🏁</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('dark')" title="Dunkler Desktop">⬛</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('green')" title="Chroma-Grün">🟩</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('white')" title="Hell">⬜</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Companion Metadata Form -->
+        <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; flex-direction:column; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">Begleiter-Name:</label>
+            <input type="text" id="compName" value="Mein Begleiter" oninput="onMetaChange()" placeholder="z. B. Kuschelbär" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Symbol / Icon:</label>
+            <div style="display:flex; gap:6px;">
+              <input type="text" id="compIcon" value="✨" maxlength="4" style="width:50px; text-align:center; font-size:1.1rem;" oninput="onMetaChange()" />
+              <div class="emoji-row" style="flex:1;">
+                <span class="emoji-btn" onclick="setEmoji('🐉')">🐉</span>
+                <span class="emoji-btn" onclick="setEmoji('🦖')">🦖</span>
+                <span class="emoji-btn" onclick="setEmoji('🐾')">🐾</span>
+                <span class="emoji-btn" onclick="setEmoji('🐱')">🐱</span>
+                <span class="emoji-btn" onclick="setEmoji('🐶')">🐶</span>
+                <span class="emoji-btn" onclick="setEmoji('🦊')">🦊</span>
+                <span class="emoji-btn" onclick="setEmoji('🤖')">🤖</span>
+                <span class="emoji-btn" onclick="setEmoji('🐝')">🐝</span>
+                <span class="emoji-btn" onclick="setEmoji('✨')">✨</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ID (Dateiname):</label>
+            <input type="text" id="compId" value="mein_begleiter" oninput="onMetaChange()" placeholder="z. B. kuschelbaer" />
+            <span style="font-size:0.65rem; color:var(--text-muted);">Ergibt: <code id="filenamePreview" style="color:var(--primary);">mein_begleiter.companion.json</code></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Beschreibung:</label>
+            <textarea id="compDesc" oninput="onMetaChange()" placeholder="Niedlicher Begleiter für den Desktop"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ersteller / Autor:</label>
+            <input type="text" id="compAuthor" value="Dino Desk Team" oninput="onMetaChange()" placeholder="z. B. Dino Desk Team oder Dein Name" />
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div class="form-group">
+              <label class="form-label">Standard-Größe:</label>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <input type="range" id="compScale" min="50" max="160" step="5" value="100" oninput="document.getElementById('compScaleVal').textContent = this.value + '%'" style="width:100%;" />
+                <span id="compScaleVal" style="font-size:0.7rem; min-width:32px;">100%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Lauf-Tempo:</label>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <input type="range" id="compSpeed" min="50" max="160" step="5" value="100" oninput="document.getElementById('compSpeedVal').textContent = this.value + '%'" style="width:100%;" />
+                <span id="compSpeedVal" style="font-size:0.7rem; min-width:32px;">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Export Action -->
+        <button type="button" onclick="exportCompanionJson()" class="primary" style="margin-top:auto; padding:10px 14px; justify-content:center;">
+          <span>💾 Als .companion.json speichern</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">
+    <span>✅</span>
+    <span id="toastMsg">Erfolgreich gespeichert!</span>
+  </div>
+
+  <script>
+    // --- Application State ---
+    let frames = []; // Array of { id, name, canvas, ctx }
+    let activeFrameIndex = 0;
+    let targetResolution = 96;
+    let currentZoom = 4; // 400%
+    let activeTool = 'wand'; // 'wand', 'eraser', 'move'
+    let undoHistory = [];
+    let isDrawing = false;
+    let lastColorPicked = null;
+
+    // Animation preview state
+    let isPlaying = true;
+    let previewFrameIndex = 0;
+    let animFps = 7;
+    let animInterval = null;
+    let walkDirection = 1;
+    let walkPosition = 0;
+
+    // Elements
+    const mainCanvas = document.getElementById('mainCanvas');
+    const mainCtx = mainCanvas.getContext('2d');
+    const previewSprite = document.getElementById('previewSprite');
+    const previewStage = document.getElementById('previewStage');
+
+    // --- Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvasEvents();
+      initDragAndDrop();
+      initJsonInput();
+      startAnimationLoop();
+
+      // Load a friendly starter sprite (a cute 4-frame animated buddy)
+      createDefaultFrames();
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // --- Starter Companion Generator (Cute Blob Buddy) ---
+    function createDefaultFrames() {
+      frames = [];
+      const colors = ['#38bdf8', '#0ea5e9'];
+
+      for (let i = 0; i < 4; i++) {
+        const c = document.createElement('canvas');
+        c.width = targetResolution;
+        c.height = targetResolution;
+        const ctx = c.getContext('2d');
+
+        // Draw cute little friendly round companion
+        const cx = targetResolution / 2;
+        const cy = targetResolution - 32;
+        const bounce = (i === 1 || i === 3) ? -4 : 0;
+        const legOffset = (i === 0 || i === 2) ? 6 : -6;
+
+        // Feet / legs
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.ellipse(cx - 10 + (i === 1 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 10 + (i === 3 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Round Body
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + bounce, 24, 22, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Belly highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 4 + bounce, 16, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cute Big Eyes
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(cx - 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
+        ctx.arc(cx + 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye reflections
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx - 9, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
+        ctx.arc(cx + 7, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Smile
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 5 + bounce, 5, 0.1 * Math.PI, 0.9 * Math.PI);
+        ctx.stroke();
+
+        // Cheeks
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.55)';
+        ctx.beginPath();
+        ctx.arc(cx - 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
+        ctx.arc(cx + 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        frames.push({
+          id: 'frame_' + i,
+          name: 'Schritt ' + (i + 1),
+          canvas: c,
+          ctx: ctx
+        });
+      }
+
+      activeFrameIndex = 0;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    // --- Drag & Drop and Image Import ---
+    function initDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+      const input = document.getElementById('fileImageInput');
+
+      ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+        });
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files) {
+          handleImageFiles(e.dataTransfer.files);
+        }
+      });
+
+      input.addEventListener('change', (e) => {
+        if (e.target.files) {
+          handleImageFiles(e.target.files);
+        }
+      });
+    }
+
+    function handleImageFiles(fileList) {
+      const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+      if (files.length === 0) return;
+
+      const remainingSlots = 8 - frames.length;
+      if (remainingSlots <= 0) {
+        alert('Maximal 8 Frames erlaubt! Bitte lösche zuerst nicht benötigte Frames.');
+        return;
+      }
+
+      const filesToLoad = files.slice(0, remainingSlots);
+
+      let loadedCount = 0;
+      filesToLoad.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            addFrameFromImage(img, file.name.replace(/\.[^/.]+$/, ''));
+            loadedCount++;
+            if (loadedCount === filesToLoad.length) {
+              showToast(`${loadedCount} Bild(er) erfolgreich geladen!`);
+            }
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function addFrameFromImage(img, frameName) {
+      if (frames.length >= 8) return;
+
+      const c = document.createElement('canvas');
+      c.width = targetResolution;
+      c.height = targetResolution;
+      const ctx = c.getContext('2d');
+
+      // Draw image fitted and bottom-aligned (feet on the ground!)
+      const scale = Math.min((targetResolution - 12) / img.width, (targetResolution - 12) / img.height);
+      const nw = img.width * scale;
+      const nh = img.height * scale;
+      const nx = (targetResolution - nw) / 2;
+      const ny = targetResolution - nh - 10; // Align slightly above bottom
+
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, nx, ny, nw, nh);
+
+      frames.push({
+        id: 'frame_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        name: frameName || ('Frame ' + (frames.length + 1)),
+        canvas: c,
+        ctx: ctx
+      });
+
+      activeFrameIndex = frames.length - 1;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function duplicateCurrentFrame() {
+      if (frames.length >= 8) {
+        alert('Maximal 8 Frames erlaubt.');
+        return;
+      }
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      const c = document.createElement('canvas');
+      c.width = targetResolution;
+      c.height = targetResolution;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(cur.canvas, 0, 0);
+
+      frames.splice(activeFrameIndex + 1, 0, {
+        id: 'frame_' + Date.now(),
+        name: cur.name + ' (Kopie)',
+        canvas: c,
+        ctx: ctx
+      });
+
+      activeFrameIndex++;
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Frame dupliziert');
+    }
+
+    function deleteCurrentFrame() {
+      if (frames.length <= 1) {
+        alert('Mindestens 1 Frame muss erhalten bleiben.');
+        return;
+      }
+      frames.splice(activeFrameIndex, 1);
+      if (activeFrameIndex >= frames.length) {
+        activeFrameIndex = frames.length - 1;
+      }
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Frame gelöscht');
+    }
+
+    function moveFrame(index, dir) {
+      const target = index + dir;
+      if (target < 0 || target >= frames.length) return;
+      const temp = frames[index];
+      frames[index] = frames[target];
+      frames[target] = temp;
+      activeFrameIndex = target;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function updateFramesList() {
+      const list = document.getElementById('framesList');
+      list.innerHTML = '';
+
+      document.getElementById('frameCountBadge').textContent = `${frames.length} / 8`;
+
+      frames.forEach((frame, idx) => {
+        const card = document.createElement('div');
+        card.className = 'frame-card' + (idx === activeFrameIndex ? ' active' : '');
+        card.onclick = () => {
+          activeFrameIndex = idx;
+          updateFramesList();
+          drawActiveFrame();
+        };
+
+        const thumb = document.createElement('div');
+        thumb.className = 'frame-thumb-box';
+        const img = document.createElement('img');
+        img.src = frame.canvas.toDataURL();
+        thumb.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'frame-info';
+        info.innerHTML = `
+          <div class="frame-name">${frame.name}</div>
+          <div class="frame-dim">Frame #${idx + 1} • ${targetResolution}×${targetResolution}</div>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'frame-actions';
+        actions.onclick = (e) => e.stopPropagation();
+
+        if (idx > 0) {
+          const upBtn = document.createElement('button');
+          upBtn.className = 'btn-icon';
+          upBtn.innerHTML = '▲';
+          upBtn.title = 'Nach oben verschieben';
+          upBtn.onclick = () => moveFrame(idx, -1);
+          actions.appendChild(upBtn);
+        }
+
+        if (idx < frames.length - 1) {
+          const downBtn = document.createElement('button');
+          downBtn.className = 'btn-icon';
+          downBtn.innerHTML = '▼';
+          downBtn.title = 'Nach unten verschieben';
+          downBtn.onclick = () => moveFrame(idx, 1);
+          actions.appendChild(downBtn);
+        }
+
+        card.appendChild(thumb);
+        card.appendChild(info);
+        card.appendChild(actions);
+        list.appendChild(card);
+      });
+    }
+
+    // --- Canvas Drawing & Zoom ---
+    function changeZoom(delta) {
+      const levels = [1, 2, 3, 4, 6, 8];
+      let idx = levels.indexOf(currentZoom);
+      if (idx === -1) idx = 3;
+      idx = Math.max(0, Math.min(levels.length - 1, idx + delta));
+      currentZoom = levels[idx];
+      document.getElementById('zoomLevelText').textContent = (currentZoom * 100) + '%';
+      drawActiveFrame();
+    }
+
+    function changeCanvasResolution(newRes) {
+      targetResolution = parseInt(newRes, 10);
+      frames.forEach(frame => {
+        const oldC = frame.canvas;
+        const newC = document.createElement('canvas');
+        newC.width = targetResolution;
+        newC.height = targetResolution;
+        const newCtx = newC.getContext('2d');
+        newCtx.imageSmoothingEnabled = false;
+        newCtx.drawImage(oldC, 0, 0, targetResolution, targetResolution);
+        frame.canvas = newC;
+        frame.ctx = newCtx;
+      });
+      mainCanvas.width = targetResolution;
+      mainCanvas.height = targetResolution;
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Auflösung auf ' + targetResolution + 'x' + targetResolution + ' geändert');
+    }
+
+    function drawActiveFrame() {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      mainCanvas.width = targetResolution;
+      mainCanvas.height = targetResolution;
+      mainCanvas.style.width = (targetResolution * currentZoom) + 'px';
+      mainCanvas.style.height = (targetResolution * currentZoom) + 'px';
+
+      mainCtx.clearRect(0, 0, targetResolution, targetResolution);
+      mainCtx.imageSmoothingEnabled = false;
+      mainCtx.drawImage(cur.canvas, 0, 0);
+
+      // Draw overlay guides if enabled
+      const showBaseline = document.getElementById('guideBaseline').checked;
+      const showGrid = document.getElementById('guideGrid').checked;
+
+      if (showBaseline) {
+        mainCtx.save();
+        mainCtx.strokeStyle = 'rgba(239, 68, 68, 0.75)';
+        mainCtx.lineWidth = 1;
+        mainCtx.setLineDash([2, 2]);
+        mainCtx.beginPath();
+        // Baseline is placed at targetResolution - 8px
+        const groundY = targetResolution - 8;
+        mainCtx.moveTo(0, groundY);
+        mainCtx.lineTo(targetResolution, groundY);
+        mainCtx.stroke();
+        mainCtx.restore();
+      }
+
+      if (showGrid && currentZoom >= 3) {
+        mainCtx.save();
+        mainCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        mainCtx.lineWidth = 0.5;
+        for (let x = 0; x < targetResolution; x += 8) {
+          mainCtx.beginPath();
+          mainCtx.moveTo(x, 0);
+          mainCtx.lineTo(x, targetResolution);
+          mainCtx.stroke();
+        }
+        for (let y = 0; y < targetResolution; y += 8) {
+          mainCtx.beginPath();
+          mainCtx.moveTo(0, y);
+          mainCtx.lineTo(targetResolution, y);
+          mainCtx.stroke();
+        }
+        mainCtx.restore();
+      }
+    }
+
+    // --- Tools & Event Handling ---
+    function setTool(tool) {
+      activeTool = tool;
+      document.getElementById('toolWand').classList.toggle('active', tool === 'wand');
+      document.getElementById('toolEraser').classList.toggle('active', tool === 'eraser');
+      document.getElementById('toolMove').classList.toggle('active', tool === 'move');
+
+      document.getElementById('wandParams').style.display = (tool === 'wand' ? 'flex' : 'none');
+      document.getElementById('eraserParams').style.display = (tool === 'eraser' ? 'flex' : 'none');
+
+      const statusEl = document.getElementById('canvasStatusText');
+      if (tool === 'wand') statusEl.textContent = 'Klicke auf eine Farbe im Bild, um sie transparent zu machen.';
+      if (tool === 'eraser') statusEl.textContent = 'Klicke und ziehe mit der Maus, um Pixel wegzuradieren.';
+      if (tool === 'move') statusEl.textContent = 'Bewege das Bild mit den Pfeiltasten oder durch Ziehen.';
+    }
+
+    function updateToleranceLabel(val) {
+      document.getElementById('toleranceVal').textContent = val + '%';
+    }
+
+    function saveUndoState() {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      const snap = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+      undoHistory.push({ index: activeFrameIndex, data: snap });
+      if (undoHistory.length > 20) undoHistory.shift();
+    }
+
+    function undo() {
+      if (undoHistory.length === 0) return;
+      const last = undoHistory.pop();
+      if (frames[last.index]) {
+        frames[last.index].ctx.putImageData(last.data, 0, 0);
+        activeFrameIndex = last.index;
+        updateFramesList();
+        drawActiveFrame();
+        showToast('Schritt rückgängig gemacht');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undo();
+      }
+      if (activeTool === 'move') {
+        if (e.key === 'ArrowUp') { moveActiveFramePixels(0, -1); e.preventDefault(); }
+        if (e.key === 'ArrowDown') { moveActiveFramePixels(0, 1); e.preventDefault(); }
+        if (e.key === 'ArrowLeft') { moveActiveFramePixels(-1, 0); e.preventDefault(); }
+        if (e.key === 'ArrowRight') { moveActiveFramePixels(1, 0); e.preventDefault(); }
+      }
+    });
+
+    function moveActiveFramePixels(dx, dy) {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      saveUndoState();
+      const imgData = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+      cur.ctx.clearRect(0, 0, targetResolution, targetResolution);
+      cur.ctx.putImageData(imgData, dx, dy);
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function initCanvasEvents() {
+      mainCanvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        handleCanvasAction(e);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDrawing = false;
+      });
+
+      mainCanvas.addEventListener('mousemove', (e) => {
+        const rect = mainCanvas.getBoundingClientRect();
+        const px = Math.floor((e.clientX - rect.left) / currentZoom);
+        const py = Math.floor((e.clientY - rect.top) / currentZoom);
+        document.getElementById('mouseCoordsText').textContent = `X: ${Math.max(0, Math.min(targetResolution-1, px))}, Y: ${Math.max(0, Math.min(targetResolution-1, py))}`;
+
+        if (isDrawing && activeTool === 'eraser') {
+          eraseAt(px, py);
+        }
+      });
+    }
+
+    function handleCanvasAction(e) {
+      const rect = mainCanvas.getBoundingClientRect();
+      const px = Math.floor((e.clientX - rect.left) / currentZoom);
+      const py = Math.floor((e.clientY - rect.top) / currentZoom);
+      if (px < 0 || px >= targetResolution || py < 0 || py >= targetResolution) return;
+
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      saveUndoState();
+
+      if (activeTool === 'wand') {
+        const tol = parseInt(document.getElementById('toleranceRange').value, 10);
+        const contiguous = document.getElementById('contiguousWand').checked;
+        removeBackgroundColor(cur, px, py, tol, contiguous);
+        updateFramesList();
+        drawActiveFrame();
+      } else if (activeTool === 'eraser') {
+        eraseAt(px, py);
+      }
+    }
+
+    function eraseAt(px, py) {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      const size = parseInt(document.getElementById('eraserSizeRange').value, 10);
+      cur.ctx.save();
+      cur.ctx.globalCompositeOperation = 'destination-out';
+      cur.ctx.beginPath();
+      cur.ctx.arc(px, py, size / 2, 0, Math.PI * 2);
+      cur.ctx.fill();
+      cur.ctx.restore();
+
+      drawActiveFrame();
+      updateFramesList();
+    }
+
+    // --- Transparency & Magic Wand Algorithm ---
+    function removeBackgroundColor(frameObj, startX, startY, tolerancePercent, contiguous) {
+      const ctx = frameObj.ctx;
+      const w = targetResolution;
+      const h = targetResolution;
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      const startIndex = (startY * w + startX) * 4;
+      const targetR = data[startIndex];
+      const targetG = data[startIndex + 1];
+      const targetB = data[startIndex + 2];
+      const targetA = data[startIndex + 3];
+
+      if (targetA === 0) return; // Already transparent
+
+      lastColorPicked = { r: targetR, g: targetG, b: targetB, a: targetA };
+
+      // Max color distance in RGB cube is sqrt(255^2 * 3) ~ 441.67
+      const maxDist = 441.67;
+      const threshold = (tolerancePercent / 100) * maxDist;
+
+      function colorMatch(idx) {
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        if (a === 0) return false;
+        const dist = Math.sqrt((r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2);
+        return dist <= threshold;
+      }
+
+      if (!contiguous) {
+        // Global color replacement
+        for (let i = 0; i < data.length; i += 4) {
+          if (colorMatch(i)) {
+            data[i + 3] = 0; // Transparent
+          }
+        }
+      } else {
+        // Connected Flood Fill (Magic Wand)
+        const visited = new Uint8Array(w * h);
+        const queue = [startY * w + startX];
+        visited[startY * w + startX] = 1;
+
+        while (queue.length > 0) {
+          const pos = queue.pop();
+          const cx = pos % w;
+          const cy = Math.floor(pos / w);
+          const idx = pos * 4;
+
+          data[idx + 3] = 0; // Make transparent
+
+          const neighbors = [
+            [cx + 1, cy],
+            [cx - 1, cy],
+            [cx, cy + 1],
+            [cx, cy - 1]
+          ];
+
+          for (let n = 0; n < neighbors.length; n++) {
+            const nx = neighbors[n][0];
+            const ny = neighbors[n][1];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const npos = ny * w + nx;
+              if (!visited[npos] && colorMatch(npos * 4)) {
+                visited[npos] = 1;
+                queue.push(npos);
+              }
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    function applyMagicWandToAllFrames() {
+      if (!lastColorPicked) {
+        alert('Klicke zuerst auf eine Farbe im aktiven Bild, die entfernt werden soll!');
+        return;
+      }
+
+      const tol = parseInt(document.getElementById('toleranceRange').value, 10);
+      const maxDist = 441.67;
+      const threshold = (tol / 100) * maxDist;
+
+      frames.forEach(f => {
+        const imgData = f.ctx.getImageData(0, 0, targetResolution, targetResolution);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const dist = Math.sqrt((r - lastColorPicked.r) ** 2 + (g - lastColorPicked.g) ** 2 + (b - lastColorPicked.b) ** 2);
+          if (dist <= threshold) {
+            data[i + 3] = 0;
+          }
+        }
+        f.ctx.putImageData(imgData, 0, 0);
+      });
+
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Hintergrund bei allen ' + frames.length + ' Frames entfernt!');
+    }
+
+    // --- Live Animation Preview Loop ---
+    function startAnimationLoop() {
+      if (animInterval) clearInterval(animInterval);
+      animInterval = setInterval(stepAnimation, 1000 / animFps);
+    }
+
+    function stepAnimation() {
+      if (!isPlaying || frames.length === 0) return;
+
+      previewFrameIndex = (previewFrameIndex + 1) % frames.length;
+      const f = frames[previewFrameIndex];
+      if (f) {
+        previewSprite.src = f.canvas.toDataURL();
+      }
+
+      // Horizontal walk simulation
+      const walkMode = document.getElementById('previewWalkMode').checked;
+      if (walkMode) {
+        const stageWidth = previewStage.clientWidth;
+        const maxWalk = (stageWidth / 2) - 30;
+        walkPosition += walkDirection * 2.5;
+
+        if (walkPosition > maxWalk) {
+          walkPosition = maxWalk;
+          walkDirection = -1;
+        } else if (walkPosition < -maxWalk) {
+          walkPosition = -maxWalk;
+          walkDirection = 1;
+        }
+
+        previewSprite.style.transform = `translateX(${walkPosition}px) scaleX(${walkDirection})`;
+      } else {
+        previewSprite.style.transform = `translateX(0px) scaleX(1)`;
+      }
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      document.getElementById('btnPlayPause').innerHTML = isPlaying ? '<span>⏸️ Pause</span>' : '<span>▶️ Abspielen</span>';
+    }
+
+    function updateFps(fps) {
+      animFps = parseInt(fps, 10);
+      document.getElementById('fpsVal').textContent = animFps + ' FPS';
+      startAnimationLoop();
+    }
+
+    function setPreviewBg(type) {
+      previewStage.className = 'preview-stage';
+      if (type === 'dark') previewStage.classList.add('bg-dark');
+      if (type === 'green') previewStage.classList.add('bg-green');
+      if (type === 'white') previewStage.classList.add('bg-white');
+    }
+
+    // --- Metadata & Emoji Picker ---
+    function setEmoji(em) {
+      document.getElementById('compIcon').value = em;
+      onMetaChange();
+    }
+
+    function onMetaChange() {
+      const name = document.getElementById('compName').value.trim();
+      const idInput = document.getElementById('compId');
+      let idVal = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      if (!idVal && name) {
+        idVal = name.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      }
+      idInput.value = idVal;
+      document.getElementById('filenamePreview').textContent = (idVal || 'begleiter') + '.companion.json';
+    }
+
+    // --- Export as .companion.json ---
+    function exportCompanionJson() {
+      if (frames.length === 0) {
+        alert('Keine Frames vorhanden! Bitte füge mindestens 1 Bild hinzu.');
+        return;
+      }
+
+      const id = document.getElementById('compId').value.trim() || 'mein_begleiter';
+      const name = document.getElementById('compName').value.trim() || 'Mein Begleiter';
+      const icon = document.getElementById('compIcon').value.trim() || '✨';
+      const desc = document.getElementById('compDesc').value.trim() || 'Ein individueller Begleiter für das Dino-Widget-Desk';
+      const author = document.getElementById('compAuthor').value.trim() || 'Community Addon';
+      const scale = parseInt(document.getElementById('compScale').value, 10) || 100;
+      const speed = parseInt(document.getElementById('compSpeed').value, 10) || 100;
+
+      // Extract Base64 sprites
+      const walkSprites = frames.map(f => f.canvas.toDataURL('image/png'));
+      const previewUrl = walkSprites[0];
+
+      const companionPackage = {
+        id: id,
+        name: name,
+        title: `${icon} ${name}`,
+        icon: icon,
+        description: desc,
+        author: author,
+        version: "1.0.0",
+        scale: scale,
+        speed: speed,
+        preview: previewUrl,
+        walk_frames: walkSprites.length,
+        jump_frames: 0,
+        tail_frames: 0,
+        sprites: {
+          walk: walkSprites,
+          jump: walkSprites,
+          tail: walkSprites
+        }
+      };
+
+      const jsonStr = JSON.stringify(companionPackage, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${id}.companion.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Exportiert als ${id}.companion.json!`);
+    }
+
+    // --- Import existing .companion.json ---
+    function initJsonInput() {
+      const input = document.getElementById('fileJsonInput');
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            loadCompanionData(data);
+          } catch (err) {
+            alert('Fehler beim Lesen der JSON-Datei: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function loadCompanionData(data) {
+      if (!data || !data.sprites || !data.sprites.walk || data.sprites.walk.length === 0) {
+        alert('Ungültiges Begleiter-Format! Keine "sprites.walk" Frames gefunden.');
+        return;
+      }
+
+      document.getElementById('compId').value = data.id || 'begleiter';
+      document.getElementById('compName').value = data.name || 'Begleiter';
+      document.getElementById('compIcon').value = data.icon || '✨';
+      document.getElementById('compDesc').value = data.description || '';
+      document.getElementById('compAuthor').value = data.author || 'Dino Desk Team';
+      if (data.scale) {
+        document.getElementById('compScale').value = data.scale;
+        document.getElementById('compScaleVal').textContent = data.scale + '%';
+      }
+      if (data.speed) {
+        document.getElementById('compSpeed').value = data.speed;
+        document.getElementById('compSpeedVal').textContent = data.speed + '%';
+      }
+      onMetaChange();
+
+      frames = [];
+      const walkList = data.sprites.walk.slice(0, 8);
+      let loaded = 0;
+
+      walkList.forEach((src, idx) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = targetResolution;
+          c.height = targetResolution;
+          const ctx = c.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, targetResolution, targetResolution);
+
+          frames.push({
+            id: 'frame_' + idx,
+            name: 'Frame ' + (idx + 1),
+            canvas: c,
+            ctx: ctx
+          });
+
+          loaded++;
+          if (loaded === walkList.length) {
+            activeFrameIndex = 0;
+            updateFramesList();
+            drawActiveFrame();
+            showToast(`Begleiter "${data.name}" mit ${loaded} Frames geladen!`);
+          }
+        };
+        img.src = src;
+      });
+    }
+
+    // --- Export as PNGs (Downloads each frame) ---
+    function downloadAllFramesZip() {
+      if (frames.length === 0) return;
+      const compId = document.getElementById('compId').value.trim() || 'begleiter';
+
+      frames.forEach((f, idx) => {
+        const a = document.createElement('a');
+        a.href = f.canvas.toDataURL('image/png');
+        a.download = `${compId}_walk_${idx}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      showToast(`${frames.length} PNG-Dateien heruntergeladen!`);
+    }
+
+    function resetAll() {
+      if (confirm('Möchtest du wirklich alle Frames zurücksetzen und neu anfangen?')) {
+        createDefaultFrames();
+        document.getElementById('compName').value = 'Mein Begleiter';
+        document.getElementById('compId').value = 'mein_begleiter';
+        document.getElementById('compIcon').value = '✨';
+        document.getElementById('compDesc').value = '';
+        document.getElementById('compAuthor').value = 'Dino Desk Team';
+        onMetaChange();
+        showToast('Zurückgesetzt!');
+      }
+    }
+  </script>
+</body>
+</html>

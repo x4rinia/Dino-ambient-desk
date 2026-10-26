@@ -255,14 +255,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  // Active manual calendar notes (max 3; expired ones are auto-filtered & auto-deleted)
+  // Active manual calendar notes (max 3; events whose full calendar day has passed are auto-filtered & auto-deleted)
+  const startOfTodayMs = new Date().setHours(0, 0, 0, 0);
   const activeManualEvents = (events || [])
-    .filter(
-      (ev) =>
-        ev.source !== 'google' &&
-        ev.source !== 'ics' &&
-        new Date(ev.start_iso).getTime() > Date.now()
-    )
+    .filter((ev) => {
+      if (ev.source === 'google' || ev.source === 'ics') return false;
+      const d = new Date(ev.start_iso);
+      if (isNaN(d.getTime())) return false;
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      return dayStart >= startOfTodayMs;
+    })
     .sort((a, b) => new Date(a.start_iso).getTime() - new Date(b.start_iso).getTime())
     .slice(0, 3);
 

@@ -14,19 +14,25 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
     return () => clearInterval(timer);
   }, []);
 
+  const startOfTodayMs = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
   const upcoming = events
     .map((ev) => ({
       ...ev,
       dateObj: new Date(ev.start_iso),
     }))
-    .filter((ev) => !isNaN(ev.dateObj.getTime()) && ev.dateObj.getTime() > now.getTime() - 60000)
+    .filter((ev) => {
+      if (isNaN(ev.dateObj.getTime())) return false;
+      const eventDayStart = new Date(ev.dateObj.getFullYear(), ev.dateObj.getMonth(), ev.dateObj.getDate()).getTime();
+      return eventDayStart >= startOfTodayMs;
+    })
     .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
 
   const nextEvent = upcoming[0];
 
   const formatRelative = (target: Date): string => {
     const diffMs = target.getTime() - now.getTime();
-    if (diffMs <= 0) return 'Starting now';
+    if (diffMs <= 0) return 'Heute';
     const totalMinutes = Math.ceil(diffMs / 60000);
     if (totalMinutes < 60) {
       return `in ${totalMinutes} min`;

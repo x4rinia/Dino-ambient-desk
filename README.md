@@ -49,6 +49,7 @@ In der Beispielansicht oben sind die verfuegbaren Widgets uebersichtlich angeord
 * **Stufenlose Skalierung (Begleiter-Groesse):** Ueber einen Schieberegler von 50% bis 160% in 5%-Schritten skalierbar. Durch die Verankerung an den Fuessen bleibt der Begleiter bei jeder Groesse exakt auf der Standlinie.
 * **Geschwindigkeit, Transparenz und Laufbreite:** Tempo (50% bis 160%), Transparenz (20% bis 100%) und die Weite des Laufbereichs (300px bis 850px) sind frei einstellbar.
 * **Visuelle Ausrichtungshilfe:** Bei geoeffneten Einstellungen wird der gesamte Laufbereich mit einem gruen gestrichelten Rahmen dargestellt und kann per Maus an jede Wunschposition auf dem Bildschirm gezogen werden. Nach dem Speichern wird der Rahmen vollstaendig unsichtbar.
+* **Integrierter Begleiter-Editor (companion-editor):** Im Ordner companion-editor steht ein vollstaendiger visueller Sprite- und Begleiter-Editor bereit. Bis zu 8 Bilder koennen importiert, Hintergruende transparent freigestellt, die Groesse skaliert und die fertige .companion.json Datei mit einem Klick exportiert werden.
 
 ### 2. Desktop-Hintergrund und 2 Widget-Stile
 * **Echtes Desktop-Hintergrundbild:** Zwischen den Widgets bleibt das bestehende, hochaufloesende Windows-Hintergrundbild sichtbar.
@@ -64,7 +65,7 @@ In der Beispielansicht oben sind die verfuegbaren Widgets uebersichtlich angeord
 ### 4. Kalender-Notizen und Terminverwaltung
 * **Dashboard-Notizen:** Bis zu drei Termine oder Aufgaben direkt im Widget sichtbar.
 * **Einfache Bearbeitung:** Titel, Datum und Uhrzeit koennen im Einstellungsfenster direkt eingetragen werden.
-* **Automatische Bereinigung:** Abgelaufene Termine werden nach Ablauf automatisch entfernt.
+* **Ganztagig sichtbare Termine:** Termine des aktuellen Tages bleiben den gesamten Tag ueber bis Mitternacht sichtbar. Erst wenn der Kalendertag vollstaendig verstrichen ist, werden abgelaufene Termine automatisch entfernt.
 * **Kalender-Synchronisation:** Unterstuetzt den Import externer Kalenderdaten via Google Kalender oder iCal-URL (.ics).
 
 ### 5. Frauen-Zyklus-Tracker (Cycle Tracker)
