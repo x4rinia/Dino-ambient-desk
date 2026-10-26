@@ -39,13 +39,12 @@ In der Beispielansicht oben sind die verfuegbaren Widgets uebersichtlich angeord
 
 ### 1. Animierte Schreibtisch-Begleiter & Addon-System
 * **Begleiter-Auswahl per Knopfdruck:** Ueber einen eigenen Button in den Einstellungen koennen alle erkannten Begleiter uebersichtlich in einer Galerie angezeigt und per Klick aktiviert werden.
+* **Standard-Begleiter (Dino Desk Team):** Standardmaessig ist der niedliche Drache als treuer Schreibtisch-Begleiter aktiv. Zusaetzlich ist der klassische Ankylosaurus-Dino vorinstalliert.
 * **Kompaktes Addon-Dateiformat (.companion.json):** Jeder Begleiter ist in einer einzigen, eigenstaendigen Datei gebuendelt (Name, Beschreibung, Vorschaubild und alle Animations-Frames). Es muessen keine tausenden Einzel-Dateien oder Ordner mehr verwaltet werden.
-* **Ordner-Zugriff & Import:** Neue Begleiter lassen sich einfach als .companion.json herunterladen und in den Begleiter-Ordner ablegen oder direkt ueber den Button "Addon importieren" in der App laden.
-* **12 vorinstallierte Begleiter:** Unter anderem Ankylosaurus (Standard-Dino), Biene, Diddl, Drache, Elfe, Mops, Terrier, Katze, Optimus, Roboter und Waldtroll.
-* **Natuerliche 4-Frame-Laufanimation:** Geht fluessig und gleichmaessig ueber seinen eingestellten Laufbereich hin und her, ohne unruhiges Drehen oder hinkende Bewegungsablaeufe.
-* **Keulen-Wedeln mit Glitzereffekt:** Bleibt zwischendurch stehen und schwingt froehlich seine Schwanzkeule.
-* **Freudensprung:** Geht kurz in die Knie und huepft vor Freude mit ausgestreckten Armen in die Luft.
-* **Individuell ein- und ausschaltbare Animationen:** Jede der drei Aktionen (Laufen, Keulen-Wedeln, Freudensprung) kann in den Einstellungen ueber Kontrollkaestchen einzeln aktiviert oder deaktiviert werden.
+* **Ordner-Zugriff & Live-Erkennung:** Neue Begleiter lassen sich einfach als .companion.json herunterladen und ueber den Button "Ordner oeffnen" in das Begleiter-Verzeichnis ablegen. Das Dashboard erkennt neu hinzugefuegte Begleiter automatisch in Echtzeit.
+* **Zusatz-Paket (addon.zip):** 10 weitere Begleiter (Biene, Diddl, Elfe, Mops, Terrier, 2 Katzen, Optimus, Roboter, Waldtroll) stehen als separates Addon-Archiv (addon.zip) zur Verfuegung.
+* **Fokussierte Animationen:** Alle Begleiter verfuegen ueber eine gleichmaessige, natuerliche 4-Frame-Laufanimation. Der Ankylosaurus besitzt darueber hinaus zusaetzlich Keulen-Wedeln und einen Freudensprung.
+* **Individuell ein- und ausschaltbare Animationen:** Das Laufen kann in den Einstellungen ueber ein Kontrollkaestchen flexibel aktiviert oder deaktiviert werden. Fuer den Ankylosaurus lassen sich Keulen-Wedeln und Freudensprung zusaetzlich separat steuern.
 * **Ruhemodus / Auf der Stelle stehen:** Wird das Laufen deaktiviert, bleibt der Begleiter ruhig an seinem Ankerpunkt stehen. Sind alle Animationen deaktiviert, verharrt er friedlich im Standbild.
 * **Stufenlose Skalierung (Begleiter-Groesse):** Ueber einen Schieberegler von 50% bis 160% in 5%-Schritten skalierbar. Durch die Verankerung an den Fuessen bleibt der Begleiter bei jeder Groesse exakt auf der Standlinie.
 * **Geschwindigkeit, Transparenz und Laufbreite:** Tempo (50% bis 160%), Transparenz (20% bis 100%) und die Weite des Laufbereichs (300px bis 850px) sind frei einstellbar.
@@ -110,10 +109,11 @@ In der Beispielansicht oben sind die verfuegbaren Widgets uebersichtlich angeord
 
 ## Download und Schnellstart
 
-1. Lade das fertige Release **[Dino_ambient_Deck.zip](https://github.com/x4rinia/Dino-ambient-desk/releases)** herunter und entpacke den Ordner.
-2. Starte die Anwendung ueber `Dino_ambient_Deck.exe`.
-3. Klicke im Windows-Infobereich (System-Tray) mit der rechten Maustaste auf das Dino-Symbol, um die Einstellungen zu oeffnen.
-4. Passe die gewuenschten Module, den Dino-Laufbereich und die Farben nach deinen Vorlieben an.
+1. Lade das Hauptprogramm **[Dino_ambient_Deck.zip](https://github.com/x4rinia/Dino-ambient-desk/releases)** herunter und entpacke den Ordner. Es enthaelt bereits die Standard-Begleiter Drache und Ankylosaurus.
+2. Optional: Lade das Begleiter-Paket **[addon.zip](https://github.com/x4rinia/Dino-ambient-desk/releases)** herunter, wenn du 10 weitere Community-Begleiter nutzen moechtest.
+3. Starte die Anwendung ueber `Dino_ambient_Deck.exe`.
+4. Klicke im Windows-Infobereich (System-Tray) mit der rechten Maustaste auf das Dino-Symbol, um die Einstellungen zu oeffnen.
+5. Um Begleiter aus `addon.zip` hinzuzufuegen, klicke in den Einstellungen im Abschnitt Begleiter auf "Begleiter auswaehlen" und dann auf "Ordner oeffnen". Entpacke die gewuenschten `.companion.json` Dateien einfach in diesen Ordner. Sie stehen sofort zur Verfuegung.
 
 ---
 

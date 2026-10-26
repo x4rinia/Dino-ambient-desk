@@ -269,7 +269,7 @@ public class DinoCompanionModuleConfig
     public bool Enabled { get; set; } = true;
 
     [JsonPropertyName("variant")]
-    public string Variant { get; set; } = "ankylosaurus";
+    public string Variant { get; set; } = "drache";
 
     [JsonPropertyName("auto_cycle")]
     public bool AutoCycle { get; set; } = false;

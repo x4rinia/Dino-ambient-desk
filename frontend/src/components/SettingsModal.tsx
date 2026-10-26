@@ -362,25 +362,44 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const currentBgMode: BackgroundMode =
     rawBg === 'black' ? 'black' : 'wallpaper_blur';
 
-  const currentDinoVariant = (config.modules.dino_companion?.variant ||
-    'ankylosaurus') as DinoVariant;
-
-  const currentVariantId = (config.modules.dino_companion?.variant || 'ankylosaurus').toLowerCase();
+  const currentVariantId = (config.modules.dino_companion?.variant || 'drache').toLowerCase();
   const activeAddon = (addonCompanions || []).find((c) => c.id.toLowerCase() === currentVariantId);
-  const companionDisplayName = activeAddon ? activeAddon.name : 'Ankylosaurus';
-  const companionDisplayIcon = activeAddon ? (activeAddon.icon || '✨') : '🦖';
+  const companionDisplayName = activeAddon
+    ? activeAddon.name
+    : (currentVariantId === 'ankylosaurus' ? 'Ankylosaurus' : 'Drache');
+  const companionDisplayIcon = activeAddon
+    ? (activeAddon.icon || '✨')
+    : (currentVariantId === 'ankylosaurus' ? '🦖' : '🐉');
   const companionDisplayPreview = activeAddon
-    ? (activeAddon.preview_url || activeAddon.sprites?.walk?.[0] || '/dino/walk_0.png')
-    : '/dino/walk_0.png';
+    ? (activeAddon.preview_url || activeAddon.sprites?.walk?.[0] || '/drache/walk_0.png')
+    : (currentVariantId === 'ankylosaurus' ? '/dino/walk_0.png' : '/drache/walk_0.png');
   const companionDisplayDesc = activeAddon
     ? activeAddon.description
-    : 'Läuft sanft um seinen Ankerpunkt hin und her, wedelt fröhlich mit der Keule und springt ab und zu vor Freude hoch!';
+    : (currentVariantId === 'ankylosaurus'
+        ? 'Der treue Standard-Dino: Läuft ruhig, wedelt sanft mit seiner Keule und springt vor Freude hoch!'
+        : 'Niedlicher kleiner Drache vom Dino Desk Team (Standard-Begleiter)');
 
   const allAvailableCompanions = React.useMemo(() => {
-    const list: AddonCompanionInfo[] = [];
-    const hasAnky = (addonCompanions || []).some(
-      (c) => c.id.toLowerCase() === 'ankylosaurus'
-    );
+    const list: AddonCompanionInfo[] = [...(addonCompanions || [])];
+
+    // Ensure Drache is present
+    const hasDrache = list.some((c) => c.id.toLowerCase() === 'drache');
+    if (!hasDrache) {
+      list.push({
+        id: 'drache',
+        name: 'Drache',
+        description: 'Niedlicher kleiner Drache vom Dino Desk Team (Standard-Begleiter)',
+        icon: '🐉',
+        author: 'Dino Desk Team',
+        preview_url: '/drache/preview.png',
+        walk_frames: 4,
+        jump_frames: 0,
+        tail_frames: 0,
+      });
+    }
+
+    // Ensure Ankylosaurus is present
+    const hasAnky = list.some((c) => c.id.toLowerCase() === 'ankylosaurus');
     if (!hasAnky) {
       list.push({
         id: 'ankylosaurus',
@@ -394,8 +413,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         tail_frames: 4,
       });
     }
-    list.push(...(addonCompanions || []));
-    return list;
+
+    // Sort order: Drache first (#1), Ankylosaurus second (#2), then others alphabetically
+    return list.sort((a, b) => {
+      const idA = a.id.toLowerCase();
+      const idB = b.id.toLowerCase();
+      if (idA === 'drache') return -1;
+      if (idB === 'drache') return 1;
+      if (idA === 'ankylosaurus') return -1;
+      if (idB === 'ankylosaurus') return 1;
+      return a.name.localeCompare(b.name);
+    });
   }, [addonCompanions]);
 
   const currentCycleVariants: DinoVariant[] =
@@ -2136,7 +2164,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             >
               {allAvailableCompanions.map((comp) => {
                 const isSelected =
-                  (config.modules.dino_companion?.variant || 'ankylosaurus').toLowerCase() === comp.id.toLowerCase();
+                  (config.modules.dino_companion?.variant || 'drache').toLowerCase() === comp.id.toLowerCase();
                 return (
                   <div
                     key={comp.id}

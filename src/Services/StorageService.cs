@@ -459,7 +459,7 @@ public class StorageService
                         {
                             string fileName = Path.GetFileName(file);
                             string dst = Path.Combine(appData, fileName);
-                            if (!File.Exists(dst) || new FileInfo(dst).Length < 1000)
+                            if (!File.Exists(dst) || new FileInfo(dst).Length < 1000 || File.GetLastWriteTimeUtc(file) > File.GetLastWriteTimeUtc(dst))
                             {
                                 File.Copy(file, dst, true);
                             }

@@ -23,6 +23,27 @@ export const DINO_SPRITES = {
   ],
 };
 
+export const DRACHE_SPRITES = {
+  walk: [
+    '/drache/walk_0.png',
+    '/drache/walk_1.png',
+    '/drache/walk_2.png',
+    '/drache/walk_3.png',
+  ],
+  jump: [
+    '/drache/walk_0.png',
+    '/drache/walk_1.png',
+    '/drache/walk_2.png',
+    '/drache/walk_3.png',
+  ],
+  tail: [
+    '/drache/walk_0.png',
+    '/drache/walk_1.png',
+    '/drache/walk_2.png',
+    '/drache/walk_3.png',
+  ],
+};
+
 type DinoAction = 'walk' | 'jump' | 'tail';
 
 interface DinoCompanionProps {
@@ -62,13 +83,14 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     setCurrentAction('walk');
   }, [variant]);
 
-  // Dynamically resolve sprites: Addon companion if chosen and available, otherwise built-in Dino
+  const currentVariant = (variant || 'drache').toLowerCase();
+
+  // Dynamically resolve sprites: Addon companion if chosen and available, otherwise built-in Drache/Dino
   const activeCompanion = useMemo(() => {
-    if (!variant || variant === 'ankylosaurus') return null;
     return addonCompanions.find(
-      (c) => c.id.toLowerCase() === variant.toLowerCase()
+      (c) => c.id.toLowerCase() === currentVariant
     ) || null;
-  }, [variant, addonCompanions]);
+  }, [currentVariant, addonCompanions]);
 
   const activeSprites = useMemo(() => {
     if (activeCompanion) {
@@ -81,12 +103,15 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             );
       return {
         walk: walkFrames,
-        jump: walkFrames, // custom companions strictly only walk
-        tail: walkFrames, // custom companions strictly only walk
+        jump: currentVariant === 'ankylosaurus' ? (activeCompanion.sprites?.jump || DINO_SPRITES.jump) : walkFrames,
+        tail: currentVariant === 'ankylosaurus' ? (activeCompanion.sprites?.tail || DINO_SPRITES.tail) : walkFrames,
       };
     }
-    return DINO_SPRITES;
-  }, [activeCompanion]);
+    if (currentVariant === 'ankylosaurus') {
+      return DINO_SPRITES;
+    }
+    return DRACHE_SPRITES;
+  }, [activeCompanion, currentVariant]);
 
   // Smooth walking path state: walkX ranges from -halfTrack to +halfTrack
   const halfTrack = Math.max(120, Math.round(trackWidth / 2));
@@ -232,10 +257,10 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       // Action choices dynamically filtered by enabled settings:
       // ONLY the built-in Dino (Ankylosaurus) has tail-wagging and rejoicing jumps!
       // All other companions strictly have ONLY the walk animation!
-      const isCustomCompanion = Boolean(activeCompanion);
+      const isAnkylosaurus = currentVariant === 'ankylosaurus';
       const walkWeight = allowWalk ? 60 : 0;
-      const tailWeight = !isCustomCompanion && allowTail ? 25 : 0;
-      const jumpWeight = !isCustomCompanion && allowJump ? 20 : 0;
+      const tailWeight = isAnkylosaurus && allowTail ? 25 : 0;
+      const jumpWeight = isAnkylosaurus && allowJump ? 20 : 0;
       const totalWeight = walkWeight + tailWeight + jumpWeight;
 
       // If all animations are deactivated: peacefully stay idle standing in place

@@ -117,7 +117,7 @@ export const DEFAULT_CONFIG: AmbientDeckConfig = {
     },
     dino_companion: {
       enabled: true,
-      variant: 'ankylosaurus',
+      variant: 'drache',
       auto_cycle: false,
       cycle_variants: ['ankylosaurus', 'triceratops', 'stegosaurus', 'brachiosaurus'],
       speed: 100,
