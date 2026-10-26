@@ -1,36 +1,38 @@
-using System.Threading;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 
 namespace AmbientDeck;
 
 public partial class App : System.Windows.Application
 {
-    private static Mutex? _mutex;
-
     protected override void OnStartup(StartupEventArgs e)
     {
-        const string appName = "Global\\DinoAmbientDeck_SingleInstance_Mutex";
-        _mutex = new Mutex(true, appName, out bool createdNew);
-
-        if (!createdNew)
+        // When user launches the app, terminate any orphaned background instances so it always opens cleanly
+        try
         {
-            // Another instance is already running! Gracefully exit second instance.
-            Shutdown();
-            return;
+            var current = Process.GetCurrentProcess();
+            var others = Process.GetProcessesByName(current.ProcessName)
+                .Where(p => p.Id != current.Id)
+                .ToList();
+
+            foreach (var other in others)
+            {
+                try
+                {
+                    other.Kill();
+                    other.WaitForExit(1000);
+                }
+                catch
+                {
+                }
+            }
+        }
+        catch
+        {
         }
 
         base.OnStartup(e);
-    }
-
-    protected override void OnExit(ExitEventArgs e)
-    {
-        try
-        {
-            _mutex?.ReleaseMutex();
-        }
-        catch { }
-        _mutex?.Dispose();
-        base.OnExit(e);
     }
 }
 
