@@ -8,7 +8,6 @@ export const DINO_SPRITES = {
     '/dino/walk_1.png',
     '/dino/walk_2.png',
     '/dino/walk_3.png',
-    '/dino/walk_4.png',
   ],
   jump: [
     '/dino/jump_0.png',
