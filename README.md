@@ -5,7 +5,7 @@
 # Dino-ambient-desk
 
 **Ambient Desktop-Dashboard und Widget fuer Windows 10 und 11**  
-*Rahmenloses Glassmorphism-Design mit transparenten Schwebekarten, animiertem Ankylosaurus-Begleiter, bearbeitbaren Kalendernotizen und Frauen-Zyklus-Tracker.*
+*Rahmenloses Glassmorphism-Design mit transparenten Schwebekarten, animiertem Ankylosaurus-Begleiter, Kalender-Notizen, System-Monitoring und flexibler Modulanordnung.*
 
 [![GitHub Release](https://img.shields.io/github/v/release/x4rinia/Dino-ambient-desk?style=flat-square&color=38bdf8)](https://github.com/x4rinia/Dino-ambient-desk/releases)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512bd4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
@@ -17,58 +17,97 @@
 
 ---
 
-## Features und Highlights
+## Uebersicht
 
-### 1. Echtes Windows-Hintergrundbild mit 3 Widget-Stilen
-* Zwischen den Widgets wird immer das echte, gestochen scharfe Windows-Desktop-Hintergrundbild angezeigt.
-* **Glas-Effekt:** Edle Milchglas-Karten mit sanfter Lichtbrechung.
-* **Geblurrt:** Nur der Bereich hinter den einzelnen Widgets wird weichgezeichnet.
-* **Schwarz:** Tiefschwarze minimalistische Panels.
+Dino-ambient-desk ist ein leichtgewichtiges, aushilfsfreies Desktop-Dashboard fuer Windows 10 und 11. Es integriert sich nahtlos in den Desktop-Hintergrund, laeuft ressourcenschonend im Hintergrund und bietet sowohl praktische Widgets fuer den Alltag als auch einen charmanten, handanimierten Ankylosaurus-Begleiter.
 
-### 2. Animierter Ankylosaurus-Begleiter (Transparent freigestellt)
-* **Laufen von links nach rechts:** Wandert ruhig und gleichmaessig ueber die konfigurierbare Laufbereich-Breite ohne unruhiges staendiges Umdrehen.
-* **Springen und Freuen:** Geht ab und zu in die Knie, springt froehlich hoch in die Luft, jubelt mit offenen Armen und landet sanft wieder auf den Fuessen.
-* **Nach vorn schauen:** Wendet den Kopf zur Kamera und schaut dich mit grossen, neugierigen Augen an.
-* **Mit der Keule wedeln:** Bleibt stehen und wedelt mit seiner Schwanzkeule inklusive Bewegungs- und Glitzereffekt.
-* **Schnelligkeit und Transparenz:** Tempo (50% bis 160%) und Deckkraft (20% bis 100%) frei ueber Schieberegler einstellbar.
-* **Sichtbarer Laufbereich beim Einstellen:** Bei geoeffneten Einstellungen zeigt ein gestrichelter Rahmen genau die linke und rechte Grenze. Nach dem Speichern wird der Rahmen vollstaendig unsichtbar.
+---
 
-### 3. Zentrierte Ueberschrift und dezentes Branding
-* Frei waehlbarer Text (z. B. `X4rinia und Dino <3`), zentriert ausgerichtet mit dezentem `by x4rinia` in der rechten unteren Ecke.
+## Alle Funktionen im Detail
 
-### 4. Frei verschiebbare Widgets (Verschiebe-Modus)
-* Jedes Widget (Ueberschrift, Uhr und Kalender, Zyklus-Tracker, Hardware-Vitals, Countdown, Dino-Laufbereich) laesst sich bei geoeffnetem Einstellungsfenster frei mit der Maus an jede Wunschposition verschieben.
-* Positionen bleiben nach dem Speichern pixelgenau an Ort und Stelle.
-* Im normalen Modus 100% klick-transparent wie ein echtes Hintergrundbild.
+### 1. Animierter Ankylosaurus-Begleiter (Transparent freigestellt)
+* **Natuerliche 4-Frame-Laufanimation:** Geht fluessig und gleichmaessig ueber seinen eingestellten Laufbereich hin und her, ohne unruhiges Drehen oder hinkende Bewegungsablaeufe.
+* **Keulen-Wedeln mit Glitzereffekt:** Bleibt zwischendurch stehen und schwingt froehlich seine Schwanzkeule.
+* **Freudensprung:** Geht kurz in die Knie und huepft vor Freude mit ausgestreckten Armen in die Luft.
+* **Individuell ein- und ausschaltbare Animationen:** Jede der drei Aktionen (Laufen, Keulen-Wedeln, Freudensprung) kann in den Einstellungen ueber Kontrollkaestchen einzeln aktiviert oder deaktiviert werden.
+* **Ruhemodus / Auf der Stelle stehen:** Wird das Laufen deaktiviert, bleibt der Dino ruhig an seinem Ankerpunkt stehen. Sind alle Animationen deaktiviert, verharrt er friedlich im Standbild.
+* **Stufenlose Skalierung (Dino-Groesse):** Ueber einen Schieberegler von 50% bis 160% in 5%-Schritten skalierbar. Durch die Verankerung an den Fuessen bleibt der Dino bei jeder Groesse exakt auf der Standlinie.
+* **Geschwindigkeit, Transparenz und Laufbreite:** Tempo (50% bis 160%), Transparenz (20% bis 100%) und die Weite des Laufbereichs (300px bis 850px) sind frei einstellbar.
+* **Visuelle Ausrichtungshilfe:** Bei geoeffneten Einstellungen wird der gesamte Laufbereich mit einem gruen gestrichelten Rahmen dargestellt und kann per Maus an jede Wunschposition auf dem Bildschirm gezogen werden. Nach dem Speichern wird der Rahmen vollstaendig unsichtbar.
 
-### 5. Bearbeitbare Kalendernotizen (maximal 3 aktiv)
-* Direkt in den Einstellungen editierbar (Titel sowie Datum und Uhrzeit).
-* Abgelaufene Termine werden automatisch geloescht.
-* Optionaler Import externer Kalender ueber Google Kalender oder iCal URL (.ics).
+### 2. Desktop-Hintergrund und 3 Widget-Stile
+* **Echtes Desktop-Hintergrundbild:** Zwischen den Widgets bleibt das bestehende, hochauflösende Windows-Hintergrundbild sichtbar.
+* **Glas-Effekt:** Edle Milchglas-Optik mit feiner Lichtbrechung und dezenten Kanten.
+* **Geblurrt:** Selektive Hintergrundunschaerfe direkt hinter den Widgets.
+* **Schwarz:** Kontraststarke, tiefschwarze Panels fuer maximale Lesbarkeit.
 
-### 6. Zyklus-Kalender (Frauen-Zyklus)
-* Uebersichtliche Anzeige der aktuellen Zyklusphase, Zyklustag, Periodenstatus und Countdown zum naechsten Zyklus inklusive grafischer Verlaufsleiste ohne Jahreszeiten-Metaphern.
+### 3. Uhrzeit und Kalender (Clock & Calendar)
+* **Digitale Zeitanzeige:** Grosse, gut lesbare Zeitanzeige inklusive Sekundenanzeige und Datum mit Wochentag.
+* **Standardisierte Kalenderwoche:** Korrekte Berechnung und Anzeige der Kalenderwoche nach internationalem ISO-8601-Standard (KW-Anzeige).
+* **Monatskalender:** Kompaktes Kalenderraster mit Markierung des aktuellen Tages.
+* **Termin-Markierung:** Tage mit hinterlegten Notizen oder Terminen werden durch eine deutliche schwarze Umrandung hervorgehoben.
 
-### 7. System-Tray und Einstellungen
-* Laeuft diskret im Windows-Infobereich (System-Tray) mit Rechtsklick-Menue (Einstellungen und Beenden).
-* Taskleisten-Eintrag fuer das Hintergrund-Widget ist ausgeblendet.
+### 4. Kalender-Notizen und Terminverwaltung
+* **Dashboard-Notizen:** Bis zu drei Termine oder Aufgaben direkt im Widget sichtbar.
+* **Einfache Bearbeitung:** Titel, Datum und Uhrzeit koennen im Einstellungsfenster direkt eingetragen werden.
+* **Automatische Bereinigung:** Abgelaufene Termine werden nach Ablauf automatisch entfernt.
+* **Kalender-Synchronisation:** Unterstuetzt den Import externer Kalenderdaten via Google Kalender oder iCal-URL (.ics).
+
+### 5. Frauen-Zyklus-Tracker (Cycle Tracker)
+* **Uebersichtliche Phasenanzeige:** Zeigt die aktuelle Zyklusphase, den aktuellen Zyklustag und den Status der Periode.
+* **Vorhersage und Countdown:** Berechnet die Tage bis zur naechsten Periode.
+* **Grafische Verlaufsleiste:** Strukturierte Visualisierung des Fortschritts ohne ueberladene Metaphern.
+
+### 6. Mondkalender (Moon Calendar)
+* **Aktuelle Mondphase:** Detaillierte visuelle Darstellung der Mondphase (Neumond, zunehmender Mond, Vollmond, abnehmender Mond).
+* **Beleuchtungsgrad:** Genaue prozentuale Angabe der sichtbaren Mondflaeche.
+* **Mondzeiten:** Anzeige der Zeiten fuer Mondaufgang und Monduntergang.
+
+### 7. System-Vitals und Hardware-Monitor
+* **Prozessor (CPU):** Anzeige der aktuellen CPU-Auslastung in Prozent sowie der Kerntemperatur.
+* **Grafikkarte (GPU):** Auslastungsanzeige und Temperatur des Grafikprozessors.
+* **Arbeitsspeicher (RAM):** Belegter und verfuegbarer Arbeitsspeicher in Echtzeit.
+* **Netzwerk:** Live-Anzeige der aktuellen Upload- und Download-Geschwindigkeit.
+
+### 8. Event-Countdown
+* **Zieldatum und Event-Name:** Frei waehlbarer Titel fuer besondere Ereignisse (z. B. Urlaub, Geburtstag, Jahrestag, Pruefung).
+* **Live-Zaehler:** Sekundenaktuelle Rueckwaertszaehlung in Tagen, Stunden, Minuten und Sekunden.
+
+### 9. Schnellzugriff (Quick Launcher)
+* **Schnellstart-Schaltflaechen:** Direkte Verknuepfungen zu haeufig genutzten Kommunikationsdiensten wie E-Mail (z. B. Gmail), Discord oder WhatsApp Web.
+* **Frei konfigurierbar:** Schaltflaechen koennen einzeln aktiviert oder deaktiviert werden.
+
+### 10. Dashboard-Kopfzeile
+* **Frei anpassbarer Titel:** Optionaler Kopfzeilentext oben auf dem Desktop.
+* **Vollstaendig anpassbar oder deaktivierbar:** Kann nach Wunsch angepasst oder bei Bedarf komplett ausgeblendet werden.
+
+### 11. Frei verschiebbare Widgets (Drag & Drop Modus)
+* **Freie Platzierung:** Bei geoeffnetem Einstellungsfenster laesst sich jedes einzelne Widget mit der Maus frei an die gewuenschte Position auf dem Desktop ziehen.
+* **Dauerhafte Speicherung:** Alle Koordinaten werden in der lokalen Konfigurationsdatei gespeichert.
+* **Vollstaendig klick-transparent:** Im Normalbetrieb reagiert das Dashboard wie ein echtes Wallpaper, blockiert keine Desktop-Klicks und behindert keine Windows-Symbole.
+
+### 12. Ressourcen-Effizienz und System-Tray
+* **Geringer Arbeitsspeicherverbrauch:** Dank automatischem Working-Set-Trimming liegt die Speichernutzung im Betrieb bei typischerweise nur 40 bis 80 MB RAM.
+* **Diskret im System-Tray:** Kein stoerender Eintrag in der Windows-Taskleiste; Steuerung laeuft diskret ueber das Dino-Icon im Infobereich neben der Windows-Uhr.
+* **Multi-Monitor-Unterstuetzung:** Das Dashboard laesst sich flexibel auf den gewuenschten Monitor zuweisen.
 
 ---
 
 ## Download und Schnellstart
 
-1. Lade dir die fertige **[Dino_ambient_Deck.zip](https://github.com/x4rinia/Dino-ambient-desk/releases)** herunter und entpacke sie.
-2. Starte die Datei `Dino_ambient_Deck.exe`.
-3. Klicke im Infobereich unten rechts neben der Windows-Uhr auf das Dino-Symbol, um die Einstellungen zu oeffnen.
+1. Lade das fertige Release **[Dino_ambient_Deck.zip](https://github.com/x4rinia/Dino-ambient-desk/releases)** herunter und entpacke den Ordner.
+2. Starte die Anwendung ueber `Dino_ambient_Deck.exe`.
+3. Klicke im Windows-Infobereich (System-Tray) mit der rechten Maustaste auf das Dino-Symbol, um die Einstellungen zu oeffnen.
+4. Passe die gewuenschten Module, den Dino-Laufbereich und die Farben nach deinen Vorlieben an.
 
 ---
 
 ## Entwicklung und Build
 
 ### Voraussetzungen
-* Windows 10 oder 11
+* Windows 10 oder Windows 11 (64-Bit)
 * .NET 10 SDK
-* Node.js 18+
+* Node.js 18+ und npm
 
 ### Repository klonen
 ```powershell
@@ -90,5 +129,5 @@ dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile
 ---
 
 <div align="center">
-  <sub>Erstellt mit Sorgfalt by x4rinia</sub>
+  <sub>Dino-ambient-desk | Open-Source Desktop Widget Dashboard</sub>
 </div>
