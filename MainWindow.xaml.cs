@@ -196,20 +196,24 @@ public partial class MainWindow : Window
     {
         try
         {
-            string userDataDir = Path.Combine(_storage.AppDataFolder, "WebView2Data");
+            string baseDataDir = Path.Combine(_storage.AppDataFolder, "WebView2Data");
+            string userDataDir = baseDataDir;
+
             var options = new CoreWebView2EnvironmentOptions(
-                "--disable-features=msSmartScreenProtection,TranslateUI,MediaSessionService,CalculateNativeWinOcclusion " +
-                "--enable-features=msLowMemoryMode,AutomaticTabDiscarding,TurnOffStreamingMediaCachingOnBattery " +
-                "--process-per-site " +
-                "--disable-background-networking " +
-                "--disable-component-update " +
-                "--disable-extensions " +
-                "--disable-default-apps " +
-                "--disable-sync " +
-                "--no-default-browser-check " +
-                "--disable-gpu-shader-disk-cache"
+                "--disable-features=msSmartScreenProtection,TranslateUI --disable-gpu-shader-disk-cache"
             );
-            _webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataDir, options);
+
+            try
+            {
+                _webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataDir, options);
+            }
+            catch (Exception ex) when (ex.HResult == unchecked((int)0x800700AA) || ex.Message.Contains("0x800700AA"))
+            {
+                // Fall back to a dedicated process-specific data directory if locked
+                userDataDir = Path.Combine(Path.GetTempPath(), $"Dino_WebView2_{Environment.ProcessId}");
+                _webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataDir, options);
+            }
+
             await DashboardWebView.EnsureCoreWebView2Async(_webViewEnv);
 
             var core = DashboardWebView.CoreWebView2;
