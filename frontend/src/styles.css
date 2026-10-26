@@ -589,6 +589,8 @@ body,
   justify-content: center;
   border-radius: 4px;
   color: var(--text-secondary);
+  border: 1.5px solid transparent;
+  box-sizing: border-box;
 }
 
 .calendar-day.other-month {
@@ -601,18 +603,16 @@ body,
   font-weight: 700;
 }
 
-.calendar-day.has-event::after {
-  content: '';
-  position: absolute;
-  bottom: 1px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--accent-emerald);
+.calendar-day.has-event {
+  border: 1.5px solid #000000 !important;
+  font-weight: 700;
+  color: #ffffff;
 }
 
-.calendar-day.today.has-event::after {
-  background: #080b12;
+.calendar-day.today.has-event {
+  background: var(--accent-blue);
+  color: #080b12;
+  border: 1.5px solid #000000 !important;
 }
 
 /* Communications Widget (WhatsApp & E-Mail) */

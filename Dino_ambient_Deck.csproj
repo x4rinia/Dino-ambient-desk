@@ -11,6 +11,8 @@
     <RootNamespace>AmbientDeck</RootNamespace>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     <DefaultItemExcludes>$(DefaultItemExcludes);frontend\**;drops\**;wallpapers\**;dist\**;Dino_ambient_Deck\**</DefaultItemExcludes>
   </PropertyGroup>
 

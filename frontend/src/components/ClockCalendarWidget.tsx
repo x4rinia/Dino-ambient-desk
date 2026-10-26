@@ -10,6 +10,14 @@ interface ClockCalendarWidgetProps {
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+function getISOWeekNumber(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+}
+
 export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
   showSeconds,
   showNextEvent,
@@ -216,8 +224,8 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
       <div className="calendar-matrix-wrap compact">
         <div className="calendar-month-header">
           <span>{monthLabel.toUpperCase()}</span>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem' }}>
-            KW{Math.ceil((now.getDate() + startOffset) / 7)}
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 600 }}>
+            KW {getISOWeekNumber(now)}
           </span>
         </div>
         <div className="calendar-grid compact">

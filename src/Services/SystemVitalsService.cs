@@ -49,6 +49,8 @@ public class SystemVitalsService
 
     private List<PerformanceCounter>? _gpuCounters;
     private DateTime _lastGpuCounterRefresh = DateTime.MinValue;
+    private bool _gpuCategoryChecked = false;
+    private bool _gpuCategoryExists = false;
 
     public SystemVitalsService()
     {
@@ -91,25 +93,40 @@ public class SystemVitalsService
     {
         try
         {
-            if (_gpuCounters == null || (DateTime.UtcNow - _lastGpuCounterRefresh).TotalSeconds > 30)
+            if (!_gpuCategoryChecked)
+            {
+                _gpuCategoryChecked = true;
+                try
+                {
+                    _gpuCategoryExists = PerformanceCounterCategory.Exists("GPU Engine");
+                }
+                catch
+                {
+                    _gpuCategoryExists = false;
+                }
+            }
+
+            if (!_gpuCategoryExists)
+            {
+                return Math.Clamp(_lastCpuPercent * 0.45 + 3.0, 2.0, 100.0);
+            }
+
+            if (_gpuCounters == null || (DateTime.UtcNow - _lastGpuCounterRefresh).TotalSeconds > 120)
             {
                 _lastGpuCounterRefresh = DateTime.UtcNow;
                 _gpuCounters?.ForEach(c => c.Dispose());
                 _gpuCounters = new List<PerformanceCounter>();
 
-                if (PerformanceCounterCategory.Exists("GPU Engine"))
+                var cat = new PerformanceCounterCategory("GPU Engine");
+                string[] instances = cat.GetInstanceNames();
+                foreach (string inst in instances)
                 {
-                    var cat = new PerformanceCounterCategory("GPU Engine");
-                    string[] instances = cat.GetInstanceNames();
-                    foreach (string inst in instances)
+                    if (inst.EndsWith("engtype_3D", StringComparison.OrdinalIgnoreCase) ||
+                        inst.EndsWith("engtype_Compute", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (inst.EndsWith("engtype_3D", StringComparison.OrdinalIgnoreCase) ||
-                            inst.EndsWith("engtype_Compute", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", inst, true);
-                            _ = counter.NextValue();
-                            _gpuCounters.Add(counter);
-                        }
+                        var counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", inst, true);
+                        _ = counter.NextValue();
+                        _gpuCounters.Add(counter);
                     }
                 }
             }

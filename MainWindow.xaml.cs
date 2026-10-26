@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Forms;
@@ -15,6 +16,21 @@ namespace AmbientDeck;
 
 public partial class MainWindow : Window
 {
+    [DllImport("psapi.dll")]
+    private static extern int EmptyWorkingSet(IntPtr hwProc);
+
+    public static void TrimProcessMemory()
+    {
+        try
+        {
+            GC.Collect(2, GCCollectionMode.Aggressive, true, true);
+            GC.WaitForPendingFinalizers();
+            EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+        }
+        catch
+        {
+        }
+    }
     private readonly StorageService _storage = new();
     private readonly SystemVitalsService _vitalsService = new();
     private readonly MediaSessionService _mediaService = new();
@@ -100,6 +116,17 @@ public partial class MainWindow : Window
             SendToFrontend("comms_update", comms);
         };
 
+        // Low-memory & energy-saver periodic trim timer (every 45s)
+        var memTrimTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(45)
+        };
+        memTrimTimer.Tick += (_, _) =>
+        {
+            TrimProcessMemory();
+        };
+        memTrimTimer.Start();
+
         Loaded += OnWindowLoaded;
         Deactivated += OnWindowDeactivated;
         LocationChanged += OnWindowBoundsChanged;
@@ -171,7 +198,16 @@ public partial class MainWindow : Window
         {
             string userDataDir = Path.Combine(_storage.AppDataFolder, "WebView2Data");
             var options = new CoreWebView2EnvironmentOptions(
-                "--disable-features=msSmartScreenProtection,TranslateUI --disable-gpu-shader-disk-cache"
+                "--disable-features=msSmartScreenProtection,TranslateUI,MediaSessionService,CalculateNativeWinOcclusion " +
+                "--enable-features=msLowMemoryMode,AutomaticTabDiscarding,TurnOffStreamingMediaCachingOnBattery " +
+                "--process-per-site " +
+                "--disable-background-networking " +
+                "--disable-component-update " +
+                "--disable-extensions " +
+                "--disable-default-apps " +
+                "--disable-sync " +
+                "--no-default-browser-check " +
+                "--disable-gpu-shader-disk-cache"
             );
             _webViewEnv = await CoreWebView2Environment.CreateAsync(null, userDataDir, options);
             await DashboardWebView.EnsureCoreWebView2Async(_webViewEnv);
@@ -181,6 +217,14 @@ public partial class MainWindow : Window
             core.Settings.AreDevToolsEnabled = false;
             core.Settings.IsStatusBarEnabled = false;
             core.Settings.IsZoomControlEnabled = false;
+
+            try
+            {
+                core.MemoryUsageTargetLevel = CoreWebView2MemoryUsageTargetLevel.Low;
+            }
+            catch
+            {
+            }
 
             _wwwroot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
             if (!Directory.Exists(_wwwroot))
@@ -202,6 +246,12 @@ public partial class MainWindow : Window
             core.WebMessageReceived += (_, args) => HandleWebMessage(args.TryGetWebMessageAsString());
             core.Navigate("https://ambientdeck.local/index.html?view=dashboard");
             _webViewReady = true;
+
+            // Trim memory footprint shortly after navigation
+            _ = Task.Delay(3500).ContinueWith(_ =>
+            {
+                Dispatcher.Invoke(TrimProcessMemory);
+            });
         }
         catch (Exception ex)
         {
