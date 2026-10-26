@@ -72,32 +72,17 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
 
   const activeSprites = useMemo(() => {
     if (activeCompanion) {
-      if (activeCompanion.sprites?.walk && activeCompanion.sprites.walk.length > 0) {
-        return {
-          walk: activeCompanion.sprites.walk,
-          jump:
-            activeCompanion.sprites.jump && activeCompanion.sprites.jump.length > 0
-              ? activeCompanion.sprites.jump
-              : activeCompanion.sprites.walk,
-          tail:
-            activeCompanion.sprites.tail && activeCompanion.sprites.tail.length > 0
-              ? activeCompanion.sprites.tail
-              : activeCompanion.sprites.walk,
-        };
-      }
+      const walkFrames =
+        activeCompanion.sprites?.walk && activeCompanion.sprites.walk.length > 0
+          ? activeCompanion.sprites.walk
+          : Array.from(
+              { length: activeCompanion.walk_frames || 4 },
+              (_, i) => `${activeCompanion.base_url}/walk_${i}.png`
+            );
       return {
-        walk: Array.from(
-          { length: activeCompanion.walk_frames || 4 },
-          (_, i) => `${activeCompanion.base_url}/walk_${i}.png`
-        ),
-        jump: Array.from(
-          { length: activeCompanion.jump_frames || 4 },
-          (_, i) => `${activeCompanion.base_url}/jump_${i}.png`
-        ),
-        tail: Array.from(
-          { length: activeCompanion.tail_frames || 4 },
-          (_, i) => `${activeCompanion.base_url}/tail_${i}.png`
-        ),
+        walk: walkFrames,
+        jump: walkFrames, // custom companions strictly only walk
+        tail: walkFrames, // custom companions strictly only walk
       };
     }
     return DINO_SPRITES;
@@ -245,10 +230,12 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       }
 
       // Action choices dynamically filtered by enabled settings:
-      // walkWeight: 60, tailWeight: 25, jumpWeight: 20
+      // ONLY the built-in Dino (Ankylosaurus) has tail-wagging and rejoicing jumps!
+      // All other companions strictly have ONLY the walk animation!
+      const isCustomCompanion = Boolean(activeCompanion);
       const walkWeight = allowWalk ? 60 : 0;
-      const tailWeight = allowTail ? 25 : 0;
-      const jumpWeight = allowJump ? 20 : 0;
+      const tailWeight = !isCustomCompanion && allowTail ? 25 : 0;
+      const jumpWeight = !isCustomCompanion && allowJump ? 20 : 0;
       const totalWeight = walkWeight + tailWeight + jumpWeight;
 
       // If all animations are deactivated: peacefully stay idle standing in place

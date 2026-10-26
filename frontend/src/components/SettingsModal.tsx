@@ -1581,29 +1581,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <FolderOpen size={12} color="#38bdf8" />
                   <span>Ordner öffnen</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => Bridge.importCompanionFile()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '6px 12px',
-                    borderRadius: '7px',
-                    background: 'rgba(52, 211, 153, 0.12)',
-                    border: '1px solid rgba(52, 211, 153, 0.28)',
-                    color: '#34d399',
-                    fontSize: '0.72rem',
-                    cursor: 'pointer',
-                    fontWeight: 600,
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Wähle eine heruntergeladene .companion.json Addon-Datei aus"
-                >
-                  <Upload size={12} />
-                  <span>Addon (.companion.json) importieren</span>
-                </button>
               </div>
 
               {/* Animationen einzeln aktivieren / deaktivieren */}
@@ -1652,90 +1629,99 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span>🐾 Laufen & Schlendern</span>
                   </label>
 
-                  {/* Checkbox: Tail */}
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: '0.73rem',
-                      cursor: 'pointer',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      background: (config.modules.dino_companion?.anim_tail ?? true)
-                        ? 'rgba(251, 191, 36, 0.15)'
-                        : 'rgba(255, 255, 255, 0.04)',
-                      border: `1px solid ${(config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : 'rgba(255, 255, 255, 0.12)'}`,
-                      color: (config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : '#94a3b8',
-                      userSelect: 'none',
-                      transition: 'all 0.15s ease',
-                    }}
-                    title="Wedelt zwischendurch fröhlich mit seiner Keule."
-                  >
-                    <input
-                      type="checkbox"
-                      checked={config.modules.dino_companion?.anim_tail ?? true}
-                      onChange={(e) =>
-                        onUpdateConfig({
-                          ...config,
-                          modules: {
-                            ...config.modules,
-                            dino_companion: {
-                              ...config.modules.dino_companion,
-                              anim_tail: e.target.checked,
-                            },
-                          },
-                        })
-                      }
-                      style={{ accentColor: '#fbbf24', cursor: 'pointer' }}
-                    />
-                    <span>✨ Keulen-Wedeln</span>
-                  </label>
+                  {/* Checkboxen für Dino-spezifische Zusatzanimationen */}
+                  {currentVariantId === 'ankylosaurus' ? (
+                    <>
+                      {/* Checkbox: Tail */}
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: '0.73rem',
+                          cursor: 'pointer',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          background: (config.modules.dino_companion?.anim_tail ?? true)
+                            ? 'rgba(251, 191, 36, 0.15)'
+                            : 'rgba(255, 255, 255, 0.04)',
+                          border: `1px solid ${(config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : 'rgba(255, 255, 255, 0.12)'}`,
+                          color: (config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : '#94a3b8',
+                          userSelect: 'none',
+                          transition: 'all 0.15s ease',
+                        }}
+                        title="Wedelt zwischendurch fröhlich mit seiner Keule."
+                      >
+                        <input
+                          type="checkbox"
+                          checked={config.modules.dino_companion?.anim_tail ?? true}
+                          onChange={(e) =>
+                            onUpdateConfig({
+                              ...config,
+                              modules: {
+                                ...config.modules,
+                                dino_companion: {
+                                  ...config.modules.dino_companion,
+                                  anim_tail: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                          style={{ accentColor: '#fbbf24', cursor: 'pointer' }}
+                        />
+                        <span>✨ Keulen-Wedeln</span>
+                      </label>
 
-                  {/* Checkbox: Jump */}
-                  <label
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      fontSize: '0.73rem',
-                      cursor: 'pointer',
-                      padding: '4px 10px',
-                      borderRadius: '6px',
-                      background: (config.modules.dino_companion?.anim_jump ?? true)
-                        ? 'rgba(52, 211, 153, 0.15)'
-                        : 'rgba(255, 255, 255, 0.04)',
-                      border: `1px solid ${(config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : 'rgba(255, 255, 255, 0.12)'}`,
-                      color: (config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : '#94a3b8',
-                      userSelect: 'none',
-                      transition: 'all 0.15s ease',
-                    }}
-                    title="Macht ab und zu einen fröhlichen Freudensprung."
-                  >
-                    <input
-                      type="checkbox"
-                      checked={config.modules.dino_companion?.anim_jump ?? true}
-                      onChange={(e) =>
-                        onUpdateConfig({
-                          ...config,
-                          modules: {
-                            ...config.modules,
-                            dino_companion: {
-                              ...config.modules.dino_companion,
-                              anim_jump: e.target.checked,
-                            },
-                          },
-                        })
-                      }
-                      style={{ accentColor: '#34d399', cursor: 'pointer' }}
-                    />
-                    <span>🦘 Freudensprung</span>
-                  </label>
+                      {/* Checkbox: Jump */}
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          fontSize: '0.73rem',
+                          cursor: 'pointer',
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          background: (config.modules.dino_companion?.anim_jump ?? true)
+                            ? 'rgba(52, 211, 153, 0.15)'
+                            : 'rgba(255, 255, 255, 0.04)',
+                          border: `1px solid ${(config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : 'rgba(255, 255, 255, 0.12)'}`,
+                          color: (config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : '#94a3b8',
+                          userSelect: 'none',
+                          transition: 'all 0.15s ease',
+                        }}
+                        title="Macht ab und zu einen fröhlichen Freudensprung."
+                      >
+                        <input
+                          type="checkbox"
+                          checked={config.modules.dino_companion?.anim_jump ?? true}
+                          onChange={(e) =>
+                            onUpdateConfig({
+                              ...config,
+                              modules: {
+                                ...config.modules,
+                                dino_companion: {
+                                  ...config.modules.dino_companion,
+                                  anim_jump: e.target.checked,
+                                },
+                              },
+                            })
+                          }
+                          style={{ accentColor: '#34d399', cursor: 'pointer' }}
+                        />
+                        <span>🦘 Freudensprung</span>
+                      </label>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: '0.70rem', color: '#94a3b8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 6px' }}>
+                      <span>(Zusatzanimationen wie Keulen-Wedeln und Freudensprung sind exklusiv für den Dino. Begleiter nutzen die reine Laufanimation)</span>
+                    </div>
+                  )}
                 </div>
 
                 {!(config.modules.dino_companion?.anim_walk ?? true) && (
                   <div style={{ fontSize: '0.69rem', color: '#38bdf8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    ℹ️ Laufen ist pausiert: Dino bleibt auf der Stelle stehen.
+                    ℹ️ Laufen ist pausiert: Begleiter bleibt auf der Stelle stehen.
                   </div>
                 )}
                 {!(config.modules.dino_companion?.anim_walk ?? true) &&
@@ -2097,28 +2083,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <button
                   type="button"
-                  onClick={() => Bridge.importCompanionFile()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    background: 'rgba(52, 211, 153, 0.15)',
-                    border: '1px solid rgba(52, 211, 153, 0.35)',
-                    color: '#34d399',
-                    fontSize: '0.74rem',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                  }}
-                  title="Wähle eine .companion.json Datei aus"
-                >
-                  <Upload size={13} />
-                  <span>Addon importieren</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => Bridge.refreshCompanions()}
                   style={{
                     padding: '6px 10px',
@@ -2137,15 +2101,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   type="button"
                   onClick={() => setIsCompanionModalOpen(false)}
                   style={{
-                    padding: '6px 10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 14px',
                     borderRadius: '8px',
-                    background: 'rgba(239, 68, 68, 0.15)',
-                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                    color: '#ef4444',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: '1px solid rgba(16, 185, 129, 0.45)',
+                    color: '#ffffff',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
                     cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+                    transition: 'all 0.15s ease',
                   }}
+                  title="Auswahl übernehmen und schließen"
                 >
-                  <X size={14} />
+                  <Check size={13} strokeWidth={3} />
+                  <span>Speichern</span>
                 </button>
               </div>
             </div>
