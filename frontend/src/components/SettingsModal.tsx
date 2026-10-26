@@ -449,59 +449,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     });
   }, [addonCompanions]);
 
-  const resolveFramesAsDataUrls = async (frames: string[]): Promise<string[]> => {
-    return Promise.all(
-      frames.map((src) => {
-        if (!src || src.startsWith('data:')) return Promise.resolve(src);
-        return new Promise<string>((resolve) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => {
-            try {
-              const canvas = document.createElement('canvas');
-              canvas.width = img.naturalWidth || 96;
-              canvas.height = img.naturalHeight || 96;
-              const ctx = canvas.getContext('2d');
-              if (ctx) {
-                ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL('image/png'));
-              } else {
-                resolve(src);
-              }
-            } catch {
-              resolve(src);
-            }
-          };
-          img.onerror = () => resolve(src);
-          img.src = src;
-        });
-      })
-    );
-  };
-
-  const handleOpenInEditor = async (comp: AddonCompanionInfo, asCopy: boolean) => {
+  const handleOpenInEditor = (comp: AddonCompanionInfo, asCopy: boolean) => {
     try {
       const idLower = comp.id.toLowerCase();
-      // Ankylosaurus is special: cannot be edited or copied!
-      if (idLower === 'ankylosaurus') {
-        alert('Der Original Dino (Ankylosaurus) ist exklusiv und kann weder bearbeitet noch kopiert werden.');
+      // Standard companions cannot be edited in editor - editor is strictly for custom/self-created
+      if (idLower === 'ankylosaurus' || idLower === 'drache' || idLower === 'biene') {
+        alert('Standard-Begleiter sind geschützt und können nicht bearbeitet werden. Der Begleiter-Editor ist für deine eigenen Kreationen gedacht!');
         return;
       }
 
-      const isStandardLocked = idLower === 'drache' || idLower === 'biene';
-      const targetId = asCopy || isStandardLocked ? `${idLower}_kopie` : idLower;
-      const targetName = asCopy || isStandardLocked ? `${comp.name} (Kopie)` : comp.name;
+      const targetId = asCopy ? `${idLower}_kopie` : idLower;
+      const targetName = asCopy ? `${comp.name} (Kopie)` : comp.name;
 
-      let rawFrames: string[] = [];
-      if (comp.sprites?.walk && comp.sprites.walk.length > 0) {
-        rawFrames = comp.sprites.walk;
-      } else if (idLower === 'drache') {
-        rawFrames = ['/drache/walk_0.png', '/drache/walk_1.png', '/drache/walk_2.png', '/drache/walk_3.png'];
-      } else if (comp.preview_url) {
-        rawFrames = [comp.preview_url];
-      }
-
-      const walkFrames = await resolveFramesAsDataUrls(rawFrames);
+      const walkFrames = comp.sprites?.walk && comp.sprites.walk.length > 0
+        ? comp.sprites.walk
+        : (comp.preview_url ? [comp.preview_url] : []);
 
       const pkg = {
         id: targetId,
@@ -509,11 +471,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         title: `${comp.icon || '✨'} ${targetName}`,
         icon: comp.icon || '✨',
         description: comp.description || '',
-        author: asCopy || isStandardLocked ? 'Mein Begleiter' : (comp.author || 'Dino Desk Team'),
+        author: asCopy ? 'Mein Begleiter' : (comp.author || 'Mein Begleiter'),
         version: '1.0.0',
-        scale: comp.scale || (idLower === 'biene' ? 72 : 100),
+        scale: comp.scale || 100,
         speed: comp.speed || 100,
-        is_flying: comp.is_flying || idLower === 'biene',
+        is_flying: Boolean(comp.is_flying),
+        preview: comp.preview_url || walkFrames[0] || '',
+        walk_frames: walkFrames.length || 4,
+        jump_frames: 0,
+        tail_frames: 0,
         sprites: {
           walk: walkFrames,
           jump: walkFrames,
@@ -2367,36 +2333,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           }}
                           title="Der Ankylosaurus ist der exklusive Standard-Dino und kann weder bearbeitet noch kopiert werden."
                         >
-                          ⭐ Exklusiv (kann nicht bearbeitet oder kopiert werden)
+                          ⭐ Exklusiv (Original Dino)
                         </div>
                       ) : isStandardLocked ? (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenInEditor(comp, true);
-                          }}
+                        <div
                           style={{
                             flex: 1,
-                            padding: '5px 8px',
+                            padding: '6px 8px',
                             borderRadius: '6px',
-                            background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.22))',
-                            border: '1px solid rgba(251, 191, 36, 0.45)',
+                            background: 'rgba(251, 191, 36, 0.08)',
+                            border: '1px dashed rgba(251, 191, 36, 0.35)',
                             color: '#fef08a',
-                            fontSize: '0.70rem',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: 5,
-                            fontWeight: 700,
-                            transition: 'all 0.15s ease',
+                            fontSize: '0.67rem',
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            userSelect: 'none',
                           }}
-                          title="Standard-Begleiter ist geschützt. Erstellt eine Kopie und lädt sie direkt in den Editor!"
+                          title="Geschützter Standard-Begleiter vom Dino Desk Team."
                         >
-                          <Copy size={11} color="#fbbf24" />
-                          <span>Kopieren & im Editor bearbeiten</span>
-                        </button>
+                          🔒 Standard-Begleiter (Geschützt)
+                        </div>
                       ) : (
                         <>
                           <button

@@ -651,6 +651,11 @@
     </div>
 
     <div class="header-actions">
+      <button type="button" onclick="loadExampleSprite()" style="background:rgba(52, 211, 153, 0.15); border-color:#10b981; color:#34d399; font-weight:700;" title="Lädt ein fertiges animiertes Beispiel-Sprite als Vorlage">
+        <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        <span>Beispiel-Sprite laden</span>
+      </button>
+
       <input type="file" id="fileJsonInput" accept=".json,.companion.json" style="display:none;" />
       <button type="button" onclick="document.getElementById('fileJsonInput').click()">
         <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -1011,10 +1016,9 @@
       setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
-    // --- Starter Companion Generator (Cute Friendly Blob) ---
-    function createDefaultFrames() {
+    // --- Starter Companion Generator (Cute Animated Dino Sprite) ---
+    function createDefaultFrames(showNotification = false) {
       frames = [];
-      const colors = ['#38bdf8', '#0ea5e9'];
 
       for (let i = 0; i < 4; i++) {
         const c = document.createElement('canvas');
@@ -1022,57 +1026,129 @@
         c.height = targetResolution;
         const ctx = c.getContext('2d');
 
-        const cx = targetResolution / 2;
-        const cy = targetResolution - 32;
-        const bounce = (i === 1 || i === 3) ? -4 : 0;
-        const legOffset = (i === 0 || i === 2) ? 6 : -6;
+        const cx = 46;
+        const cy = 52;
+        const bounce = (i === 1) ? -4 : (i === 3 ? -2 : 0);
+        const legSwing = (i === 0) ? 6 : (i === 2 ? -6 : 0);
+        const tailOffset = (i === 0) ? 0 : (i === 1 ? -4 : (i === 2 ? 0 : 3));
 
-        // Feet / legs
-        ctx.fillStyle = '#0284c7';
-        ctx.beginPath();
-        ctx.ellipse(cx - 10 + (i === 1 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
-        ctx.ellipse(cx + 10 + (i === 3 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Round Body
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath();
-        ctx.ellipse(cx, cy + bounce, 24, 22, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Belly highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-        ctx.beginPath();
-        ctx.ellipse(cx, cy + 4 + bounce, 16, 14, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Big Cute Eyes
-        ctx.fillStyle = '#0f172a';
-        ctx.beginPath();
-        ctx.arc(cx - 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
-        ctx.arc(cx + 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Eye reflections
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(cx - 9, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
-        ctx.arc(cx + 7, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Smile
-        ctx.strokeStyle = '#0f172a';
+        // 1. Tail (behind body)
+        ctx.fillStyle = '#10b981';
+        ctx.strokeStyle = '#047857';
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        ctx.arc(cx, cy + 5 + bounce, 5, 0.1 * Math.PI, 0.9 * Math.PI);
+        ctx.moveTo(cx - 18, cy + 6 + bounce);
+        ctx.quadraticCurveTo(cx - 28, cy + 12 + bounce + tailOffset, cx - 36, cy + 4 + bounce + tailOffset);
+        ctx.quadraticCurveTo(cx - 26, cy + 2 + bounce, cx - 16, cy - 2 + bounce);
+        ctx.closePath();
+        ctx.fill();
         ctx.stroke();
 
-        // Cheeks
-        ctx.fillStyle = 'rgba(244, 63, 94, 0.55)';
+        // 2. Back plates/spikes (3 spikes)
+        const spikes = [
+          { x: cx - 12, y: cy - 14 + bounce, r: 4 },
+          { x: cx - 4, y: cy - 18 + bounce, r: 5 },
+          { x: cx + 4, y: cy - 20 + bounce, r: 4 }
+        ];
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 1.5;
+        spikes.forEach(sp => {
+          ctx.beginPath();
+          ctx.moveTo(sp.x - sp.r, sp.y + 3);
+          ctx.lineTo(sp.x, sp.y - sp.r * 1.6);
+          ctx.lineTo(sp.x + sp.r, sp.y + 3);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        });
+
+        // 3. Feet / legs
+        // Rear foot
+        ctx.fillStyle = '#059669';
+        ctx.strokeStyle = '#047857';
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(cx - 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
-        ctx.arc(cx + 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
+        const foot1X = cx - 8 - legSwing;
+        const foot1Y = cy + 22 + (i === 1 ? -4 : 0);
+        ctx.ellipse(foot1X, foot1Y, 7, 5, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.stroke();
+
+        // Front foot
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        const foot2X = cx + 12 + legSwing;
+        const foot2Y = cy + 22 + (i === 3 ? -3 : 0);
+        ctx.ellipse(foot2X, foot2Y, 7, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 4. Main Body & Head
+        ctx.fillStyle = '#10b981';
+        ctx.strokeStyle = '#047857';
+        ctx.lineWidth = 2;
+        // Body ellipse
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + bounce, 22, 19, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Head ellipse (connected smoothly)
+        ctx.beginPath();
+        ctx.ellipse(cx + 12, cy - 8 + bounce, 16, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Snout
+        ctx.beginPath();
+        ctx.ellipse(cx + 22, cy - 5 + bounce, 9, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 5. Mint belly
+        ctx.fillStyle = '#a7f3d0';
+        ctx.beginPath();
+        ctx.ellipse(cx + 1, cy + 4 + bounce, 13, 11, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 6. Eye (Big cute anime eye)
+        // White sclera
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(cx + 13, cy - 10 + bounce, 6, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Iris & pupil
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.ellipse(cx + 14, cy - 10 + bounce, 4.5, 5.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sparkle reflections
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx + 13, cy - 12 + bounce, 2, 0, Math.PI * 2);
+        ctx.arc(cx + 16, cy - 9 + bounce, 1, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 7. Cheeks (blush)
+        ctx.fillStyle = 'rgba(244, 114, 182, 0.65)';
+        ctx.beginPath();
+        ctx.ellipse(cx + 18, cy - 2 + bounce, 4, 2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 8. Nostril & Smile
+        ctx.fillStyle = '#047857';
+        ctx.beginPath();
+        ctx.arc(cx + 27, cy - 7 + bounce, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#047857';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(cx + 22, cy - 1 + bounce, 3.5, 0.1 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
 
         frames.push({
           id: 'frame_' + i,
@@ -1085,6 +1161,26 @@
       activeFrameIndex = 0;
       updateFramesList();
       drawActiveFrame();
+
+      document.getElementById('compName').value = 'Beispiel Dino';
+      document.getElementById('compId').value = 'beispiel_dino';
+      document.getElementById('compIcon').value = '🦖';
+      document.getElementById('compDesc').value = 'Ein niedlicher kleiner Beispiel-Dino als Vorlage für eigene Kreationen!';
+      document.getElementById('compAuthor').value = 'Mein Begleiter';
+      document.getElementById('compScale').value = 100;
+      document.getElementById('compScaleVal').textContent = '100%';
+      document.getElementById('compSpeed').value = 100;
+      document.getElementById('compSpeedVal').textContent = '100%';
+      document.getElementById('compIsFlying').checked = false;
+      onMetaChange();
+
+      if (showNotification) {
+        showToast('Beispiel-Sprite erfolgreich geladen!');
+      }
+    }
+
+    function loadExampleSprite() {
+      createDefaultFrames(true);
     }
 
     // --- Drag & Drop and Image Import ---
@@ -1768,25 +1864,18 @@
       let id = (data.id || 'begleiter').toLowerCase();
       let name = data.name || 'Begleiter';
 
-      // Protection: Ankylosaurus cannot be edited or copied
-      if (id === 'ankylosaurus') {
-        alert('Der Original Dino (Ankylosaurus) ist exklusiv geschützt und kann weder bearbeitet noch kopiert werden.');
+      // Protection: Standard companions are protected and not editable in editor
+      if (id === 'ankylosaurus' || id === 'drache' || id === 'biene') {
+        alert('Standard-Begleiter sind geschützt. Der Editor ist für deine eigenen Kreationen gedacht!');
         createDefaultFrames();
         return;
-      }
-
-      // Protection: Drache & Biene cannot be overwritten; editing creates a copy
-      const isLockedStandard = (id === 'drache' || id === 'biene');
-      if (isLockedStandard || data.as_copy) {
-        if (!id.endsWith('_kopie')) id = id + '_kopie';
-        if (!name.includes('(Kopie)')) name = name + ' (Kopie)';
       }
 
       document.getElementById('compId').value = id;
       document.getElementById('compName').value = name;
       document.getElementById('compIcon').value = data.icon || '✨';
       document.getElementById('compDesc').value = data.description || '';
-      document.getElementById('compAuthor').value = isLockedStandard ? 'Mein Begleiter' : (data.author || 'Dino Desk Team');
+      document.getElementById('compAuthor').value = data.author || 'Mein Begleiter';
       if (data.scale) {
         document.getElementById('compScale').value = data.scale;
         document.getElementById('compScaleVal').textContent = data.scale + '%';
@@ -1879,14 +1968,8 @@
 
     function resetAll() {
       if (confirm('Möchtest du wirklich alle Frames zurücksetzen und neu anfangen?')) {
-        createDefaultFrames();
-        document.getElementById('compName').value = 'Mein Begleiter';
-        document.getElementById('compId').value = 'mein_begleiter';
-        document.getElementById('compIcon').value = '✨';
-        document.getElementById('compDesc').value = '';
-        document.getElementById('compAuthor').value = 'Dino Desk Team';
-        onMetaChange();
-        showToast('Zurückgesetzt!');
+        createDefaultFrames(false);
+        showToast('Zurückgesetzt mit Beispiel-Dino!');
       }
     }
   </script>
