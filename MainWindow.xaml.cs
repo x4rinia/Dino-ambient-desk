@@ -39,6 +39,9 @@ public partial class MainWindow : Window
     private AmbientDeckConfig _config = new();
     private List<MonitorInfo> _monitors = new();
 
+    public AmbientDeckConfig CurrentConfig => _config;
+    public List<MonitorInfo> ConnectedMonitors => _monitors;
+
     private IntPtr _hwnd;
     private bool _isInitializingWindow = true;
     private bool _webViewReady;
@@ -246,6 +249,7 @@ public partial class MainWindow : Window
             );
 
             UpdateWallpapersVirtualHostMapping();
+            UpdateAddonSpritesVirtualHostMapping();
 
             // Inject initial config and wallpaper before HTML loads so frontend renders synchronously without black flash
             try
@@ -260,7 +264,8 @@ public partial class MainWindow : Window
                     windows_wallpaper_url = winWp,
                     notes = _storage.LoadNotes(),
                     events = _storage.LoadAllEvents(),
-                    quotes = _storage.LoadQuotes()
+                    quotes = _storage.LoadQuotes(),
+                    addon_companions = _storage.GetAddonCompanions()
                 };
                 string initJson = JsonSerializer.Serialize(initialPayload, JsonOptions);
                 await core.AddScriptToExecuteOnDocumentCreatedAsync($"window.__INITIAL_DATA__ = {initJson};");
@@ -308,6 +313,24 @@ public partial class MainWindow : Window
         );
     }
 
+    private void UpdateAddonSpritesVirtualHostMapping()
+    {
+        if (DashboardWebView.CoreWebView2 == null) return;
+        string? addonDir = _storage.ResolveAddonSpritesDirectory();
+        if (!string.IsNullOrEmpty(addonDir) && Directory.Exists(addonDir))
+        {
+            try
+            {
+                DashboardWebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "addons.ambientdeck.local",
+                    addonDir,
+                    CoreWebView2HostResourceAccessKind.Allow
+                );
+            }
+            catch { }
+        }
+    }
+
     private void OpenSettingsWindowOnPrimaryMonitor()
     {
         if (_webViewEnv == null) return;
@@ -330,7 +353,7 @@ public partial class MainWindow : Window
         _monitors = Win32WindowHelper.GetConnectedMonitors();
         var primaryMonitor = _monitors.FirstOrDefault(m => m.IsPrimary) ?? _monitors.First();
 
-        _settingsWindow = new SettingsWindow(this, _webViewEnv, _wwwroot, primaryMonitor);
+        _settingsWindow = new SettingsWindow(this, _webViewEnv, _wwwroot, primaryMonitor, _storage);
         _settingsWindow.Closed += (_, _) =>
         {
             _settingsWindow = null;
@@ -369,6 +392,7 @@ public partial class MainWindow : Window
                         notes = _storage.LoadNotes(),
                         events = _storage.LoadAllEvents(),
                         quotes = _storage.LoadQuotes(),
+                        addon_companions = _storage.GetAddonCompanions(),
                         vitals
                     };
                     SendToFrontend("init_state", fastPayload);
@@ -633,6 +657,52 @@ public partial class MainWindow : Window
                     _storage.SaveConfig(_config);
                     var syncedEvents = await _storage.SyncGoogleCalendarIcsAsync(icalUrl);
                     SendToFrontend("events_updated", new { events = syncedEvents });
+                    break;
+                }
+
+                case "open_companions_folder":
+                {
+                    string dir = _storage.ResolveCompanionsDirectory();
+                    Directory.CreateDirectory(dir);
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = dir,
+                        UseShellExecute = true
+                    });
+                    break;
+                }
+
+                case "import_companion_file":
+                {
+                    using var dlg = new OpenFileDialog
+                    {
+                        Title = "Begleiter-Addon (.companion.json) importieren",
+                        Filter = "Begleiter Addons (*.companion.json;*.json)|*.companion.json;*.json|Alle Dateien (*.*)|*.*",
+                        Multiselect = true
+                    };
+                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    {
+                        string targetDir = _storage.ResolveCompanionsDirectory();
+                        Directory.CreateDirectory(targetDir);
+                        foreach (string srcFile in dlg.FileNames)
+                        {
+                            try
+                            {
+                                string dest = Path.Combine(targetDir, Path.GetFileName(srcFile));
+                                File.Copy(srcFile, dest, overwrite: true);
+                            }
+                            catch { }
+                        }
+                        var updatedCompanions = _storage.GetAddonCompanions();
+                        SendToFrontend("companions_updated", new { addon_companions = updatedCompanions });
+                    }
+                    break;
+                }
+
+                case "refresh_companions":
+                {
+                    var updatedCompanions = _storage.GetAddonCompanions();
+                    SendToFrontend("companions_updated", new { addon_companions = updatedCompanions });
                     break;
                 }
             }

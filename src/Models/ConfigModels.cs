@@ -466,3 +466,57 @@ public class CommsStatusData
     [JsonPropertyName("recent_items")]
     public List<CommsNotificationItem> RecentItems { get; set; } = new();
 }
+
+public class CompanionSprites
+{
+    [JsonPropertyName("walk")]
+    public List<string> Walk { get; set; } = new();
+
+    [JsonPropertyName("tail")]
+    public List<string> Tail { get; set; } = new();
+
+    [JsonPropertyName("jump")]
+    public List<string> Jump { get; set; } = new();
+}
+
+public class AddonCompanionInfo
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = "";
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = "";
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = "";
+
+    [JsonPropertyName("icon")]
+    public string Icon { get; set; } = "";
+
+    [JsonPropertyName("author")]
+    public string Author { get; set; } = "";
+
+    [JsonPropertyName("preview_url")]
+    public string PreviewUrl { get; set; } = "";
+
+    [JsonPropertyName("base_url")]
+    public string BaseUrl { get; set; } = "";
+
+    [JsonPropertyName("walk_frames")]
+    public int WalkFrames { get; set; } = 4;
+
+    [JsonPropertyName("jump_frames")]
+    public int JumpFrames { get; set; } = 4;
+
+    [JsonPropertyName("tail_frames")]
+    public int TailFrames { get; set; } = 4;
+
+    [JsonPropertyName("sprites")]
+    public CompanionSprites? Sprites { get; set; }
+
+    [JsonPropertyName("scale")]
+    public int Scale { get; set; } = 100;
+
+    [JsonPropertyName("speed")]
+    public int Speed { get; set; } = 100;
+}

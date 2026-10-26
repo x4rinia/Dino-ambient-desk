@@ -25,20 +25,23 @@ Dino-ambient-desk ist ein leichtgewichtiges, aushilfsfreies Desktop-Dashboard fu
 
 ## Alle Funktionen im Detail
 
-### 1. Animierter Ankylosaurus-Begleiter (Transparent freigestellt)
+### 1. Animierte Schreibtisch-Begleiter & Addon-System
+* **Begleiter-Auswahl per Knopfdruck:** Ueber einen eigenen Button in den Einstellungen koennen alle erkannten Begleiter uebersichtlich in einer Galerie angezeigt und per Klick aktiviert werden.
+* **Kompaktes Addon-Dateiformat (.companion.json):** Jeder Begleiter ist in einer einzigen, eigenstaendigen Datei gebuendelt (Name, Beschreibung, Vorschaubild und alle Animations-Frames). Es muessen keine tausenden Einzel-Dateien oder Ordner mehr verwaltet werden.
+* **Ordner-Zugriff & Import:** Neue Begleiter lassen sich einfach als .companion.json herunterladen und in den Begleiter-Ordner ablegen oder direkt ueber den Button "Addon importieren" in der App laden.
+* **12 vorinstallierte Begleiter:** Unter anderem Ankylosaurus (Standard-Dino), Biene, Diddl, Drache, Elfe, Mops, Terrier, Katze, Optimus, Roboter und Waldtroll.
 * **Natuerliche 4-Frame-Laufanimation:** Geht fluessig und gleichmaessig ueber seinen eingestellten Laufbereich hin und her, ohne unruhiges Drehen oder hinkende Bewegungsablaeufe.
 * **Keulen-Wedeln mit Glitzereffekt:** Bleibt zwischendurch stehen und schwingt froehlich seine Schwanzkeule.
 * **Freudensprung:** Geht kurz in die Knie und huepft vor Freude mit ausgestreckten Armen in die Luft.
 * **Individuell ein- und ausschaltbare Animationen:** Jede der drei Aktionen (Laufen, Keulen-Wedeln, Freudensprung) kann in den Einstellungen ueber Kontrollkaestchen einzeln aktiviert oder deaktiviert werden.
-* **Ruhemodus / Auf der Stelle stehen:** Wird das Laufen deaktiviert, bleibt der Dino ruhig an seinem Ankerpunkt stehen. Sind alle Animationen deaktiviert, verharrt er friedlich im Standbild.
-* **Stufenlose Skalierung (Dino-Groesse):** Ueber einen Schieberegler von 50% bis 160% in 5%-Schritten skalierbar. Durch die Verankerung an den Fuessen bleibt der Dino bei jeder Groesse exakt auf der Standlinie.
+* **Ruhemodus / Auf der Stelle stehen:** Wird das Laufen deaktiviert, bleibt der Begleiter ruhig an seinem Ankerpunkt stehen. Sind alle Animationen deaktiviert, verharrt er friedlich im Standbild.
+* **Stufenlose Skalierung (Begleiter-Groesse):** Ueber einen Schieberegler von 50% bis 160% in 5%-Schritten skalierbar. Durch die Verankerung an den Fuessen bleibt der Begleiter bei jeder Groesse exakt auf der Standlinie.
 * **Geschwindigkeit, Transparenz und Laufbreite:** Tempo (50% bis 160%), Transparenz (20% bis 100%) und die Weite des Laufbereichs (300px bis 850px) sind frei einstellbar.
 * **Visuelle Ausrichtungshilfe:** Bei geoeffneten Einstellungen wird der gesamte Laufbereich mit einem gruen gestrichelten Rahmen dargestellt und kann per Maus an jede Wunschposition auf dem Bildschirm gezogen werden. Nach dem Speichern wird der Rahmen vollstaendig unsichtbar.
 
-### 2. Desktop-Hintergrund und 3 Widget-Stile
-* **Echtes Desktop-Hintergrundbild:** Zwischen den Widgets bleibt das bestehende, hochauflösende Windows-Hintergrundbild sichtbar.
-* **Glas-Effekt:** Edle Milchglas-Optik mit feiner Lichtbrechung und dezenten Kanten.
-* **Geblurrt:** Selektive Hintergrundunschaerfe direkt hinter den Widgets.
+### 2. Desktop-Hintergrund und 2 Widget-Stile
+* **Echtes Desktop-Hintergrundbild:** Zwischen den Widgets bleibt das bestehende, hochaufloesende Windows-Hintergrundbild sichtbar.
+* **Geblurrt:** Selektive Hintergrundunschaerfe direkt hinter den Widgets, waehrend das Hintergrundbild dazwischen gestochen scharf bleibt.
 * **Schwarz:** Kontraststarke, tiefschwarze Panels fuer maximale Lesbarkeit.
 
 ### 3. Uhrzeit und Kalender (Clock & Calendar)

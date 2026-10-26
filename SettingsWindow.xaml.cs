@@ -10,18 +10,21 @@ public partial class SettingsWindow : Window
     private readonly MainWindow _mainWindow;
     private readonly CoreWebView2Environment _env;
     private readonly string _wwwroot;
+    private readonly AmbientDeck.Services.StorageService? _storage;
     public bool IsWebViewReady { get; private set; }
 
     public SettingsWindow(
         MainWindow mainWindow,
         CoreWebView2Environment env,
         string wwwroot,
-        MonitorInfo primaryMonitor
+        MonitorInfo primaryMonitor,
+        AmbientDeck.Services.StorageService? storage = null
     )
     {
         _mainWindow = mainWindow;
         _env = env;
         _wwwroot = wwwroot;
+        _storage = storage;
 
         InitializeComponent();
         ShowInTaskbar = true;
@@ -64,6 +67,39 @@ public partial class SettingsWindow : Window
                 CoreWebView2HostResourceAccessKind.Allow
             );
 
+            if (_storage != null)
+            {
+                string? addonDir = _storage.ResolveAddonSpritesDirectory();
+                if (!string.IsNullOrEmpty(addonDir) && System.IO.Directory.Exists(addonDir))
+                {
+                    try
+                    {
+                        core.SetVirtualHostNameToFolderMapping(
+                            "addons.ambientdeck.local",
+                            addonDir,
+                            CoreWebView2HostResourceAccessKind.Allow
+                        );
+                    }
+                    catch { }
+                }
+
+                try
+                {
+                    var initialPayload = new
+                    {
+                        config = _mainWindow.CurrentConfig,
+                        addon_companions = _storage.GetAddonCompanions(),
+                        monitors = _mainWindow.ConnectedMonitors,
+                        notes = _storage.LoadNotes(),
+                        events = _storage.LoadAllEvents(),
+                        quotes = _storage.LoadQuotes()
+                    };
+                    string initJson = System.Text.Json.JsonSerializer.Serialize(initialPayload);
+                    await core.AddScriptToExecuteOnDocumentCreatedAsync($"window.__INITIAL_DATA__ = {initJson};");
+                }
+                catch { }
+            }
+
             core.WebMessageReceived += (_, args) =>
             {
                 _mainWindow.HandleWebMessage(args.TryGetWebMessageAsString());
@@ -79,7 +115,7 @@ public partial class SettingsWindow : Window
 
     public void PostJsonMessage(string json)
     {
-        if (!IsWebViewReady || SettingsWebView.CoreWebView2 == null) return;
+        if (SettingsWebView.CoreWebView2 == null) return;
         try
         {
             SettingsWebView.CoreWebView2.PostWebMessageAsJson(json);

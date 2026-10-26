@@ -1,4 +1,5 @@
 import {
+  AddonCompanionInfo,
   AmbientDeckConfig,
   CalendarEvent,
   DailyQuote,
@@ -16,6 +17,7 @@ export interface InitialDataPayload {
   notes?: string;
   events?: CalendarEvent[];
   quotes?: DailyQuote[];
+  addon_companions?: AddonCompanionInfo[];
 }
 
 declare global {
@@ -52,7 +54,7 @@ export const DEFAULT_CONFIG: AmbientDeckConfig = {
   },
   theme: {
     color_mode: 'cyber_blue',
-    background_mode: 'glass',
+    background_mode: 'wallpaper_blur',
     wallpaper_blur_px: 16,
     custom_primary: '#38bdf8',
     custom_secondary: '#34d399',
@@ -184,6 +186,9 @@ export const Bridge = {
     sendToBackend('save_manual_events', { events }),
   syncGoogleCalendar: (icalUrl: string) =>
     sendToBackend('sync_google_calendar', { ical_url: icalUrl }),
+  openCompanionsFolder: () => sendToBackend('open_companions_folder'),
+  importCompanionFile: () => sendToBackend('import_companion_file'),
+  refreshCompanions: () => sendToBackend('refresh_companions'),
   openWindowsNotificationSettings: () =>
     sendToBackend('open_windows_notification_settings'),
 };

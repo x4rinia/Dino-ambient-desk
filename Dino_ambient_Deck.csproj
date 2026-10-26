@@ -13,7 +13,7 @@
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <DefaultItemExcludes>$(DefaultItemExcludes);frontend\**;drops\**;wallpapers\**;dist\**;Dino_ambient_Deck\**</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);frontend\**;drops\**;wallpapers\**;dist\**;Dino_ambient_Deck\**;Addon_sprites\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>

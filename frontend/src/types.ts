@@ -21,6 +21,28 @@ export type DinoVariant =
   | 'stegosaurus'
   | 'brachiosaurus';
 
+export interface CompanionSprites {
+  walk?: string[];
+  tail?: string[];
+  jump?: string[];
+}
+
+export interface AddonCompanionInfo {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  author?: string;
+  preview_url: string;
+  base_url?: string;
+  walk_frames?: number;
+  jump_frames?: number;
+  tail_frames?: number;
+  sprites?: CompanionSprites;
+  scale?: number;
+  speed?: number;
+}
+
 export interface WidgetOffset {
   x: number;
   y: number;

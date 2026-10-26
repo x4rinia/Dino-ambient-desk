@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Anchor, ArrowLeftRight } from 'lucide-react';
-import { WidgetOffset } from '../types';
+import { AddonCompanionInfo, WidgetOffset } from '../types';
 
 export const DINO_SPRITES = {
   walk: [
@@ -36,6 +36,8 @@ interface DinoCompanionProps {
   isEditable?: boolean;
   anchorOffset?: WidgetOffset;
   onAnchorChange?: (next: WidgetOffset) => void;
+  variant?: string;
+  addonCompanions?: AddonCompanionInfo[];
 }
 
 export const DinoCompanion: React.FC<DinoCompanionProps> = ({
@@ -49,9 +51,52 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   isEditable = false,
   anchorOffset = { x: 0, y: 0 },
   onAnchorChange,
+  variant,
+  addonCompanions = [],
 }) => {
   const [currentAction, setCurrentAction] = useState<DinoAction>('walk');
   const [frameIndex, setFrameIndex] = useState(0);
+
+  // Dynamically resolve sprites: Addon companion if chosen and available, otherwise built-in Dino
+  const activeCompanion = useMemo(() => {
+    if (!variant || variant === 'ankylosaurus') return null;
+    return addonCompanions.find(
+      (c) => c.id.toLowerCase() === variant.toLowerCase()
+    ) || null;
+  }, [variant, addonCompanions]);
+
+  const activeSprites = useMemo(() => {
+    if (activeCompanion) {
+      if (activeCompanion.sprites?.walk && activeCompanion.sprites.walk.length > 0) {
+        return {
+          walk: activeCompanion.sprites.walk,
+          jump:
+            activeCompanion.sprites.jump && activeCompanion.sprites.jump.length > 0
+              ? activeCompanion.sprites.jump
+              : activeCompanion.sprites.walk,
+          tail:
+            activeCompanion.sprites.tail && activeCompanion.sprites.tail.length > 0
+              ? activeCompanion.sprites.tail
+              : activeCompanion.sprites.walk,
+        };
+      }
+      return {
+        walk: Array.from(
+          { length: activeCompanion.walk_frames || 4 },
+          (_, i) => `${activeCompanion.base_url}/walk_${i}.png`
+        ),
+        jump: Array.from(
+          { length: activeCompanion.jump_frames || 4 },
+          (_, i) => `${activeCompanion.base_url}/jump_${i}.png`
+        ),
+        tail: Array.from(
+          { length: activeCompanion.tail_frames || 4 },
+          (_, i) => `${activeCompanion.base_url}/tail_${i}.png`
+        ),
+      };
+    }
+    return DINO_SPRITES;
+  }, [activeCompanion]);
 
   // Smooth walking path state: walkX ranges from -halfTrack to +halfTrack
   const halfTrack = Math.max(120, Math.round(trackWidth / 2));
@@ -72,15 +117,15 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     baseY: number;
   } | null>(null);
 
-  // Preload all 16 frames on mount
+  // Preload all frames on mount or when companion changes
   useEffect(() => {
-    Object.values(DINO_SPRITES).forEach((list) => {
+    Object.values(activeSprites).forEach((list) => {
       list.forEach((src) => {
         const img = new Image();
         img.src = src;
       });
     });
-  }, []);
+  }, [activeSprites]);
 
   useEffect(() => {
     if (!dragging) {
@@ -227,7 +272,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             return;
           }
           stepCount++;
-          setFrameIndex((prev) => (prev + 1) % DINO_SPRITES.walk.length);
+          setFrameIndex((prev) => (prev + 1) % activeSprites.walk.length);
 
           // Update position
           walkXRef.current += dirRef.current * stepPx;
@@ -299,11 +344,11 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       isCancelled = true;
       if (actionTimer) clearTimeout(actionTimer);
     };
-  }, [speed, trackWidth, allowWalk, allowTail, allowJump]);
+  }, [speed, trackWidth, allowWalk, allowTail, allowJump, activeSprites]);
 
   // Current sprite image path
   const currentSpriteSrc =
-    DINO_SPRITES[currentAction]?.[frameIndex] || DINO_SPRITES.walk[0];
+    activeSprites[currentAction]?.[frameIndex] || activeSprites.walk[0];
 
   const opacityValue = Math.max(0.15, Math.min(1.0, (opacity ?? 100) / 100));
 
@@ -450,7 +495,10 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       >
         <img
           src={currentSpriteSrc}
-          alt="Ankylosaurus Dino"
+          alt={activeCompanion ? activeCompanion.name : 'Dino Begleiter'}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = '/dino/walk_0.png';
+          }}
           draggable={false}
           style={{
             width: '100%',

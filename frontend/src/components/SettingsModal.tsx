@@ -18,8 +18,13 @@ import {
   X,
   Move,
   Trash2,
+  FolderOpen,
+  Upload,
+  Check,
+  Sparkles,
 } from 'lucide-react';
 import {
+  AddonCompanionInfo,
   AmbientDeckConfig,
   BackgroundMode,
   CalendarEvent,
@@ -42,6 +47,7 @@ interface SettingsModalProps {
   onSaveManualEvents: (events: CalendarEvent[]) => void;
   onSelectMonitor: (id: number) => void;
   onResetWidgetPositions: () => void;
+  addonCompanions?: AddonCompanionInfo[];
   onClose: () => void;
 }
 
@@ -50,7 +56,6 @@ const BACKGROUND_MODES: {
   label: string;
   desc: string;
 }[] = [
-  { id: 'glass', label: '🪟 Glas-Effekt', desc: 'Widgets im Milchglas-Look, dazwischen das Hintergrundbild' },
   { id: 'wallpaper_blur', label: '🌫️ Geblurrt', desc: 'Widgets weichgezeichnet, dazwischen das Hintergrundbild' },
   { id: 'black', label: '⬛ Schwarz', desc: 'Widgets tiefschwarz, dazwischen das Hintergrundbild' },
 ];
@@ -113,6 +118,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSaveManualEvents,
   onSelectMonitor,
   onResetWidgetPositions,
+  addonCompanions = [],
   onClose,
 }) => {
   const initialSnapshotRef = useRef<AmbientDeckConfig | null>(null);
@@ -135,6 +141,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [newEventDate, setNewEventDate] = useState(() =>
     new Date(Date.now() + 3600000).toISOString().slice(0, 16)
   );
+  const [isCompanionModalOpen, setIsCompanionModalOpen] = useState(false);
 
   useEffect(() => {
     setCustomX(config.window.x);
@@ -353,10 +360,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const rawBg = config.theme?.background_mode as string | undefined;
   const currentBgMode: BackgroundMode =
-    rawBg === 'wallpaper_blur' || rawBg === 'black' ? rawBg : 'glass';
+    rawBg === 'black' ? 'black' : 'wallpaper_blur';
 
   const currentDinoVariant = (config.modules.dino_companion?.variant ||
     'ankylosaurus') as DinoVariant;
+
+  const currentVariantId = (config.modules.dino_companion?.variant || 'ankylosaurus').toLowerCase();
+  const activeAddon = (addonCompanions || []).find((c) => c.id.toLowerCase() === currentVariantId);
+  const companionDisplayName = activeAddon ? activeAddon.name : 'Ankylosaurus';
+  const companionDisplayIcon = activeAddon ? (activeAddon.icon || '✨') : '🦖';
+  const companionDisplayPreview = activeAddon ? activeAddon.preview_url : '/dino/walk_0.png';
+  const companionDisplayDesc = activeAddon
+    ? activeAddon.description
+    : 'Läuft sanft um seinen Ankerpunkt hin und her, wedelt fröhlich mit der Keule und springt ab und zu vor Freude hoch!';
+
+  const allAvailableCompanions = React.useMemo(() => {
+    const list: AddonCompanionInfo[] = [];
+    const hasAnky = (addonCompanions || []).some(
+      (c) => c.id.toLowerCase() === 'ankylosaurus'
+    );
+    if (!hasAnky) {
+      list.push({
+        id: 'ankylosaurus',
+        name: 'Ankylosaurus',
+        description: 'Der treue Standard-Dino: Läuft ruhig, wedelt sanft mit seiner Keule und springt vor Freude hoch!',
+        icon: '🦖',
+        author: 'Dino Desk Team',
+        preview_url: '/dino/walk_0.png',
+        walk_frames: 4,
+        jump_frames: 4,
+        tail_frames: 4,
+      });
+    }
+    list.push(...(addonCompanions || []));
+    return list;
+  }, [addonCompanions]);
 
   const currentCycleVariants: DinoVariant[] =
     config.modules.dino_companion?.cycle_variants &&
@@ -1437,11 +1475,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="settings-section">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
             <div className="widget-title">
-              <span>5. Dino-Begleiter — Ankylosaurus</span>
+              <span>5. Begleiter — {companionDisplayIcon} {companionDisplayName}</span>
             </div>
 
             <label className="setting-toggle-card" style={{ gap: 8, padding: '5px 12px' }}>
-              <span>Dino-Begleiter aktivieren</span>
+              <span>Begleiter aktivieren</span>
               <input
                 type="checkbox"
                 checked={config.modules.dino_companion?.enabled ?? true}
@@ -1475,21 +1513,95 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }}
             >
               <img
-                src="/dino/walk_0.png"
-                alt="Ankylosaurus Dino"
+                src={companionDisplayPreview}
+                alt={companionDisplayName}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/dino/walk_0.png';
+                }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f3f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span>🛡️ Dein persönlicher Ankylosaurus-Begleiter</span>
+                <span>{companionDisplayIcon} Dein Begleiter: {companionDisplayName}</span>
                 <span style={{ fontSize: '0.64rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(52, 211, 153, 0.35)' }}>
                   Lebendig animiert
                 </span>
               </div>
               <div style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                Läuft sanft um seinen Ankerpunkt hin und her, <strong>wedelt fröhlich mit der Keule</strong> und <strong>springt ab und zu vor Freude hoch</strong>!
+                {companionDisplayDesc}
+              </div>
+
+              {/* Prominenter Button zur Begleiter-Auswahl & Addon-Verwaltung */}
+              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsCompanionModalOpen(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #38bdf8, #0284c7)',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '0.78rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Sparkles size={14} />
+                  <span>Begleiter auswählen ({allAvailableCompanions.length} erkannt)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => Bridge.openCompanionsFolder()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '6px 12px',
+                    borderRadius: '7px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    color: '#cbd5e1',
+                    fontSize: '0.72rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  title="Öffnet den Begleiter-Ordner im Windows Explorer zum Hinzufügen von .companion.json Dateien"
+                >
+                  <FolderOpen size={12} color="#38bdf8" />
+                  <span>Ordner öffnen</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => Bridge.importCompanionFile()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '6px 12px',
+                    borderRadius: '7px',
+                    background: 'rgba(52, 211, 153, 0.12)',
+                    border: '1px solid rgba(52, 211, 153, 0.28)',
+                    color: '#34d399',
+                    fontSize: '0.72rem',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    transition: 'all 0.15s ease',
+                  }}
+                  title="Wähle eine heruntergeladene .companion.json Addon-Datei aus"
+                >
+                  <Upload size={12} />
+                  <span>Addon (.companion.json) importieren</span>
+                </button>
               </div>
 
               {/* Animationen einzeln aktivieren / deaktivieren */}
@@ -1901,6 +2013,282 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Begleiter-Auswahl Modal / Addon Gallery */}
+      {isCompanionModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(5, 8, 14, 0.85)',
+            backdropFilter: 'blur(12px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+          }}
+          onClick={() => setIsCompanionModalOpen(false)}
+        >
+          <div
+            className="glass-panel"
+            style={{
+              width: '100%',
+              maxWidth: '860px',
+              maxHeight: '88vh',
+              display: 'flex',
+              flexDirection: 'column',
+              background: '#0d111a',
+              border: '1.5px solid rgba(56, 189, 248, 0.35)',
+              borderRadius: '16px',
+              boxShadow: '0 24px 60px rgba(0, 0, 0, 0.75)',
+              overflow: 'hidden',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                padding: '16px 22px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                background: 'rgba(255, 255, 255, 0.02)',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#f3f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span>🦕 Schreibtisch-Begleiter & Addons</span>
+                  <span style={{ fontSize: '0.68rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '2px 9px', borderRadius: '999px', border: '1px solid rgba(56, 189, 248, 0.35)', fontWeight: 700 }}>
+                    {allAvailableCompanions.length} Begleiter erkannt
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.73rem', color: '#94a3b8', marginTop: 4 }}>
+                  Klicke auf einen Begleiter, um ihn sofort auf deinem Desktop zu aktivieren. Neue Begleiter können einfach als einzelne <code>.companion.json</code> Addon-Datei hinzugefügt werden!
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => Bridge.openCompanionsFolder()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: '#f3f5f9',
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                  }}
+                  title="Öffnet den Begleiter-Ordner im Windows Explorer"
+                >
+                  <FolderOpen size={13} color="#38bdf8" />
+                  <span>Ordner öffnen</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => Bridge.importCompanionFile()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(52, 211, 153, 0.15)',
+                    border: '1px solid rgba(52, 211, 153, 0.35)',
+                    color: '#34d399',
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                  }}
+                  title="Wähle eine .companion.json Datei aus"
+                >
+                  <Upload size={13} />
+                  <span>Addon importieren</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => Bridge.refreshCompanions()}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    background: 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                  }}
+                  title="Begleiter-Liste neu laden"
+                >
+                  <RefreshCw size={13} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsCompanionModalOpen(false)}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    background: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Cards Grid */}
+            <div
+              style={{
+                padding: '20px',
+                overflowY: 'auto',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+                gap: 14,
+                maxHeight: 'calc(88vh - 90px)',
+              }}
+            >
+              {allAvailableCompanions.map((comp) => {
+                const isSelected =
+                  (config.modules.dino_companion?.variant || 'ankylosaurus').toLowerCase() === comp.id.toLowerCase();
+                return (
+                  <div
+                    key={comp.id}
+                    onClick={() => {
+                      onUpdateConfig({
+                        ...config,
+                        modules: {
+                          ...config.modules,
+                          dino_companion: {
+                            ...config.modules.dino_companion,
+                            variant: comp.id,
+                          },
+                        },
+                      });
+                    }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: '12px',
+                      padding: '12px 14px',
+                      background: isSelected
+                        ? 'rgba(56, 189, 248, 0.14)'
+                        : 'rgba(255, 255, 255, 0.03)',
+                      border: isSelected
+                        ? '2px solid #38bdf8'
+                        : '1px solid rgba(255, 255, 255, 0.08)',
+                      cursor: 'pointer',
+                      transition: 'all 0.18s ease',
+                      position: 'relative',
+                      gap: 10,
+                    }}
+                  >
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <div
+                        style={{
+                          width: '54px',
+                          height: '50px',
+                          borderRadius: '10px',
+                          background: 'rgba(14, 18, 28, 0.85)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          padding: '3px',
+                        }}
+                      >
+                        <img
+                          src={comp.preview_url || '/dino/walk_0.png'}
+                          alt={comp.name}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/dino/walk_0.png';
+                          }}
+                          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        />
+                      </div>
+
+                      <div style={{ overflow: 'hidden', flex: 1 }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f3f5f9', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                          {comp.icon || '🦖'} {comp.name}
+                        </div>
+                        <div style={{ fontSize: '0.67rem', color: '#94a3b8' }}>
+                          {comp.author || 'Begleiter-Addon'}
+                        </div>
+                      </div>
+
+                      {isSelected && (
+                        <div
+                          style={{
+                            background: '#38bdf8',
+                            color: '#080a10',
+                            borderRadius: '999px',
+                            padding: '3px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 0 10px rgba(56, 189, 248, 0.6)',
+                          }}
+                        >
+                          <Check size={12} strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ fontSize: '0.72rem', color: '#cbd5e1', lineHeight: '1.35', flex: 1 }}>
+                      {comp.description}
+                    </div>
+
+                    <button
+                      type="button"
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        background: isSelected
+                          ? 'rgba(56, 189, 248, 0.25)'
+                          : 'rgba(255, 255, 255, 0.06)',
+                        border: isSelected
+                          ? '1px solid #38bdf8'
+                          : '1px solid rgba(255, 255, 255, 0.1)',
+                        color: isSelected ? '#38bdf8' : '#e2e8f0',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        marginTop: 4,
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check size={13} />
+                          <span>Aktiv auf dem Desktop</span>
+                        </>
+                      ) : (
+                        <span>Als Begleiter aktivieren</span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
