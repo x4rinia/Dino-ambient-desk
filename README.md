@@ -1,6 +1,10 @@
 <div align="center">
 
-<img src="./dino_preview.png" width="260" alt="Ankylosaurus Dino Begleiter" />
+<p float="center">
+  <img src="./dashboard_preview.png" width="340" alt="Dino Ambient Desk Dashboard Ansicht" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="./dino_preview.png" width="220" alt="Ankylosaurus Dino Begleiter" />
+</p>
 
 # Dino-ambient-desk
 
@@ -19,7 +23,15 @@
 
 ## Uebersicht
 
-Dino-ambient-desk ist ein leichtgewichtiges, aushilfsfreies Desktop-Dashboard fuer Windows 10 und 11. Es integriert sich nahtlos in den Desktop-Hintergrund, laeuft ressourcenschonend im Hintergrund und bietet sowohl praktische Widgets fuer den Alltag als auch einen charmanten, handanimierten Ankylosaurus-Begleiter.
+Dino-ambient-desk ist ein leichtgewichtiges, aushilfsfreies Desktop-Dashboard fuer Windows 10 und 11. Es integriert sich nahtlos in den Desktop-Hintergrund, laeuft ressourcenschonend im Hintergrund und bietet sowohl praktische Widgets fuer den Alltag als auch anpassbare Begleiter-Animationen.
+
+In der Beispielansicht oben sind die verfuegbaren Widgets uebersichtlich angeordnet:
+* **Uhrzeit & Datum:** Grosse Zeitanzeige, Wochentag, Kalender mit ISO-8601 Kalenderwoche (KW) und naechste Termine
+* **Aktivitaets-Tracker:** Fortschrittsanzeige fuer Tagesziele (z. B. Schrittzaehler)
+* **Hardware System Vitals:** Echtzeit-Balken fuer CPU, RAM und GPU
+* **Desktop-Begleiter:** Frei waehlbarer Begleiter (wie der abgebildete Drache oder Dino), der ueber die Plattform laeuft
+* **Mondkalender:** Aktuelle Mondphase mit Beleuchtungsgrad und Tagen bis zum naechsten Vollmond/Neumond
+* **Event-Countdown:** Sekundenaktuelle Restzeit bis zum gewuenschten Zieldatum (z. B. Urlaub)
 
 ---
 

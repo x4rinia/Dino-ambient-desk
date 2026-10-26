@@ -46,3 +46,4 @@ Eine `.companion.json` Datei hat folgende Struktur:
 }
 ```
 Sobald eine Datei in diesen Ordner gelegt wird, erkennt Dino-Widget-Desk sie automatisch!
+
