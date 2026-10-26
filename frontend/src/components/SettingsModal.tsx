@@ -1564,9 +1564,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f3f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f3f5f9', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span>{companionDisplayIcon} Dein Begleiter: {companionDisplayName}</span>
-                <span style={{ fontSize: '0.64rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(52, 211, 153, 0.35)' }}>
+                {['ankylosaurus', 'drache', 'biene'].includes(currentVariantId) ? (
+                  <span style={{ fontSize: '0.64rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(251, 191, 36, 0.35)', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 700 }}>
+                    <Lock size={10} /> Geschützt
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.64rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(52, 211, 153, 0.35)', fontWeight: 700 }}>
+                    Anpassbar
+                  </span>
+                )}
+                <span style={{ fontSize: '0.64rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.12)', padding: '2px 7px', borderRadius: '999px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
                   Lebendig animiert
                 </span>
               </div>
@@ -2246,11 +2255,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           <span>{comp.author || 'Begleiter'}</span>
                           {isExclusive ? (
                             <span style={{ fontSize: '0.60rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                              ⭐ Spezial-Dino (Exklusiv)
+                              <Lock size={9} /> Geschützt (Original-Dino)
                             </span>
                           ) : isStandardLocked ? (
                             <span style={{ fontSize: '0.60rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                              <Lock size={9} /> Standard
+                              <Lock size={9} /> Geschützt
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.60rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
@@ -2323,17 +2332,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             flex: 1,
                             padding: '6px 8px',
                             borderRadius: '6px',
-                            background: 'rgba(56, 189, 248, 0.08)',
-                            border: '1px dashed rgba(56, 189, 248, 0.35)',
+                            background: 'rgba(56, 189, 248, 0.10)',
+                            border: '1px dashed rgba(56, 189, 248, 0.40)',
                             color: '#7dd3fc',
                             fontSize: '0.67rem',
                             textAlign: 'center',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             userSelect: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 5,
                           }}
-                          title="Der Ankylosaurus ist der exklusive Standard-Dino und kann weder bearbeitet noch kopiert werden."
+                          title="Der Ankylosaurus ist der exklusive Standard-Dino und ist vollständig geschützt."
                         >
-                          ⭐ Exklusiv (Original Dino)
+                          <Lock size={11} />
+                          <span>Geschützt (Original Dino)</span>
                         </div>
                       ) : isStandardLocked ? (
                         <div
@@ -2346,12 +2360,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             color: '#fef08a',
                             fontSize: '0.67rem',
                             textAlign: 'center',
-                            fontWeight: 600,
+                            fontWeight: 700,
                             userSelect: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 5,
                           }}
                           title="Geschützter Standard-Begleiter vom Dino Desk Team."
                         >
-                          🔒 Standard-Begleiter (Geschützt)
+                          <Lock size={11} />
+                          <span>Geschützt (Standard-Begleiter)</span>
                         </div>
                       ) : (
                         <>

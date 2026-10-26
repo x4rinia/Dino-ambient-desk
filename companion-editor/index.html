@@ -1211,6 +1211,7 @@
       input.addEventListener('change', (e) => {
         if (e.target.files) {
           handleImageFiles(e.target.files);
+          input.value = '';
         }
       });
     }
@@ -1852,6 +1853,7 @@
           }
         };
         reader.readAsText(file);
+        input.value = '';
       });
     }
 
@@ -1927,22 +1929,6 @@
               updateFramesList();
               drawActiveFrame();
             }
-          }
-        };
-        img.src = src;
-      });
-            id: 'frame_' + idx,
-            name: 'Frame ' + (idx + 1),
-            canvas: c,
-            ctx: ctx
-          });
-
-          loaded++;
-          if (loaded === walkList.length) {
-            activeFrameIndex = 0;
-            updateFramesList();
-            drawActiveFrame();
-            showToast(`Begleiter "${data.name}" mit ${loaded} Frames geladen!`);
           }
         };
         img.src = src;
