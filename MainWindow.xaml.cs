@@ -454,12 +454,6 @@ public partial class MainWindow : Window
                         {
                             SendToFrontend("comms_update", comms);
                         });
-
-                        if (!string.IsNullOrWhiteSpace(_config.Modules.ClockCalendar.GoogleIcalUrl))
-                        {
-                            var synced = await _storage.SyncGoogleCalendarIcsAsync(_config.Modules.ClockCalendar.GoogleIcalUrl);
-                            Dispatcher.Invoke(() => SendToFrontend("events_updated", new { events = synced }));
-                        }
                     });
                     break;
                 }
@@ -691,16 +685,6 @@ public partial class MainWindow : Window
                         var updatedEvents = _storage.SaveManualEvents(manualList);
                         SendToFrontend("events_updated", new { events = updatedEvents });
                     }
-                    break;
-                }
-
-                case "sync_google_calendar":
-                {
-                    string icalUrl = root.GetProperty("ical_url").GetString() ?? "";
-                    _config.Modules.ClockCalendar.GoogleIcalUrl = icalUrl;
-                    _storage.SaveConfig(_config);
-                    var syncedEvents = await _storage.SyncGoogleCalendarIcsAsync(icalUrl);
-                    SendToFrontend("events_updated", new { events = syncedEvents });
                     break;
                 }
 

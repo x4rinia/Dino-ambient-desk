@@ -62,6 +62,7 @@ public class StorageService
         EventsJsonPath = Path.Combine(AppDataFolder, "events.json");
         EventsIcsPath = Path.Combine(AppDataFolder, "events.ics");
         GoogleIcsCachePath = Path.Combine(AppDataFolder, "google_calendar.ics");
+        try { if (File.Exists(GoogleIcsCachePath)) File.Delete(GoogleIcsCachePath); } catch { }
         QuotesJsonPath = Path.Combine(AppDataFolder, "quotes.json");
 
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -766,20 +767,6 @@ public class StorageService
 
                     results.AddRange(cleaned);
                 }
-            }
-        }
-        catch
-        {
-        }
-
-        // 2. Load synced Google Calendar / iCal .ics cache (keep events of today & future)
-        try
-        {
-            if (File.Exists(GoogleIcsCachePath))
-            {
-                var googleEvents = ParseIcsFile(GoogleIcsCachePath, "google")
-                    .Where(ev => DateTime.TryParse(ev.StartIso, out DateTime dt) && dt.Date >= today);
-                results.AddRange(googleEvents);
             }
         }
         catch

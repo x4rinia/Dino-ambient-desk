@@ -431,7 +431,7 @@
       cursor: pointer;
     }
 
-    /* MS Paint Palette Styles */
+    /* Color Palette Styles */
     .color-swatch {
       width: 20px;
       height: 18px;
@@ -767,7 +767,7 @@
 
     <!-- Center Column: Canvas Editor -->
     <section class="canvas-panel">
-      <!-- Multi-Tier Clean Ribbon Toolbar (MS Paint Style) -->
+      <!-- Multi-Tier Clean Ribbon Toolbar -->
       <div class="canvas-ribbon">
         <!-- Row 1: Tools, Size, Wand Options & Undo -->
         <div class="ribbon-row">
@@ -794,7 +794,7 @@
               <svg class="icon-svg" viewBox="0 0 24 24"><path d="M2 22s3.5-1 5.5-3l11-11a2.83 2.83 0 0 0 0-4l-1.5-1.5a2.83 2.83 0 0 0-4 0l-11 11C1 15.5 0 19 0 19l2 3z"></path></svg>
               <span>Pipette</span>
             </button>
-            <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Verschieben: Klicke und ziehe mit der Maus, um das Bild auf der Leinwand zu bewegen">
+            <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Verschieben: Klicke und ziehe mit der Maus oder nutze Pfeiltasten/Buttons, um das Bild zu bewegen">
               <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
               <span>Verschieben</span>
             </button>
@@ -828,6 +828,34 @@
             </button>
           </div>
 
+          <!-- Move Tool Directional Controls & Alignment -->
+          <div class="ribbon-group" id="moveParams" style="display:none; gap:6px;">
+            <span class="ribbon-label">Position:</span>
+            <div style="display:flex; align-items:center; gap:3px;">
+              <button type="button" class="btn-icon" onclick="moveActiveFramePixels(-1, 0)" title="1px nach links (Pfeil Links)">◄</button>
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <button type="button" class="btn-icon" style="height:15px; line-height:11px; padding:0 4px; font-size:10px;" onclick="moveActiveFramePixels(0, -1)" title="1px nach oben (Pfeil Oben)">▲</button>
+                <button type="button" class="btn-icon" style="height:15px; line-height:11px; padding:0 4px; font-size:10px;" onclick="moveActiveFramePixels(0, 1)" title="1px nach unten (Pfeil Unten)">▼</button>
+              </div>
+              <button type="button" class="btn-icon" onclick="moveActiveFramePixels(1, 0)" title="1px nach rechts (Pfeil Rechts)">►</button>
+            </div>
+
+            <button type="button" class="tool-btn" onclick="alignSpriteToBaseline()" title="Richtet die Standlinie/Füße des Sprites automatisch an der roten Führungslinie aus" style="margin-left:4px;">
+              <svg class="icon-svg" viewBox="0 0 24 24"><line x1="3" y1="21" x2="21" y2="21"></line><path d="M12 3v14m-4-4 4 4 4-4"></path></svg>
+              <span>Auf Standlinie</span>
+            </button>
+
+            <button type="button" class="tool-btn" onclick="centerSpriteHorizontally()" title="Zentriert das Sprite horizontal auf der Leinwand">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 12H6m6-6v12"></path></svg>
+              <span>Zentrieren</span>
+            </button>
+
+            <label class="checkbox-label" style="margin-left:6px;">
+              <input type="checkbox" id="moveAllFrames" />
+              <span>Auf alle Frames anwenden</span>
+            </label>
+          </div>
+
           <!-- Undo Button -->
           <div class="ribbon-group">
             <button type="button" class="tool-btn" onclick="undo()" title="Schritt rückgängig machen (Strg+Z)">
@@ -837,9 +865,9 @@
           </div>
         </div>
 
-        <!-- Row 2: MS Paint Color Palette, View & Size -->
+        <!-- Row 2: Color Palette, View & Size -->
         <div class="ribbon-row">
-          <!-- Color Palette (MS Paint Style) -->
+          <!-- Color Palette -->
           <div class="ribbon-group" style="gap:10px;">
             <span class="ribbon-label">Farbe:</span>
             <div style="position:relative; display:flex; align-items:center;">
@@ -1592,14 +1620,15 @@
       }
     }
 
-    // --- MS Paint Style Tools & Event Handling ---
+    // --- Studio Tools & Event Handling ---
     let activeTool = 'pen'; // 'pen', 'fill', 'eraser', 'wand', 'picker', 'move'
     let currentColor = '#10b981';
     let brushSize = 2;
     let isDrawing = false;
     let isMoving = false;
-    let moveStart = { x: 0, y: 0 };
-    let moveSnapshot = null;
+    let moveStartClientX = 0;
+    let moveStartClientY = 0;
+    let moveSnapshotCanvases = null;
     let lastCoords = null;
 
     function setTool(tool) {
@@ -1615,6 +1644,9 @@
       const sizeParams = document.getElementById('sizeParams');
       if (sizeParams) sizeParams.style.display = (tool === 'pen' || tool === 'eraser' ? 'flex' : 'none');
 
+      const moveParams = document.getElementById('moveParams');
+      if (moveParams) moveParams.style.display = (tool === 'move' ? 'flex' : 'none');
+
       if (tool === 'move') {
         mainCanvas.style.cursor = 'grab';
       } else {
@@ -1627,7 +1659,7 @@
       if (tool === 'eraser') statusEl.textContent = 'Radiergummi: Klicke und ziehe mit der Maus, um Pixel transparent wegzuradieren.';
       if (tool === 'wand') statusEl.textContent = 'Hintergrund entfernen: Klicke auf eine Farbe, um sie transparent zu machen.';
       if (tool === 'picker') statusEl.textContent = 'Pipette: Klicke auf ein beliebiges Pixel, um seine Farbe aufzunehmen.';
-      if (tool === 'move') statusEl.textContent = 'Verschieben: Klicke und ziehe mit der Maus, um das Bild zu verschieben (oder Pfeiltasten).';
+      if (tool === 'move') statusEl.textContent = 'Verschieben: Klicke und ziehe mit der Maus oder nutze die Richtungstasten / Buttons, um das Bild zu verschieben.';
     }
 
     function setColor(color) {
@@ -1698,14 +1730,100 @@
     });
 
     function moveActiveFramePixels(dx, dy) {
+      if (frames.length === 0) return;
+      saveUndoState();
+      const applyAll = document.getElementById('moveAllFrames')?.checked ?? false;
+      const targetFrames = applyAll ? frames : [frames[activeFrameIndex]].filter(Boolean);
+
+      targetFrames.forEach(f => {
+        const temp = document.createElement('canvas');
+        temp.width = targetResolution;
+        temp.height = targetResolution;
+        const tempCtx = temp.getContext('2d');
+        tempCtx.imageSmoothingEnabled = false;
+        tempCtx.drawImage(f.canvas, 0, 0);
+
+        f.ctx.clearRect(0, 0, targetResolution, targetResolution);
+        f.ctx.imageSmoothingEnabled = false;
+        f.ctx.drawImage(temp, dx, dy);
+      });
+
+      drawActiveFrame();
+      updateFramesList();
+    }
+
+    function alignSpriteToBaseline() {
+      if (frames.length === 0) return;
       const cur = frames[activeFrameIndex];
       if (!cur) return;
-      saveUndoState();
+
       const imgData = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
-      cur.ctx.clearRect(0, 0, targetResolution, targetResolution);
-      cur.ctx.putImageData(imgData, dx, dy);
-      updateFramesList();
-      drawActiveFrame();
+      const data = imgData.data;
+      let lowestY = -1;
+
+      for (let y = targetResolution - 1; y >= 0; y--) {
+        for (let x = 0; x < targetResolution; x++) {
+          const idx = (y * targetResolution + x) * 4;
+          if (data[idx + 3] > 15) {
+            lowestY = y;
+            break;
+          }
+        }
+        if (lowestY !== -1) break;
+      }
+
+      if (lowestY === -1) {
+        showToast('Keine sichtbaren Pixel im Frame gefunden');
+        return;
+      }
+
+      const baselineY = targetResolution - 8;
+      const dy = baselineY - lowestY;
+      if (dy === 0) {
+        showToast('Sprite steht bereits exakt auf der Standlinie');
+        return;
+      }
+
+      moveActiveFramePixels(0, dy);
+      showToast(`Auf Standlinie ausgerichtet (${dy > 0 ? '+' : ''}${dy}px)`);
+    }
+
+    function centerSpriteHorizontally() {
+      if (frames.length === 0) return;
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      const imgData = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+      const data = imgData.data;
+      let minX = targetResolution;
+      let maxX = -1;
+
+      for (let y = 0; y < targetResolution; y++) {
+        for (let x = 0; x < targetResolution; x++) {
+          const idx = (y * targetResolution + x) * 4;
+          if (data[idx + 3] > 15) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+          }
+        }
+      }
+
+      if (maxX === -1) {
+        showToast('Keine sichtbaren Pixel im Frame gefunden');
+        return;
+      }
+
+      const spriteCenter = (minX + maxX) / 2;
+      const canvasCenter = targetResolution / 2;
+      const dx = Math.round(canvasCenter - spriteCenter);
+
+      if (dx === 0) {
+        showToast('Sprite ist bereits horizontal zentriert');
+        return;
+      }
+
+      moveActiveFramePixels(dx, 0);
+      showToast(`Horizontal zentriert (${dx > 0 ? '+' : ''}${dx}px)`);
     }
 
     function parseHexColor(hex) {
@@ -1865,8 +1983,17 @@
         if (activeTool === 'move') {
           saveUndoState();
           isMoving = true;
-          moveStart = { x: coords.rawX, y: coords.rawY };
-          moveSnapshot = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+          moveStartClientX = e.clientX;
+          moveStartClientY = e.clientY;
+          moveSnapshotCanvases = frames.map(f => {
+            const c = document.createElement('canvas');
+            c.width = targetResolution;
+            c.height = targetResolution;
+            const ctx = c.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(f.canvas, 0, 0);
+            return c;
+          });
           mainCanvas.style.cursor = 'grabbing';
           return;
         }
@@ -1913,13 +2040,30 @@
         const cur = frames[activeFrameIndex];
         if (!cur) return;
 
-        if (isMoving && activeTool === 'move' && moveSnapshot) {
-          const dx = coords.rawX - moveStart.x;
-          const dy = coords.rawY - moveStart.y;
-          cur.ctx.clearRect(0, 0, targetResolution, targetResolution);
-          cur.ctx.putImageData(moveSnapshot, dx, dy);
+        if (isMoving && activeTool === 'move' && moveSnapshotCanvases) {
+          const applyAll = document.getElementById('moveAllFrames')?.checked ?? false;
+          const dx = Math.round((e.clientX - moveStartClientX) / currentZoom);
+          const dy = Math.round((e.clientY - moveStartClientY) / currentZoom);
+
+          if (applyAll) {
+            frames.forEach((f, idx) => {
+              const snap = moveSnapshotCanvases[idx];
+              if (snap) {
+                f.ctx.clearRect(0, 0, targetResolution, targetResolution);
+                f.ctx.imageSmoothingEnabled = false;
+                f.ctx.drawImage(snap, dx, dy);
+              }
+            });
+          } else {
+            const curFrame = frames[activeFrameIndex];
+            const snap = moveSnapshotCanvases[activeFrameIndex];
+            if (curFrame && snap) {
+              curFrame.ctx.clearRect(0, 0, targetResolution, targetResolution);
+              curFrame.ctx.imageSmoothingEnabled = false;
+              curFrame.ctx.drawImage(snap, dx, dy);
+            }
+          }
           drawActiveFrame();
-          updateFramesList();
           return;
         }
 
@@ -1935,8 +2079,9 @@
       window.addEventListener('mouseup', () => {
         if (isMoving) {
           isMoving = false;
-          moveSnapshot = null;
+          moveSnapshotCanvases = null;
           mainCanvas.style.cursor = 'grab';
+          updateFramesList();
         }
         if (isDrawing) {
           isDrawing = false;

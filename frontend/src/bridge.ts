@@ -186,8 +186,6 @@ export const Bridge = {
     sendToBackend('add_event', { title, start_iso: startIso }),
   saveManualEvents: (events: CalendarEvent[]) =>
     sendToBackend('save_manual_events', { events }),
-  syncGoogleCalendar: (icalUrl: string) =>
-    sendToBackend('sync_google_calendar', { ical_url: icalUrl }),
   openCompanionsFolder: () => sendToBackend('open_companions_folder'),
   openCompanionEditor: (companion?: Record<string, unknown>) =>
     sendToBackend('open_companion_editor', companion ? { companion } : {}),

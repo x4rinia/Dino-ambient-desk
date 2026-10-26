@@ -129,9 +129,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   }, [config]);
 
-  const [icalInput, setIcalInput] = useState(
-    config.modules.clock_calendar.google_ical_url || ''
-  );
   const [syncMessage, setSyncMessage] = useState('');
   const [statusBanner, setStatusBanner] = useState('');
   const [customX, setCustomX] = useState(config.window.x);
@@ -151,9 +148,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setCustomHeight(config.window.height);
   }, [config.window.x, config.window.y, config.window.width, config.window.height]);
 
-  useEffect(() => {
-    setIcalInput(config.modules.clock_calendar.google_ical_url || '');
-  }, [config.modules.clock_calendar.google_ical_url]);
 
   const targetMonitor =
     monitors.find((m) => m.id === config.window.monitor_id) || monitors[0];
@@ -235,25 +229,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         color_mode: colorMode,
       },
     });
-  };
-
-  const handleSaveGoogleIcal = () => {
-    const trimmed = icalInput.trim();
-    onUpdateConfig({
-      ...config,
-      modules: {
-        ...config.modules,
-        clock_calendar: {
-          ...config.modules.clock_calendar,
-          google_ical_url: trimmed,
-        },
-      },
-    });
-    if (trimmed) {
-      Bridge.syncGoogleCalendar(trimmed);
-      setSyncMessage('Google Kalender wird synchronisiert...');
-      setTimeout(() => setSyncMessage(''), 3000);
-    }
   };
 
   // Active manual calendar notes (max 3; events whose full calendar day has passed are auto-filtered & auto-deleted)
@@ -1447,69 +1422,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   Alle 3 Plätze belegt. Du kannst jede Notiz oben direkt bearbeiten oder löschen (verstrichene Termine werden automatisch gelöscht).
                 </div>
               )}
+              {syncMessage && (
+                <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: 6, fontWeight: 600 }}>
+                  {syncMessage}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* iCal / Google Kalender URL (Optional falls vorhanden) */}
-          <div
-            style={{
-              marginTop: 8,
-              background: 'rgba(56, 189, 248, 0.06)',
-              border: '1px solid rgba(56, 189, 248, 0.22)',
-              borderRadius: 8,
-              padding: '8px 10px',
-            }}
-          >
-            <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginBottom: 6 }}>
-              <Info size={12} color="#38bdf8" style={{ display: 'inline', marginRight: 5 }} />
-              <strong>Optional — iCal / Google Kalender URL eintragen:</strong> Falls du Google Kalender (oder einen anderen iCal-Kalender) nutzt, kannst du hier die <strong>iCal-URL (<code>.ics</code>)</strong> eintragen:
-            </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Calendar size={14} color="#38bdf8" />
-              <input
-                type="text"
-                placeholder="iCal / Google Kalender URL (z.B. https://calendar.google.com/calendar/ical/.../basic.ics)"
-                value={icalInput}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setIcalInput(val);
-                  onUpdateConfig({
-                    ...config,
-                    modules: {
-                      ...config.modules,
-                      clock_calendar: {
-                        ...config.modules.clock_calendar,
-                        google_ical_url: val.trim(),
-                      },
-                    },
-                  });
-                }}
-                style={{
-                  flex: 1,
-                  background: 'rgba(0,0,0,0.45)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  borderRadius: 6,
-                  padding: '5px 10px',
-                  color: '#fff',
-                  fontSize: '0.74rem',
-                  userSelect: 'text',
-                }}
-              />
-              <button
-                type="button"
-                className="icon-btn active-blue"
-                onClick={handleSaveGoogleIcal}
-              >
-                <RefreshCw size={12} />
-                <span>iCal Sync</span>
-              </button>
-            </div>
-            {syncMessage && (
-              <div style={{ fontSize: '0.72rem', color: '#34d399', marginTop: 4 }}>
-                {syncMessage}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* 5. Dino-Begleiter (Ankylosaurus) mit Animationen & Ankerpunkt */}
