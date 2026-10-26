@@ -8,6 +8,10 @@ export const DINO_SPRITES = {
     '/dino/walk_1.png',
     '/dino/walk_2.png',
     '/dino/walk_3.png',
+    '/dino/walk_4.png',
+    '/dino/walk_5.png',
+    '/dino/walk_6.png',
+    '/dino/walk_7.png',
   ],
   jump: [
     '/dino/jump_0.png',
@@ -194,12 +198,12 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       const rand = Math.random();
 
       if (rand < 0.55) {
-        // WALK: Take 10-16 continuous steps across the track
+        // WALK: Take continuous natural steps across the track
         setCurrentAction('walk');
-        const numSteps = Math.floor(Math.random() * 7 + 10);
-        const stepPx = Math.floor(Math.random() * 3 + 6); // 6 to 8px per step
+        const numSteps = Math.floor(Math.random() * 8 + 14);
+        const stepPx = Math.floor(Math.random() * 2 + 4); // 4 to 5px per frame for smooth 8-frame cycle
         let stepCount = 0;
-        const stepInterval = Math.max(60, Math.round(130 / speedMultiplier));
+        const stepInterval = Math.max(50, Math.round(115 / speedMultiplier));
 
         const walkInterval = setInterval(() => {
           if (isCancelled) {
