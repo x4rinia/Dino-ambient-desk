@@ -16,3 +16,7 @@ frontend/dist/
 *.log
 *.tmp
 Addon_sprites/
+drops/
+dist/
+Dino_ambient_Deck/
+
