@@ -250,6 +250,7 @@ public partial class MainWindow : Window
 
             UpdateWallpapersVirtualHostMapping();
             UpdateAddonSpritesVirtualHostMapping();
+            SetupCompanionsWatcher();
 
             // Inject initial config and wallpaper before HTML loads so frontend renders synchronously without black flash
             try
@@ -329,6 +330,49 @@ public partial class MainWindow : Window
             }
             catch { }
         }
+    }
+
+    private FileSystemWatcher? _companionsWatcher;
+    private System.Timers.Timer? _companionsDebounceTimer;
+
+    private void SetupCompanionsWatcher()
+    {
+        try
+        {
+            string compDir = _storage.ResolveCompanionsDirectory();
+            Directory.CreateDirectory(compDir);
+
+            _companionsWatcher?.Dispose();
+            _companionsWatcher = new FileSystemWatcher(compDir, "*.json")
+            {
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
+                EnableRaisingEvents = true,
+                IncludeSubdirectories = false
+            };
+
+            void OnCompanionsChanged(object sender, FileSystemEventArgs e)
+            {
+                _companionsDebounceTimer?.Stop();
+                _companionsDebounceTimer?.Dispose();
+                _companionsDebounceTimer = new System.Timers.Timer(300);
+                _companionsDebounceTimer.AutoReset = false;
+                _companionsDebounceTimer.Elapsed += (_, _) =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        var companions = _storage.GetAddonCompanions();
+                        SendToFrontend("companions_updated", new { addon_companions = companions });
+                    });
+                };
+                _companionsDebounceTimer.Start();
+            }
+
+            _companionsWatcher.Created += OnCompanionsChanged;
+            _companionsWatcher.Changed += OnCompanionsChanged;
+            _companionsWatcher.Deleted += OnCompanionsChanged;
+            _companionsWatcher.Renamed += (s, e) => OnCompanionsChanged(s, e);
+        }
+        catch { }
     }
 
     private void OpenSettingsWindowOnPrimaryMonitor()

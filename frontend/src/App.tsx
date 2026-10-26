@@ -167,10 +167,6 @@ export const App: React.FC = () => {
     if (initialData?.addon_companions && initialData.addon_companions.length > 0) {
       return initialData.addon_companions;
     }
-    try {
-      const cached = localStorage.getItem('ambientdeck_cached_companions');
-      if (cached) return JSON.parse(cached);
-    } catch {}
     return [];
   });
   const [vitals, setVitals] = useState<SystemVitalsData>({
@@ -356,9 +352,6 @@ export const App: React.FC = () => {
           if (payload.events) setEvents(payload.events);
           if (payload.addon_companions) {
             setAddonCompanions(payload.addon_companions);
-            try {
-              localStorage.setItem('ambientdeck_cached_companions', JSON.stringify(payload.addon_companions));
-            } catch {}
           }
           if (payload.vitals) setVitals(payload.vitals);
           break;
@@ -366,9 +359,6 @@ export const App: React.FC = () => {
         case 'companions_updated': {
           if (payload?.addon_companions) {
             setAddonCompanions(payload.addon_companions);
-            try {
-              localStorage.setItem('ambientdeck_cached_companions', JSON.stringify(payload.addon_companions));
-            } catch {}
           }
           break;
         }

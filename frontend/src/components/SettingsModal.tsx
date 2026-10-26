@@ -369,7 +369,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const activeAddon = (addonCompanions || []).find((c) => c.id.toLowerCase() === currentVariantId);
   const companionDisplayName = activeAddon ? activeAddon.name : 'Ankylosaurus';
   const companionDisplayIcon = activeAddon ? (activeAddon.icon || '✨') : '🦖';
-  const companionDisplayPreview = activeAddon ? activeAddon.preview_url : '/dino/walk_0.png';
+  const companionDisplayPreview = activeAddon
+    ? (activeAddon.preview_url || activeAddon.sprites?.walk?.[0] || '/dino/walk_0.png')
+    : '/dino/walk_0.png';
   const companionDisplayDesc = activeAddon
     ? activeAddon.description
     : 'Läuft sanft um seinen Ankerpunkt hin und her, wedelt fröhlich mit der Keule und springt ab und zu vor Freude hoch!';
@@ -2210,7 +2212,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         }}
                       >
                         <img
-                          src={comp.preview_url || '/dino/walk_0.png'}
+                          src={comp.preview_url || comp.sprites?.walk?.[0] || '/dino/walk_0.png'}
                           alt={comp.name}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/dino/walk_0.png';

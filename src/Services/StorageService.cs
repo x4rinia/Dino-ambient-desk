@@ -72,6 +72,7 @@ public class StorageService
         Directory.CreateDirectory(DefaultWallpapersFolder);
 
         EnsureSeedFiles();
+        EnsureCompanionsSynced();
     }
 
     private void EnsureSeedFiles()
@@ -422,18 +423,53 @@ public class StorageService
 
     public string ResolveCompanionsDirectory()
     {
-        string direct = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "companions");
-        if (Directory.Exists(direct)) return direct;
-
-        string dev = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "companions"));
-        if (Directory.Exists(dev)) return dev;
-
-        string parent = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "companions"));
-        if (Directory.Exists(parent)) return parent;
-
         string appData = Path.Combine(AppDataFolder, "companions");
         Directory.CreateDirectory(appData);
         return appData;
+    }
+
+    public void EnsureCompanionsSynced()
+    {
+        try
+        {
+            string appData = ResolveCompanionsDirectory();
+
+            // Clean up any broken/stub legacy files that have no sprites
+            string legacyStub = Path.Combine(appData, "companion.json");
+            if (File.Exists(legacyStub) && new FileInfo(legacyStub).Length < 1000)
+            {
+                try { File.Delete(legacyStub); } catch { }
+            }
+
+            // Find source bundled companions folder
+            var candidateSourceDirs = new[]
+            {
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "companions"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "companions"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "companions")
+            };
+
+            foreach (var srcDir in candidateSourceDirs)
+            {
+                if (Directory.Exists(srcDir) && !Path.GetFullPath(srcDir).Equals(Path.GetFullPath(appData), StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var file in Directory.EnumerateFiles(srcDir, "*.companion.json"))
+                    {
+                        try
+                        {
+                            string fileName = Path.GetFileName(file);
+                            string dst = Path.Combine(appData, fileName);
+                            if (!File.Exists(dst) || new FileInfo(dst).Length < 1000)
+                            {
+                                File.Copy(file, dst, true);
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+        catch { }
     }
 
     public string? ResolveAddonSpritesDirectory()
@@ -452,24 +488,46 @@ public class StorageService
 
     public List<AddonCompanionInfo> GetAddonCompanions()
     {
-        var list = new List<AddonCompanionInfo>();
+        EnsureCompanionsSynced();
 
-        // 1. Scan single-file companion addons (.companion.json / .json) in companions directory
-        try
+        var list = new List<AddonCompanionInfo>();
+        var scannedIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // 1. Scan single-file companion addons (.companion.json / .json) across all candidate directories
+        var scanDirs = new List<string>
         {
-            string compDir = ResolveCompanionsDirectory();
-            if (Directory.Exists(compDir))
+            ResolveCompanionsDirectory(),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "companions"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "companions"),
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "companions")
+        };
+
+        foreach (var compDir in scanDirs)
+        {
+            if (!Directory.Exists(compDir)) continue;
+
+            try
             {
                 foreach (var filePath in Directory.EnumerateFiles(compDir, "*.json"))
                 {
                     try
                     {
+                        string fileName = Path.GetFileName(filePath).ToLowerInvariant();
+                        if (fileName.Contains("readme") || fileName.Contains("manifest")) continue;
+
                         string text = File.ReadAllText(filePath);
                         using var doc = JsonDocument.Parse(text);
                         var root = doc.RootElement;
-                        string id = root.TryGetProperty("id", out var pId) ? (pId.GetString() ?? "") : Path.GetFileNameWithoutExtension(filePath).Replace(".companion", "").ToLowerInvariant();
-                        if (string.IsNullOrWhiteSpace(id)) continue;
+
+                        string id = root.TryGetProperty("id", out var pId) ? (pId.GetString() ?? "") : "";
+                        if (string.IsNullOrWhiteSpace(id))
+                        {
+                            id = Path.GetFileNameWithoutExtension(filePath)
+                                .Replace(".companion", "", StringComparison.OrdinalIgnoreCase)
+                                .ToLowerInvariant();
+                        }
                         id = id.ToLowerInvariant();
+                        if (scannedIds.Contains(id)) continue;
 
                         string name = root.TryGetProperty("name", out var pName) ? (pName.GetString() ?? id) : id;
                         string desc = root.TryGetProperty("description", out var pDesc) ? (pDesc.GetString() ?? "") : "";
@@ -478,9 +536,6 @@ public class StorageService
                         string previewUrl = root.TryGetProperty("preview", out var pPrev) ? (pPrev.GetString() ?? "") : "";
                         int scale = root.TryGetProperty("scale", out var pScale) ? pScale.GetInt32() : 100;
                         int speed = root.TryGetProperty("speed", out var pSpd) ? pSpd.GetInt32() : 100;
-                        int walkFrames = root.TryGetProperty("walk_frames", out var pWf) ? pWf.GetInt32() : 4;
-                        int jumpFrames = root.TryGetProperty("jump_frames", out var pJf) ? pJf.GetInt32() : 4;
-                        int tailFrames = root.TryGetProperty("tail_frames", out var pTf) ? pTf.GetInt32() : 4;
 
                         CompanionSprites? sprites = null;
                         if (root.TryGetProperty("sprites", out var pSprites) && pSprites.ValueKind == JsonValueKind.Object)
@@ -488,46 +543,62 @@ public class StorageService
                             sprites = new CompanionSprites();
                             if (pSprites.TryGetProperty("walk", out var sWalk) && sWalk.ValueKind == JsonValueKind.Array)
                             {
-                                foreach (var el in sWalk.EnumerateArray()) sprites.Walk.Add(el.GetString() ?? "");
+                                foreach (var el in sWalk.EnumerateArray())
+                                {
+                                    string? s = el.GetString();
+                                    if (!string.IsNullOrEmpty(s)) sprites.Walk.Add(s);
+                                }
                             }
                             if (pSprites.TryGetProperty("tail", out var sTail) && sTail.ValueKind == JsonValueKind.Array)
                             {
-                                foreach (var el in sTail.EnumerateArray()) sprites.Tail.Add(el.GetString() ?? "");
+                                foreach (var el in sTail.EnumerateArray())
+                                {
+                                    string? s = el.GetString();
+                                    if (!string.IsNullOrEmpty(s)) sprites.Tail.Add(s);
+                                }
                             }
                             if (pSprites.TryGetProperty("jump", out var sJump) && sJump.ValueKind == JsonValueKind.Array)
                             {
-                                foreach (var el in sJump.EnumerateArray()) sprites.Jump.Add(el.GetString() ?? "");
-                            }
-                            if (sprites.Walk.Count > 0 && string.IsNullOrEmpty(previewUrl))
-                            {
-                                previewUrl = sprites.Walk[0];
+                                foreach (var el in sJump.EnumerateArray())
+                                {
+                                    string? s = el.GetString();
+                                    if (!string.IsNullOrEmpty(s)) sprites.Jump.Add(s);
+                                }
                             }
                         }
 
-                        if (!list.Any(x => x.Id == id))
+                        if (sprites != null && sprites.Walk.Count > 0)
                         {
-                            list.Add(new AddonCompanionInfo
-                            {
-                                Id = id,
-                                Name = name,
-                                Description = desc,
-                                Icon = icon,
-                                Author = author,
-                                PreviewUrl = previewUrl,
-                                WalkFrames = walkFrames,
-                                JumpFrames = jumpFrames,
-                                TailFrames = tailFrames,
-                                Scale = scale,
-                                Speed = speed,
-                                Sprites = sprites
-                            });
+                            if (sprites.Jump.Count == 0) sprites.Jump.AddRange(sprites.Walk);
+                            if (sprites.Tail.Count == 0) sprites.Tail.AddRange(sprites.Walk);
+                            if (string.IsNullOrEmpty(previewUrl)) previewUrl = sprites.Walk[0];
                         }
+
+                        // VALIDATION: Skip invalid stubs that don't have animation frames
+                        if (sprites == null || sprites.Walk.Count == 0) continue;
+
+                        scannedIds.Add(id);
+                        list.Add(new AddonCompanionInfo
+                        {
+                            Id = id,
+                            Name = name,
+                            Description = desc,
+                            Icon = icon,
+                            Author = author,
+                            PreviewUrl = previewUrl,
+                            WalkFrames = sprites.Walk.Count,
+                            JumpFrames = sprites.Jump.Count,
+                            TailFrames = sprites.Tail.Count,
+                            Scale = scale,
+                            Speed = speed,
+                            Sprites = sprites
+                        });
                     }
                     catch { }
                 }
             }
+            catch { }
         }
-        catch { }
 
         // 2. Scan legacy folder-based companions in Addon_sprites
         string? addonDir = ResolveAddonSpritesDirectory();

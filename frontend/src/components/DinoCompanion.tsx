@@ -57,6 +57,11 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   const [currentAction, setCurrentAction] = useState<DinoAction>('walk');
   const [frameIndex, setFrameIndex] = useState(0);
 
+  useEffect(() => {
+    setFrameIndex(0);
+    setCurrentAction('walk');
+  }, [variant]);
+
   // Dynamically resolve sprites: Addon companion if chosen and available, otherwise built-in Dino
   const activeCompanion = useMemo(() => {
     if (!variant || variant === 'ankylosaurus') return null;
