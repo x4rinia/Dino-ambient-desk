@@ -1,12 +1,26 @@
 import {
   AmbientDeckConfig,
   CalendarEvent,
+  DailyQuote,
+  MonitorInfo,
   OrientationMode,
   WindowLayerMode,
 } from './types';
 
+export interface InitialDataPayload {
+  config?: AmbientDeckConfig;
+  settings_open?: boolean;
+  monitors?: MonitorInfo[];
+  wallpapers?: string[];
+  windows_wallpaper_url?: string;
+  notes?: string;
+  events?: CalendarEvent[];
+  quotes?: DailyQuote[];
+}
+
 declare global {
   interface Window {
+    __INITIAL_DATA__?: InitialDataPayload;
     chrome?: {
       webview?: {
         postMessage: (message: unknown) => void;

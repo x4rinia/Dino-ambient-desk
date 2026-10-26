@@ -30,7 +30,7 @@ body,
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #080a10;
+  background: transparent;
   font-family: var(--font-sans);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;

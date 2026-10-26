@@ -64,7 +64,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         ShowInTaskbar = false;
-        DashboardWebView.DefaultBackgroundColor = Color.FromArgb(255, 8, 10, 16);
+        DashboardWebView.DefaultBackgroundColor = Color.Transparent;
 
         _monitors = Win32WindowHelper.GetConnectedMonitors();
         _config = _storage.LoadConfig(_monitors);
@@ -247,9 +247,37 @@ public partial class MainWindow : Window
 
             UpdateWallpapersVirtualHostMapping();
 
+            // Inject initial config and wallpaper before HTML loads so frontend renders synchronously without black flash
+            try
+            {
+                string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath) ?? "";
+                var initialPayload = new
+                {
+                    config = _config,
+                    settings_open = _settingsWindow != null && _settingsWindow.IsLoaded,
+                    monitors = _monitors,
+                    wallpapers = _storage.GetWallpaperUrls(_config.Modules.Slideshow.FolderPath),
+                    windows_wallpaper_url = winWp,
+                    notes = _storage.LoadNotes(),
+                    events = _storage.LoadAllEvents(),
+                    quotes = _storage.LoadQuotes()
+                };
+                string initJson = JsonSerializer.Serialize(initialPayload, JsonOptions);
+                await core.AddScriptToExecuteOnDocumentCreatedAsync($"window.__INITIAL_DATA__ = {initJson};");
+            }
+            catch
+            {
+            }
+
             core.WebMessageReceived += (_, args) => HandleWebMessage(args.TryGetWebMessageAsString());
             core.Navigate("https://ambientdeck.local/index.html?view=dashboard");
             _webViewReady = true;
+
+            // Fallback timer: ensure dashboard is revealed within 1200ms
+            _ = Task.Delay(1200).ContinueWith(_ =>
+            {
+                Dispatcher.Invoke(() => { Opacity = 1; });
+            });
 
             // Trim memory footprint shortly after navigation
             _ = Task.Delay(3500).ContinueWith(_ =>
@@ -344,6 +372,12 @@ public partial class MainWindow : Window
                         vitals
                     };
                     SendToFrontend("init_state", fastPayload);
+
+                    // Seamless reveal: dashboard is rendered and ready with user settings
+                    Dispatcher.Invoke(() =>
+                    {
+                        Opacity = 1;
+                    });
 
                     _ = Task.Run(async () =>
                     {

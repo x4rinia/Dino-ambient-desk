@@ -9,9 +9,10 @@
         MinHeight="380"
         WindowStyle="None"
         ResizeMode="NoResize"
-        Background="#080A10"
+        Background="Transparent"
+        Opacity="0"
         ShowInTaskbar="False">
-    <Grid Background="#080A10">
+    <Grid Background="Transparent">
         <wv2:WebView2 x:Name="DashboardWebView" />
     </Grid>
 </Window>

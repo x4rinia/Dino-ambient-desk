@@ -126,24 +126,42 @@ export const App: React.FC = () => {
     []
   );
 
-  const [config, setConfig] = useState<AmbientDeckConfig>(DEFAULT_CONFIG);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [monitors, setMonitors] = useState<MonitorInfo[]>([
-    {
-      id: 1,
-      name: 'DISPLAY1',
-      label: 'Display 1: 1920x1080 @ (0, 0)',
-      x: 0,
-      y: 0,
-      width: 1920,
-      height: 1080,
-      is_primary: true,
-    },
-  ]);
-  const [wallpapers, setWallpapers] = useState<string[]>([]);
-  const [windowsWallpaperUrl, setWindowsWallpaperUrl] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const initialData = typeof window !== 'undefined' ? window.__INITIAL_DATA__ : undefined;
+
+  const [config, setConfig] = useState<AmbientDeckConfig>(() => {
+    if (initialData?.config) return initialData.config;
+    try {
+      const saved = localStorage.getItem('ambientdeck_cached_config');
+      if (saved) return { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+    } catch {}
+    return DEFAULT_CONFIG;
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(() => initialData?.settings_open ?? false);
+  const [monitors, setMonitors] = useState<MonitorInfo[]>(() => {
+    if (initialData?.monitors && initialData.monitors.length > 0) return initialData.monitors;
+    return [
+      {
+        id: 1,
+        name: 'DISPLAY1',
+        label: 'Display 1: 1920x1080 @ (0, 0)',
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080,
+        is_primary: true,
+      },
+    ];
+  });
+  const [wallpapers, setWallpapers] = useState<string[]>(() => initialData?.wallpapers || []);
+  const [windowsWallpaperUrl, setWindowsWallpaperUrl] = useState<string>(() => {
+    if (initialData?.windows_wallpaper_url) return initialData.windows_wallpaper_url;
+    try {
+      return localStorage.getItem('ambientdeck_cached_wallpaper') || '';
+    } catch {}
+    return '';
+  });
+  const [notes, setNotes] = useState<string>(() => initialData?.notes || '');
+  const [events, setEvents] = useState<CalendarEvent[]>(() => initialData?.events || []);
   const [vitals, setVitals] = useState<SystemVitalsData>({
     cpu_percent: 12,
     ram_percent: 40,
@@ -156,6 +174,20 @@ export const App: React.FC = () => {
     w: window.innerWidth,
     h: window.innerHeight,
   }));
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ambientdeck_cached_config', JSON.stringify(config));
+    } catch {}
+  }, [config]);
+
+  useEffect(() => {
+    if (windowsWallpaperUrl) {
+      try {
+        localStorage.setItem('ambientdeck_cached_wallpaper', windowsWallpaperUrl);
+      } catch {}
+    }
+  }, [windowsWallpaperUrl]);
 
   useEffect(() => {
     const onResize = () => {
