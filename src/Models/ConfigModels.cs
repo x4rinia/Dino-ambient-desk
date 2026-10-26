@@ -280,11 +280,23 @@ public class DinoCompanionModuleConfig
     [JsonPropertyName("speed")]
     public int Speed { get; set; } = 100;
 
+    [JsonPropertyName("scale")]
+    public int Scale { get; set; } = 100;
+
     [JsonPropertyName("opacity")]
     public int Opacity { get; set; } = 100;
 
     [JsonPropertyName("track_width")]
     public int TrackWidth { get; set; } = 480;
+
+    [JsonPropertyName("anim_walk")]
+    public bool AnimWalk { get; set; } = true;
+
+    [JsonPropertyName("anim_tail")]
+    public bool AnimTail { get; set; } = true;
+
+    [JsonPropertyName("anim_jump")]
+    public bool AnimJump { get; set; } = true;
 }
 
 public class ToggleableModuleConfig

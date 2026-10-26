@@ -626,12 +626,16 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* L. Dino Companion (Transparent Ankylosaurus with Walking, Jumping, Looking & Tail Wagging) */}
+      {/* L. Dino Companion (Transparent Ankylosaurus with Walking, Jumping & Tail Wagging) */}
       {config.modules.dino_companion.enabled && (
         <DinoCompanion
           speed={config.modules.dino_companion?.speed ?? 100}
+          scale={config.modules.dino_companion?.scale ?? 100}
           opacity={config.modules.dino_companion?.opacity ?? 100}
           trackWidth={config.modules.dino_companion?.track_width ?? 480}
+          allowWalk={config.modules.dino_companion?.anim_walk ?? true}
+          allowTail={config.modules.dino_companion?.anim_tail ?? true}
+          allowJump={config.modules.dino_companion?.anim_jump ?? true}
           isEditable={isSettingsOpen}
           anchorOffset={getOffset('dino_companion')}
           onAnchorChange={(next) => handleWidgetOffsetChange('dino_companion', next)}

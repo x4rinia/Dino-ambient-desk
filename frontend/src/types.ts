@@ -112,8 +112,12 @@ export interface DinoCompanionModuleConfig {
   auto_cycle?: boolean;
   cycle_variants?: DinoVariant[];
   speed?: number; // 50 to 160 percent (default: 100)
+  scale?: number; // 50 to 160 percent (default: 100)
   opacity?: number; // 20 to 100 percent (default: 100)
   track_width?: number; // 280 to 900 px (default: 480)
+  anim_walk?: boolean; // default: true
+  anim_tail?: boolean; // default: true
+  anim_jump?: boolean; // default: true
 }
 
 export interface ToggleableModuleConfig {

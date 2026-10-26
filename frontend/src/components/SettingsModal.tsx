@@ -1475,7 +1475,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }}
             >
               <img
-                src="/dino/look_2.png"
+                src="/dino/walk_0.png"
                 alt="Ankylosaurus Dino"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
@@ -1491,22 +1491,152 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.4' }}>
                 Läuft sanft um seinen Ankerpunkt hin und her, <strong>wedelt fröhlich mit der Keule</strong> und <strong>springt ab und zu vor Freude hoch</strong>!
               </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 3 }}>
-                <span style={{ fontSize: '0.65rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                  🐾 Laufen & Schlendern
-                </span>
-                <span style={{ fontSize: '0.65rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                  ✨ Keulen-Wedeln & Glitzern
-                </span>
-                <span style={{ fontSize: '0.65rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                  🦘 Freudensprung
-                </span>
+
+              {/* Animationen einzeln aktivieren / deaktivieren */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+                <div style={{ fontSize: '0.71rem', fontWeight: 600, color: '#94a3b8' }}>
+                  Aktivierte Animationen:
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {/* Checkbox: Walk */}
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: '0.73rem',
+                      cursor: 'pointer',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: (config.modules.dino_companion?.anim_walk ?? true)
+                        ? 'rgba(56, 189, 248, 0.15)'
+                        : 'rgba(255, 255, 255, 0.04)',
+                      border: `1px solid ${(config.modules.dino_companion?.anim_walk ?? true) ? '#38bdf8' : 'rgba(255, 255, 255, 0.12)'}`,
+                      color: (config.modules.dino_companion?.anim_walk ?? true) ? '#38bdf8' : '#94a3b8',
+                      userSelect: 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                    title="Wenn deaktiviert, bleibt der Dino gemütlich auf der Stelle stehen."
+                  >
+                    <input
+                      type="checkbox"
+                      checked={config.modules.dino_companion?.anim_walk ?? true}
+                      onChange={(e) =>
+                        onUpdateConfig({
+                          ...config,
+                          modules: {
+                            ...config.modules,
+                            dino_companion: {
+                              ...config.modules.dino_companion,
+                              anim_walk: e.target.checked,
+                            },
+                          },
+                        })
+                      }
+                      style={{ accentColor: '#38bdf8', cursor: 'pointer' }}
+                    />
+                    <span>🐾 Laufen & Schlendern</span>
+                  </label>
+
+                  {/* Checkbox: Tail */}
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: '0.73rem',
+                      cursor: 'pointer',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: (config.modules.dino_companion?.anim_tail ?? true)
+                        ? 'rgba(251, 191, 36, 0.15)'
+                        : 'rgba(255, 255, 255, 0.04)',
+                      border: `1px solid ${(config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : 'rgba(255, 255, 255, 0.12)'}`,
+                      color: (config.modules.dino_companion?.anim_tail ?? true) ? '#fbbf24' : '#94a3b8',
+                      userSelect: 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                    title="Wedelt zwischendurch fröhlich mit seiner Keule."
+                  >
+                    <input
+                      type="checkbox"
+                      checked={config.modules.dino_companion?.anim_tail ?? true}
+                      onChange={(e) =>
+                        onUpdateConfig({
+                          ...config,
+                          modules: {
+                            ...config.modules,
+                            dino_companion: {
+                              ...config.modules.dino_companion,
+                              anim_tail: e.target.checked,
+                            },
+                          },
+                        })
+                      }
+                      style={{ accentColor: '#fbbf24', cursor: 'pointer' }}
+                    />
+                    <span>✨ Keulen-Wedeln</span>
+                  </label>
+
+                  {/* Checkbox: Jump */}
+                  <label
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: '0.73rem',
+                      cursor: 'pointer',
+                      padding: '4px 10px',
+                      borderRadius: '6px',
+                      background: (config.modules.dino_companion?.anim_jump ?? true)
+                        ? 'rgba(52, 211, 153, 0.15)'
+                        : 'rgba(255, 255, 255, 0.04)',
+                      border: `1px solid ${(config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : 'rgba(255, 255, 255, 0.12)'}`,
+                      color: (config.modules.dino_companion?.anim_jump ?? true) ? '#34d399' : '#94a3b8',
+                      userSelect: 'none',
+                      transition: 'all 0.15s ease',
+                    }}
+                    title="Macht ab und zu einen fröhlichen Freudensprung."
+                  >
+                    <input
+                      type="checkbox"
+                      checked={config.modules.dino_companion?.anim_jump ?? true}
+                      onChange={(e) =>
+                        onUpdateConfig({
+                          ...config,
+                          modules: {
+                            ...config.modules,
+                            dino_companion: {
+                              ...config.modules.dino_companion,
+                              anim_jump: e.target.checked,
+                            },
+                          },
+                        })
+                      }
+                      style={{ accentColor: '#34d399', cursor: 'pointer' }}
+                    />
+                    <span>🦘 Freudensprung</span>
+                  </label>
+                </div>
+
+                {!(config.modules.dino_companion?.anim_walk ?? true) && (
+                  <div style={{ fontSize: '0.69rem', color: '#38bdf8', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    ℹ️ Laufen ist pausiert: Dino bleibt auf der Stelle stehen.
+                  </div>
+                )}
+                {!(config.modules.dino_companion?.anim_walk ?? true) &&
+                 !(config.modules.dino_companion?.anim_tail ?? true) &&
+                 !(config.modules.dino_companion?.anim_jump ?? true) && (
+                  <div style={{ fontSize: '0.69rem', color: '#a78bfa', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    💤 Ruhemodus: Alle Animationen pausiert — Dino steht entspannt auf der Stelle.
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Dino Speed, Opacity & Track Width Controls */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14, marginTop: 12 }}>
+          {/* Dino Speed, Scale, Opacity & Track Width Controls */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14, marginTop: 14 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
                 <span>🏃 Schnelligkeit / Tempo:</span>
@@ -1536,6 +1666,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <span>Gemütlich (50%)</span>
                 <span>Normal (100%)</span>
                 <span>Flink (160%)</span>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
+                <span>🦕 Dino-Größe / Skalierung:</span>
+                <strong style={{ color: '#a78bfa' }}>{config.modules.dino_companion?.scale ?? 100}%</strong>
+              </div>
+              <input
+                type="range"
+                min="50"
+                max="160"
+                step="5"
+                value={config.modules.dino_companion?.scale ?? 100}
+                onChange={(e) =>
+                  onUpdateConfig({
+                    ...config,
+                    modules: {
+                      ...config.modules,
+                      dino_companion: {
+                        ...config.modules.dino_companion,
+                        scale: parseInt(e.target.value, 10),
+                      },
+                    },
+                  })
+                }
+                style={{ width: '100%', accentColor: '#a78bfa' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
+                <span>Kompakt (60%)</span>
+                <span>Standard (100%)</span>
+                <span>Groß (140%)</span>
               </div>
             </div>
 

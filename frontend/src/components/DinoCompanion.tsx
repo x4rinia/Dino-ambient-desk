@@ -27,8 +27,12 @@ type DinoAction = 'walk' | 'jump' | 'tail';
 
 interface DinoCompanionProps {
   speed?: number;
+  scale?: number;
   opacity?: number;
   trackWidth?: number;
+  allowWalk?: boolean;
+  allowTail?: boolean;
+  allowJump?: boolean;
   isEditable?: boolean;
   anchorOffset?: WidgetOffset;
   onAnchorChange?: (next: WidgetOffset) => void;
@@ -36,8 +40,12 @@ interface DinoCompanionProps {
 
 export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   speed = 100,
+  scale = 100,
   opacity = 100,
   trackWidth = 480,
+  allowWalk = true,
+  allowTail = true,
+  allowJump = true,
   isEditable = false,
   anchorOffset = { x: 0, y: 0 },
   onAnchorChange,
@@ -47,11 +55,11 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
 
   // Smooth walking path state: walkX ranges from -halfTrack to +halfTrack
   const halfTrack = Math.max(120, Math.round(trackWidth / 2));
-  const [walkX, setWalkX] = useState<number>(-halfTrack + 40);
+  const [walkX, setWalkX] = useState<number>(allowWalk ? -halfTrack + 40 : 0);
   const [direction, setDirection] = useState<1 | -1>(1); // 1 = walking right, -1 = walking left
 
   // Position and direction refs so the animation loop never cancels itself
-  const walkXRef = useRef<number>(-halfTrack + 40);
+  const walkXRef = useRef<number>(allowWalk ? -halfTrack + 40 : 0);
   const dirRef = useRef<1 | -1>(1);
 
   // Dragging state for the Dino Anchor Point
@@ -171,22 +179,41 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
     const scheduleNextAction = () => {
       if (isCancelled) return;
 
-      // Check boundaries using refs
-      if (walkXRef.current >= currentHalfTrack - boundaryMargin) {
-        dirRef.current = -1;
-        setDirection(-1);
-      } else if (walkXRef.current <= -currentHalfTrack + boundaryMargin) {
-        dirRef.current = 1;
-        setDirection(1);
+      // If walk is disabled, ensure Dino stays stationary at center (walkX = 0)
+      if (!allowWalk) {
+        walkXRef.current = 0;
+        setWalkX(0);
+      } else {
+        // Check boundaries using refs
+        if (walkXRef.current >= currentHalfTrack - boundaryMargin) {
+          dirRef.current = -1;
+          setDirection(-1);
+        } else if (walkXRef.current <= -currentHalfTrack + boundaryMargin) {
+          dirRef.current = 1;
+          setDirection(1);
+        }
       }
 
-      // Action choices:
-      // 60% walk stroll in current direction
-      // 20% tail wag (stays in place, wedelt mit Keule)
-      // 20% jump & cheer (freudensprung)
-      const rand = Math.random();
+      // Action choices dynamically filtered by enabled settings:
+      // walkWeight: 60, tailWeight: 25, jumpWeight: 20
+      const walkWeight = allowWalk ? 60 : 0;
+      const tailWeight = allowTail ? 25 : 0;
+      const jumpWeight = allowJump ? 20 : 0;
+      const totalWeight = walkWeight + tailWeight + jumpWeight;
 
-      if (rand < 0.60) {
+      // If all animations are deactivated: peacefully stay idle standing in place
+      if (totalWeight === 0) {
+        setCurrentAction('walk');
+        setFrameIndex(0);
+        walkXRef.current = 0;
+        setWalkX(0);
+        actionTimer = setTimeout(scheduleNextAction, 1200);
+        return;
+      }
+
+      const roll = Math.random() * totalWeight;
+
+      if (roll < walkWeight) {
         // WALK: Take 10-16 continuous steps across the track
         setCurrentAction('walk');
         const numSteps = Math.floor(Math.random() * 7 + 10);
@@ -226,7 +253,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             );
           }
         }, stepInterval);
-      } else if (rand < 0.80) {
+      } else if (roll < walkWeight + tailWeight) {
         // TAIL WAG: Wedelt fröhlich mit der Keule
         const sequence = [0, 1, 2, 3, 0, 1, 2, 3];
         const stepDelay = Math.max(50, Math.round(115 / speedMultiplier));
@@ -240,6 +267,8 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             setFrameIndex(sequence[i]);
             actionTimer = setTimeout(tick, stepDelay);
           } else {
+            setCurrentAction('walk');
+            setFrameIndex(0);
             actionTimer = setTimeout(
               scheduleNextAction,
               Math.max(400, Math.round(900 / speedMultiplier))
@@ -250,6 +279,8 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       } else {
         // JUMP & REJOICE: Springt fröhlich hoch und jubelt!
         playSequence('jump', [200, 220, 460, 220], () => {
+          setCurrentAction('walk');
+          setFrameIndex(0);
           actionTimer = setTimeout(
             scheduleNextAction,
             Math.max(400, Math.round(900 / speedMultiplier))
@@ -268,7 +299,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       isCancelled = true;
       if (actionTimer) clearTimeout(actionTimer);
     };
-  }, [speed, trackWidth]);
+  }, [speed, trackWidth, allowWalk, allowTail, allowJump]);
 
   // Current sprite image path
   const currentSpriteSrc =
@@ -403,7 +434,8 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           width: '160px',
           height: '142px',
           marginLeft: '-80px',
-          transform: `translate3d(${walkX}px, 0, 0) scaleX(${isFacingLeft ? -1 : 1})`,
+          transformOrigin: 'bottom center',
+          transform: `translate3d(${walkX}px, 0, 0) scale(${scale / 100}) scaleX(${isFacingLeft ? -1 : 1})`,
           transition:
             currentAction === 'walk'
               ? 'transform 0.12s linear'
