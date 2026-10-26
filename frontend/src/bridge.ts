@@ -189,7 +189,8 @@ export const Bridge = {
   syncGoogleCalendar: (icalUrl: string) =>
     sendToBackend('sync_google_calendar', { ical_url: icalUrl }),
   openCompanionsFolder: () => sendToBackend('open_companions_folder'),
-  openCompanionEditor: () => sendToBackend('open_companion_editor'),
+  openCompanionEditor: (companion?: Record<string, unknown>) =>
+    sendToBackend('open_companion_editor', companion ? { companion } : {}),
   importCompanionFile: () => sendToBackend('import_companion_file'),
   refreshCompanions: () => sendToBackend('refresh_companions'),
   openWindowsNotificationSettings: () =>

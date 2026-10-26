@@ -449,22 +449,59 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     });
   }, [addonCompanions]);
 
-  const handleOpenInEditor = (comp: AddonCompanionInfo, asCopy: boolean) => {
-    try {
-      const isLocked = comp.id.toLowerCase() === 'drache' || comp.id.toLowerCase() === 'ankylosaurus';
-      const targetId = asCopy || isLocked ? `${comp.id.toLowerCase()}_kopie` : comp.id.toLowerCase();
-      const targetName = asCopy || isLocked ? `${comp.name} (Kopie)` : comp.name;
+  const resolveFramesAsDataUrls = async (frames: string[]): Promise<string[]> => {
+    return Promise.all(
+      frames.map((src) => {
+        if (!src || src.startsWith('data:')) return Promise.resolve(src);
+        return new Promise<string>((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.naturalWidth || 96;
+              canvas.height = img.naturalHeight || 96;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+              } else {
+                resolve(src);
+              }
+            } catch {
+              resolve(src);
+            }
+          };
+          img.onerror = () => resolve(src);
+          img.src = src;
+        });
+      })
+    );
+  };
 
-      let walkFrames: string[] = [];
-      if (comp.sprites?.walk && comp.sprites.walk.length > 0) {
-        walkFrames = comp.sprites.walk;
-      } else if (comp.id.toLowerCase() === 'drache') {
-        walkFrames = ['/drache/walk_0.png', '/drache/walk_1.png', '/drache/walk_2.png', '/drache/walk_3.png'];
-      } else if (comp.id.toLowerCase() === 'ankylosaurus') {
-        walkFrames = ['/dino/walk_0.png', '/dino/walk_1.png', '/dino/walk_2.png', '/dino/walk_3.png'];
-      } else if (comp.preview_url) {
-        walkFrames = [comp.preview_url];
+  const handleOpenInEditor = async (comp: AddonCompanionInfo, asCopy: boolean) => {
+    try {
+      const idLower = comp.id.toLowerCase();
+      // Ankylosaurus is special: cannot be edited or copied!
+      if (idLower === 'ankylosaurus') {
+        alert('Der Original Dino (Ankylosaurus) ist exklusiv und kann weder bearbeitet noch kopiert werden.');
+        return;
       }
+
+      const isStandardLocked = idLower === 'drache' || idLower === 'biene';
+      const targetId = asCopy || isStandardLocked ? `${idLower}_kopie` : idLower;
+      const targetName = asCopy || isStandardLocked ? `${comp.name} (Kopie)` : comp.name;
+
+      let rawFrames: string[] = [];
+      if (comp.sprites?.walk && comp.sprites.walk.length > 0) {
+        rawFrames = comp.sprites.walk;
+      } else if (idLower === 'drache') {
+        rawFrames = ['/drache/walk_0.png', '/drache/walk_1.png', '/drache/walk_2.png', '/drache/walk_3.png'];
+      } else if (comp.preview_url) {
+        rawFrames = [comp.preview_url];
+      }
+
+      const walkFrames = await resolveFramesAsDataUrls(rawFrames);
 
       const pkg = {
         id: targetId,
@@ -472,11 +509,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         title: `${comp.icon || '✨'} ${targetName}`,
         icon: comp.icon || '✨',
         description: comp.description || '',
-        author: asCopy || isLocked ? 'Mein Begleiter' : (comp.author || 'Dino Desk Team'),
+        author: asCopy || isStandardLocked ? 'Mein Begleiter' : (comp.author || 'Dino Desk Team'),
         version: '1.0.0',
-        scale: comp.scale || 100,
+        scale: comp.scale || (idLower === 'biene' ? 72 : 100),
         speed: comp.speed || 100,
-        is_flying: comp.is_flying || comp.id.toLowerCase() === 'biene',
+        is_flying: comp.is_flying || idLower === 'biene',
         sprites: {
           walk: walkFrames,
           jump: walkFrames,
@@ -484,8 +521,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         },
       };
 
-      localStorage.setItem('companion_studio_import', JSON.stringify(pkg));
-      Bridge.openCompanionEditor();
+      try {
+        localStorage.setItem('companion_studio_import', JSON.stringify(pkg));
+      } catch { }
+
+      Bridge.openCompanionEditor(pkg);
     } catch (err) {
       console.error('Failed to prepare companion for editor', err);
       Bridge.openCompanionEditor();
@@ -2172,7 +2212,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {allAvailableCompanions.map((comp) => {
                 const isSelected =
                   (config.modules.dino_companion?.variant || 'drache').toLowerCase() === comp.id.toLowerCase();
-                const isLocked = comp.id.toLowerCase() === 'drache' || comp.id.toLowerCase() === 'ankylosaurus';
+                const idLower = comp.id.toLowerCase();
+                const isExclusive = idLower === 'ankylosaurus';
+                const isStandardLocked = idLower === 'drache' || idLower === 'biene';
                 return (
                   <div
                     key={comp.id}
@@ -2236,7 +2278,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
                         <div style={{ fontSize: '0.66rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
                           <span>{comp.author || 'Begleiter'}</span>
-                          {isLocked ? (
+                          {isExclusive ? (
+                            <span style={{ fontSize: '0.60rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              ⭐ Spezial-Dino (Exklusiv)
+                            </span>
+                          ) : isStandardLocked ? (
                             <span style={{ fontSize: '0.60rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                               <Lock size={9} /> Standard
                             </span>
@@ -2305,7 +2351,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                     {/* Action Row: Bearbeiten & Kopieren */}
                     <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
-                      {isLocked ? (
+                      {isExclusive ? (
+                        <div
+                          style={{
+                            flex: 1,
+                            padding: '6px 8px',
+                            borderRadius: '6px',
+                            background: 'rgba(56, 189, 248, 0.08)',
+                            border: '1px dashed rgba(56, 189, 248, 0.35)',
+                            color: '#7dd3fc',
+                            fontSize: '0.67rem',
+                            textAlign: 'center',
+                            fontWeight: 600,
+                            userSelect: 'none',
+                          }}
+                          title="Der Ankylosaurus ist der exklusive Standard-Dino und kann weder bearbeitet noch kopiert werden."
+                        >
+                          ⭐ Exklusiv (kann nicht bearbeitet oder kopiert werden)
+                        </div>
+                      ) : isStandardLocked ? (
                         <button
                           type="button"
                           onClick={(e) => {
@@ -2316,21 +2380,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             flex: 1,
                             padding: '5px 8px',
                             borderRadius: '6px',
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            border: '1px solid rgba(255, 255, 255, 0.12)',
-                            color: '#cbd5e1',
+                            background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.22))',
+                            border: '1px solid rgba(251, 191, 36, 0.45)',
+                            color: '#fef08a',
                             fontSize: '0.70rem',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             gap: 5,
-                            fontWeight: 600,
+                            fontWeight: 700,
+                            transition: 'all 0.15s ease',
                           }}
-                          title="Original-Begleiter ist geschützt. Erstellt eine Kopie und öffnet sie direkt im Begleiter-Editor!"
+                          title="Standard-Begleiter ist geschützt. Erstellt eine Kopie und lädt sie direkt in den Editor!"
                         >
                           <Copy size={11} color="#fbbf24" />
-                          <span>Kopieren & Bearbeiten</span>
+                          <span>Kopieren & im Editor bearbeiten</span>
                         </button>
                       ) : (
                         <>

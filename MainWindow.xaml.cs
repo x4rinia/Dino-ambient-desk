@@ -723,6 +723,32 @@ public partial class MainWindow : Window
                         string? editorPath = _storage.ResolveCompanionEditorPath();
                         if (!string.IsNullOrEmpty(editorPath) && File.Exists(editorPath))
                         {
+                            string editorDir = Path.GetDirectoryName(editorPath)!;
+                            string jsContent = "window.__COMPANION_IMPORT_DATA__ = null;\n";
+
+                            if (root.TryGetProperty("companion", out var pComp) && pComp.ValueKind == JsonValueKind.Object)
+                            {
+                                string compJson = pComp.GetRawText();
+                                jsContent = $"window.__COMPANION_IMPORT_DATA__ = {compJson};\n";
+                            }
+
+                            // Write active_edit.js to both the runtime editor dir and AppData editor dir
+                            try
+                            {
+                                File.WriteAllText(Path.Combine(editorDir, "active_edit.js"), jsContent);
+                            }
+                            catch { }
+
+                            try
+                            {
+                                string appDataEditorDir = Path.Combine(_storage.AppDataFolder, "companion-editor");
+                                if (Directory.Exists(appDataEditorDir))
+                                {
+                                    File.WriteAllText(Path.Combine(appDataEditorDir, "active_edit.js"), jsContent);
+                                }
+                            }
+                            catch { }
+
                             string abs = Path.GetFullPath(editorPath);
                             try
                             {

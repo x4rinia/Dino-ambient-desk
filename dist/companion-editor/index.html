@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dino Companion Studio — Begleiter & Sprite Editor</title>
+  <script src="active_edit.js"></script>
   <style>
     :root {
       --bg-dark: #0b0f19;
@@ -923,6 +924,13 @@
               </div>
             </div>
           </div>
+
+          <div style="margin-top: 10px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:0.78rem; font-weight:600; cursor:pointer; color:var(--text);">
+              <input type="checkbox" id="compIsFlying" style="accent-color:var(--primary); width:15px; height:15px;" />
+              <span>🐝 Fliegender Begleiter (schwebt in der Luft statt zu laufen)</span>
+            </label>
+          </div>
         </div>
 
         <!-- Quick Export Action -->
@@ -972,16 +980,24 @@
       initJsonInput();
       startAnimationLoop();
 
-      // Check if an existing companion was sent from the app for editing or copying
-      const autoImport = localStorage.getItem('companion_studio_import');
-      if (autoImport) {
+      // Check if import data was injected via active_edit.js or localStorage
+      const autoData = window.__COMPANION_IMPORT_DATA__ || (function() {
         try {
-          const parsed = JSON.parse(autoImport);
-          localStorage.removeItem('companion_studio_import');
-          loadCompanionData(parsed);
+          const raw = localStorage.getItem('companion_studio_import');
+          if (raw) {
+            localStorage.removeItem('companion_studio_import');
+            return JSON.parse(raw);
+          }
+        } catch (e) { }
+        return null;
+      })();
+
+      if (autoData) {
+        try {
+          loadCompanionData(autoData);
           return;
         } catch (e) {
-          console.error('Failed to parse companion_studio_import', e);
+          console.error('Failed to load auto companion data', e);
         }
       }
 
@@ -1663,8 +1679,14 @@
 
       let id = document.getElementById('compId').value.trim() || 'mein_begleiter';
       const rawId = id.toLowerCase();
-      if (rawId === 'drache' || rawId === 'ankylosaurus') {
-        alert('Der Standard-Begleiter "' + id + '" ist geschützt und kann nicht direkt überschrieben werden! Bitte wähle eine andere ID (z. B. ' + rawId + '_kopie).');
+      if (rawId === 'ankylosaurus') {
+        alert('Der Standard-Dino "ankylosaurus" ist exklusiv und kann weder überschrieben noch kopiert werden!');
+        document.getElementById('compId').value = 'mein_begleiter';
+        onMetaChange();
+        return;
+      }
+      if (rawId === 'drache' || rawId === 'biene') {
+        alert('Der Standard-Begleiter "' + id + '" ist geschützt und kann nicht überschrieben werden! Bitte wähle eine andere ID (z. B. ' + rawId + '_kopie).');
         document.getElementById('compId').value = rawId + '_kopie';
         onMetaChange();
         return;
@@ -1675,6 +1697,7 @@
       const author = document.getElementById('compAuthor').value.trim() || 'Community Addon';
       const scale = parseInt(document.getElementById('compScale').value, 10) || 100;
       const speed = parseInt(document.getElementById('compSpeed').value, 10) || 100;
+      const isFlying = document.getElementById('compIsFlying').checked;
 
       const walkSprites = frames.map(f => f.canvas.toDataURL('image/png'));
       const previewUrl = walkSprites[0];
@@ -1689,6 +1712,7 @@
         version: "1.0.0",
         scale: scale,
         speed: speed,
+        is_flying: isFlying,
         preview: previewUrl,
         walk_frames: walkSprites.length,
         jump_frames: 0,
@@ -1741,19 +1765,28 @@
         return;
       }
 
-      let id = data.id || 'begleiter';
+      let id = (data.id || 'begleiter').toLowerCase();
       let name = data.name || 'Begleiter';
-      const isLocked = (id.toLowerCase() === 'drache' || id.toLowerCase() === 'ankylosaurus');
-      if (isLocked) {
-        id = id.toLowerCase() + '_kopie';
-        name = name + ' (Kopie)';
+
+      // Protection: Ankylosaurus cannot be edited or copied
+      if (id === 'ankylosaurus') {
+        alert('Der Original Dino (Ankylosaurus) ist exklusiv geschützt und kann weder bearbeitet noch kopiert werden.');
+        createDefaultFrames();
+        return;
+      }
+
+      // Protection: Drache & Biene cannot be overwritten; editing creates a copy
+      const isLockedStandard = (id === 'drache' || id === 'biene');
+      if (isLockedStandard || data.as_copy) {
+        if (!id.endsWith('_kopie')) id = id + '_kopie';
+        if (!name.includes('(Kopie)')) name = name + ' (Kopie)';
       }
 
       document.getElementById('compId').value = id;
       document.getElementById('compName').value = name;
       document.getElementById('compIcon').value = data.icon || '✨';
       document.getElementById('compDesc').value = data.description || '';
-      document.getElementById('compAuthor').value = isLocked ? 'Mein Begleiter' : (data.author || 'Dino Desk Team');
+      document.getElementById('compAuthor').value = isLockedStandard ? 'Mein Begleiter' : (data.author || 'Dino Desk Team');
       if (data.scale) {
         document.getElementById('compScale').value = data.scale;
         document.getElementById('compScaleVal').textContent = data.scale + '%';
@@ -1762,10 +1795,11 @@
         document.getElementById('compSpeed').value = data.speed;
         document.getElementById('compSpeedVal').textContent = data.speed + '%';
       }
+      document.getElementById('compIsFlying').checked = Boolean(data.is_flying);
       onMetaChange();
 
-      frames = [];
       const walkList = data.sprites.walk.slice(0, 8);
+      frames = new Array(walkList.length);
       let loaded = 0;
 
       walkList.forEach((src, idx) => {
@@ -1778,7 +1812,36 @@
           ctx.imageSmoothingEnabled = false;
           ctx.drawImage(img, 0, 0, targetResolution, targetResolution);
 
-          frames.push({
+          frames[idx] = {
+            id: 'frame_' + idx,
+            name: 'Frame ' + (idx + 1),
+            canvas: c,
+            ctx: ctx
+          };
+
+          loaded++;
+          if (loaded === walkList.length) {
+            frames = frames.filter(Boolean);
+            activeFrameIndex = 0;
+            updateFramesList();
+            drawActiveFrame();
+            showToast(`Begleiter "${name}" erfolgreich mit ${frames.length} Frames geladen!`);
+          }
+        };
+        img.onerror = () => {
+          console.error('Failed to load frame', idx, src);
+          loaded++;
+          if (loaded === walkList.length) {
+            frames = frames.filter(Boolean);
+            if (frames.length > 0) {
+              activeFrameIndex = 0;
+              updateFramesList();
+              drawActiveFrame();
+            }
+          }
+        };
+        img.src = src;
+      });
             id: 'frame_' + idx,
             name: 'Frame ' + (idx + 1),
             canvas: c,
