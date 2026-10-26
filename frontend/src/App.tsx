@@ -534,7 +534,7 @@ export const App: React.FC = () => {
                   userSelect: 'none',
                 }}
               >
-                by x4rinia
+                by X4rinia
               </span>
             </section>
           </DraggableWidgetBox>
