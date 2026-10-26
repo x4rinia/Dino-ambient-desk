@@ -90,6 +90,12 @@ public class ThemeConfig
 
     [JsonPropertyName("text_color")]
     public string TextColor { get; set; } = "#f3f5f9";
+
+    [JsonPropertyName("use_custom_secondary_color")]
+    public bool UseCustomSecondaryColor { get; set; } = false;
+
+    [JsonPropertyName("secondary_text_color")]
+    public string SecondaryTextColor { get; set; } = "#1e293b";
 }
 
 public class ModulesConfig
@@ -279,6 +285,9 @@ public class DinoCompanionModuleConfig
 
     [JsonPropertyName("speed")]
     public int Speed { get; set; } = 100;
+
+    [JsonPropertyName("is_flying")]
+    public bool IsFlying { get; set; } = false;
 
     [JsonPropertyName("scale")]
     public int Scale { get; set; } = 100;
@@ -519,4 +528,7 @@ public class AddonCompanionInfo
 
     [JsonPropertyName("speed")]
     public int Speed { get; set; } = 100;
+
+    [JsonPropertyName("is_flying")]
+    public bool IsFlying { get; set; } = false;
 }

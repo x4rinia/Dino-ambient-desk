@@ -371,6 +371,9 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
 
   // Dino faces left when walking left (-1), faces right when walking right (1)
   const isFacingLeft = direction === -1;
+  const isFlying = currentVariant === 'biene' || Boolean(activeCompanion?.is_flying);
+  const companionScaleMultiplier = currentVariant === 'biene' ? 0.72 : (activeCompanion?.scale ? activeCompanion.scale / 100 : 1.0);
+  const effectiveScale = (scale / 100) * companionScaleMultiplier;
 
   return (
     <div
@@ -491,13 +494,13 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       <div
         style={{
           position: 'absolute',
-          bottom: '0',
+          bottom: isFlying ? '32px' : '0',
           left: '50%',
           width: '160px',
           height: '142px',
           marginLeft: '-80px',
           transformOrigin: 'bottom center',
-          transform: `translate3d(${walkX}px, 0, 0) scale(${scale / 100}) scaleX(${isFacingLeft ? -1 : 1})`,
+          transform: `translate3d(${walkX}px, 0, 0) scale(${effectiveScale}) scaleX(${isFacingLeft ? -1 : 1})`,
           transition:
             currentAction === 'walk'
               ? 'transform 0.12s linear'
@@ -522,6 +525,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             height: '100%',
             objectFit: 'contain',
             imageRendering: 'auto',
+            animation: isFlying ? 'dinoBeeHover 1.6s ease-in-out infinite' : 'none',
           }}
         />
       </div>

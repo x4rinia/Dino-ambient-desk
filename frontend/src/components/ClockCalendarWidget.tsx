@@ -177,11 +177,12 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
               display: 'flex',
               alignItems: 'center',
               gap: 5,
-              fontSize: '0.64rem',
-              fontWeight: 600,
+              fontSize: '0.66rem',
+              fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              color: 'var(--text-secondary)',
+              color: 'var(--accent-emerald)',
+              textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
             }}
           >
             <Clock size={11} color="var(--accent-emerald)" />
@@ -209,6 +210,7 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
+                      textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
                     }}
                   >
                     {ev.title}
@@ -224,13 +226,13 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
                     <span style={{ color: 'var(--accent-amber)', fontWeight: 600 }}>
                       {ev.countdownText}
                     </span>
-                    <span style={{ color: 'var(--text-muted)' }}>• {ev.timeLabel}</span>
+                    <span style={{ color: 'var(--text-muted)', fontWeight: 600, textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)' }}>• {ev.timeLabel}</span>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)', textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)' }}>
               Keine aktiven Termine
             </div>
           )}
@@ -241,7 +243,7 @@ export const ClockCalendarWidget: React.FC<ClockCalendarWidgetProps> = ({
       <div className="calendar-matrix-wrap compact">
         <div className="calendar-month-header">
           <span>{monthLabel.toUpperCase()}</span>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.62rem', fontWeight: 600 }}>
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.64rem', fontWeight: 700, textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)' }}>
             KW {getISOWeekNumber(now)}
           </span>
         </div>

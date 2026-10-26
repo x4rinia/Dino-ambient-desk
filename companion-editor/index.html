@@ -6,17 +6,19 @@
   <title>Dino Companion Studio — Begleiter & Sprite Editor</title>
   <style>
     :root {
-      --bg-dark: #0a0d14;
-      --bg-card: #121824;
-      --bg-card-hover: #1a2234;
-      --border: rgba(255, 255, 255, 0.08);
+      --bg-dark: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-card-hover: #1c263f;
+      --bg-surface: #18223a;
+      --border: rgba(255, 255, 255, 0.12);
       --border-focus: #38bdf8;
       --primary: #38bdf8;
       --primary-hover: #0284c7;
       --accent: #10b981;
       --accent-hover: #059669;
       --danger: #ef4444;
-      --text: #f1f5f9;
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
       --text-muted: #94a3b8;
       --checker-1: #1e293b;
       --checker-2: #0f172a;
@@ -26,26 +28,27 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
       user-select: none;
     }
 
     body {
       background-color: var(--bg-dark);
-      color: var(--text);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
+      font-size: 13px;
     }
 
     /* Top Navigation Bar */
     header {
-      background: rgba(18, 24, 36, 0.85);
-      backdrop-filter: blur(12px);
+      background: #111827;
       border-bottom: 1px solid var(--border);
-      height: 54px;
-      padding: 0 18px;
+      height: 58px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -56,86 +59,92 @@
     .logo-area {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .logo-icon {
-      font-size: 1.4rem;
+    .logo-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
     }
 
     .logo-title {
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #fff;
-    }
-
-    .logo-badge {
-      font-size: 0.65rem;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.15);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .header-actions {
+      letter-spacing: -0.01em;
+      color: #ffffff;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
+    .logo-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     button {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.07);
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 7px;
-      font-size: 0.78rem;
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
+      white-space: nowrap;
       transition: all 0.15s ease;
     }
 
     button:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
     button.primary {
       background: linear-gradient(135deg, #10b981, #059669);
-      border: none;
-      color: #fff;
-      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.35);
     }
 
     button.primary:hover {
       background: linear-gradient(135deg, #059669, #047857);
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45);
-    }
-
-    button.blue {
-      background: linear-gradient(135deg, #38bdf8, #0284c7);
-      border: none;
-      color: #fff;
+      box-shadow: 0 5px 16px rgba(16, 185, 129, 0.5);
     }
 
     button.danger:hover {
-      background: rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.25);
       border-color: var(--danger);
-      color: var(--danger);
+      color: #fca5a5;
     }
 
     /* Main Workspace Layout */
     main {
       display: grid;
-      grid-template-columns: 260px 1fr 310px;
+      grid-template-columns: 280px 1fr 340px;
       flex: 1;
-      height: calc(100vh - 54px);
+      height: calc(100vh - 58px);
       overflow: hidden;
     }
 
@@ -154,102 +163,103 @@
     }
 
     .panel-header {
-      padding: 12px 14px;
+      padding: 14px 16px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.03);
     }
 
     .panel-title {
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .panel-body {
-      padding: 12px;
+      padding: 16px;
       overflow-y: auto;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    /* Left Sidebar: Frames List */
+    /* Left Sidebar: Frames */
     .drop-zone {
-      border: 2px dashed rgba(56, 189, 248, 0.35);
-      border-radius: 10px;
-      padding: 16px 12px;
+      border: 2px dashed rgba(56, 189, 248, 0.45);
+      border-radius: 12px;
+      padding: 18px 14px;
       text-align: center;
       cursor: pointer;
-      background: rgba(56, 189, 248, 0.03);
+      background: rgba(56, 189, 248, 0.05);
       transition: all 0.2s ease;
     }
 
     .drop-zone:hover, .drop-zone.dragover {
-      background: rgba(56, 189, 248, 0.1);
+      background: rgba(56, 189, 248, 0.15);
       border-color: var(--primary);
     }
 
     .drop-zone-icon {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
       margin-bottom: 4px;
     }
 
     .drop-zone-text {
-      font-size: 0.76rem;
-      font-weight: 600;
-      color: #e2e8f0;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
     }
 
     .drop-zone-hint {
-      font-size: 0.65rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .frames-list {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .frame-card {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px;
+      border-radius: 10px;
+      padding: 10px 12px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       cursor: pointer;
       transition: all 0.15s ease;
       position: relative;
     }
 
     .frame-card:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
     }
 
     .frame-card.active {
-      background: rgba(56, 189, 248, 0.14);
-      border-color: var(--primary);
+      background: rgba(56, 189, 248, 0.18);
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
     }
 
     .frame-thumb-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 6px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 54px;
+      height: 54px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -258,8 +268,8 @@
                         linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
                         linear-gradient(45deg, transparent 75%, var(--checker-1) 75%),
                         linear-gradient(-45deg, transparent 75%, var(--checker-1) 75%);
-      background-size: 8px 8px;
-      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+      background-size: 10px 10px;
+      background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
       background-color: var(--checker-2);
       overflow: hidden;
     }
@@ -277,103 +287,146 @@
     }
 
     .frame-name {
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      color: #fff;
+      color: #ffffff;
+      margin-bottom: 2px;
     }
 
     .frame-dim {
-      font-size: 0.65rem;
-      color: var(--text-muted);
+      font-size: 0.72rem;
+      color: var(--text-sub);
     }
 
     .frame-actions {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .btn-icon {
-      padding: 3px 6px;
-      font-size: 0.7rem;
-      border-radius: 4px;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
     }
 
     .btn-icon:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Center Panel: Canvas & Tool Bar */
+    /* Center Panel: Canvas & Multi-Tier Toolbar */
     .canvas-panel {
       display: flex;
       flex-direction: column;
-      background: #080b11;
+      background: #080b13;
       overflow: hidden;
       position: relative;
     }
 
-    .canvas-toolbar {
-      height: 48px;
-      background: rgba(18, 24, 36, 0.95);
+    /* Ribbon / Dual Tier Toolbar */
+    .canvas-ribbon {
+      background: #111827;
       border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: center;
-      padding: 0 14px;
-      gap: 12px;
+      flex-direction: column;
       flex-shrink: 0;
+    }
+
+    .ribbon-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       overflow-x: auto;
     }
 
-    .tool-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      border-right: 1px solid var(--border);
-      padding-right: 12px;
+    .ribbon-row:last-child {
+      border-bottom: none;
     }
 
-    .tool-group:last-child {
+    .ribbon-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding-right: 16px;
+      flex-shrink: 0;
+    }
+
+    .ribbon-group:last-child {
       border-right: none;
       padding-right: 0;
     }
 
-    .tool-label {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-right: 4px;
+    .ribbon-label {
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .tool-btn {
-      padding: 5px 9px;
-      font-size: 0.75rem;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.04);
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border);
-      color: #cbd5e1;
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
     }
 
     .tool-btn.active {
-      background: rgba(56, 189, 248, 0.2);
+      background: rgba(56, 189, 248, 0.22);
       border-color: var(--primary);
       color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
     }
 
-    .tool-slider-box {
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+    }
+
+    .slider-box input[type="range"] {
+      width: 90px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-label {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.72rem;
-      color: #cbd5e1;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    .tool-slider-box input[type="range"] {
-      width: 75px;
+    .checkbox-label input {
       accent-color: var(--primary);
+      width: 15px;
+      height: 15px;
       cursor: pointer;
     }
 
@@ -383,7 +436,7 @@
       align-items: center;
       justify-content: center;
       overflow: auto;
-      padding: 20px;
+      padding: 24px;
       position: relative;
       background-image: linear-gradient(45deg, #131924 25%, transparent 25%),
                         linear-gradient(-45deg, #131924 25%, transparent 25%),
@@ -395,8 +448,8 @@
     }
 
     #mainCanvas {
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
       image-rendering: pixelated;
       cursor: crosshair;
       background-image: linear-gradient(45deg, #242f40 25%, transparent 25%),
@@ -410,21 +463,21 @@
 
     /* Right Sidebar: Preview & Config */
     .preview-box {
-      background: rgba(10, 14, 22, 0.85);
+      background: #0f172a;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
     .preview-stage {
       width: 100%;
-      height: 140px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      height: 150px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       position: relative;
       overflow: hidden;
       display: flex;
@@ -435,8 +488,8 @@
                         linear-gradient(-45deg, #182232 25%, transparent 25%),
                         linear-gradient(45deg, transparent 75%, #182232 75%),
                         linear-gradient(-45deg, transparent 75%, #182232 75%);
-      background-size: 12px 12px;
-      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
     }
 
     .preview-stage.bg-dark {
@@ -456,17 +509,17 @@
 
     .preview-ground {
       position: absolute;
-      bottom: 22px;
+      bottom: 24px;
       left: 0;
       right: 0;
       height: 2px;
-      background: rgba(56, 189, 248, 0.4);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
     }
 
     #previewSprite {
       position: absolute;
-      bottom: 24px;
+      bottom: 26px;
       image-rendering: pixelated;
       transition: transform 0.05s linear;
       transform-origin: bottom center;
@@ -475,7 +528,7 @@
     .preview-controls {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
       justify-content: space-between;
     }
@@ -484,72 +537,75 @@
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
 
     .form-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-sub);
     }
 
     input[type="text"], textarea, select {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.07);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 6px 10px;
-      color: #fff;
-      font-size: 0.78rem;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 0.84rem;
       outline: none;
-      transition: border-color 0.15s ease;
+      transition: all 0.15s ease;
     }
 
     input[type="text"]:focus, textarea:focus, select:focus {
       border-color: var(--border-focus);
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
     }
 
     textarea {
       resize: vertical;
-      min-height: 48px;
+      min-height: 52px;
     }
 
     .emoji-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 5px;
       margin-top: 4px;
     }
 
     .emoji-btn {
-      padding: 3px 6px;
-      font-size: 0.85rem;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4px 8px;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       cursor: pointer;
+      transition: all 0.15s ease;
     }
 
     .emoji-btn:hover {
-      background: rgba(56, 189, 248, 0.2);
+      background: rgba(56, 189, 248, 0.25);
       border-color: var(--primary);
+      transform: scale(1.1);
     }
 
-    /* Modals & Dialogs */
+    /* Toast Notification */
     .toast {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 24px;
+      right: 24px;
       background: #10b981;
-      color: #fff;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       transform: translateY(100px);
       opacity: 0;
       transition: all 0.25s ease;
@@ -561,11 +617,15 @@
       opacity: 1;
     }
 
-    .color-swatch {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+    /* SVG Icon Helpers */
+    .icon-svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
       display: inline-block;
       vertical-align: middle;
     }
@@ -576,30 +636,38 @@
   <!-- Top Header Navigation -->
   <header>
     <div class="logo-area">
-      <span class="logo-icon">🐾</span>
-      <span class="logo-title">Dino Companion Studio</span>
-      <span class="logo-badge">Begleiter & Sprite Editor</span>
+      <div class="logo-icon-box">
+        <svg class="icon-svg" style="width:20px; height:20px; color:#ffffff;" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="logo-title">
+        <span>Dino Companion Studio</span>
+        <span class="logo-badge">Begleiter & Sprite Editor</span>
+      </div>
     </div>
 
     <div class="header-actions">
       <input type="file" id="fileJsonInput" accept=".json,.companion.json" style="display:none;" />
       <button type="button" onclick="document.getElementById('fileJsonInput').click()">
-        <span>📂</span>
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         <span>Addon laden (.companion.json)</span>
       </button>
 
       <button type="button" onclick="resetAll()" class="danger" title="Alles leeren und neu anfangen">
-        <span>🔄</span>
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
         <span>Neu</span>
       </button>
 
       <button type="button" onclick="exportCompanionJson()" class="primary">
-        <span>💾</span>
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
         <span>Als .companion.json speichern</span>
       </button>
 
       <button type="button" onclick="downloadAllFramesZip()">
-        <span>📦</span>
+        <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
         <span>Frames als PNGs</span>
       </button>
     </div>
@@ -611,10 +679,10 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">
-          <span>🎞️</span>
+          <svg class="icon-svg" style="color:var(--primary);" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
           <span>Frames (max. 8)</span>
         </span>
-        <span id="frameCountBadge" style="font-size:0.72rem; color:var(--primary); font-weight:700;">0 / 8</span>
+        <span id="frameCountBadge" style="font-size:0.8rem; color:var(--primary); font-weight:800; background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:999px;">0 / 8</span>
       </div>
 
       <div class="panel-body">
@@ -622,18 +690,19 @@
         <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileImageInput').click()">
           <div class="drop-zone-icon">🖼️</div>
           <div class="drop-zone-text">Bilder hierher ziehen</div>
-          <div class="drop-zone-hint">Oder klicken zum Auswählen (PNG, JPG, WebP)</div>
+          <div class="drop-zone-hint">Oder klicken zum Auswählen (bis zu 8 Bilder)</div>
         </div>
 
-        <div style="display:flex; gap:6px;">
-          <button type="button" onclick="document.getElementById('fileImageInput').click()" style="flex:1;">
-            <span>➕ Frame laden</span>
+        <div style="display:flex; gap:8px;">
+          <button type="button" onclick="document.getElementById('fileImageInput').click()" style="flex:1; justify-content:center;">
+            <svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Frame laden</span>
           </button>
           <button type="button" onclick="duplicateCurrentFrame()" title="Aktuellen Frame duplizieren">
-            <span>📑</span>
+            <svg class="icon-svg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
           <button type="button" onclick="deleteCurrentFrame()" class="danger" title="Aktuellen Frame löschen">
-            <span>🗑️</span>
+            <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
 
@@ -645,86 +714,97 @@
 
     <!-- Center Column: Canvas Editor -->
     <section class="canvas-panel">
-      <!-- Toolbar -->
-      <div class="canvas-toolbar">
-        <!-- Tool Selection -->
-        <div class="tool-group">
-          <span class="tool-label">Werkzeug:</span>
-          <button type="button" id="toolWand" class="tool-btn active" onclick="setTool('wand')" title="Klicke auf den Hintergrund, um ihn transparent zu machen">
-            <span>🪄 Hintergrund löschen</span>
-          </button>
-          <button type="button" id="toolEraser" class="tool-btn" onclick="setTool('eraser')" title="Pixel manuell wegradieren">
-            <span>🧹 Radiergummi</span>
-          </button>
-          <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Bild im Canvas verschieben">
-            <span>✋ Verschieben</span>
-          </button>
-        </div>
-
-        <!-- Wand Parameters -->
-        <div class="tool-group" id="wandParams">
-          <span class="tool-label">Toleranz:</span>
-          <div class="tool-slider-box">
-            <input type="range" id="toleranceRange" min="0" max="100" value="25" oninput="updateToleranceLabel(this.value)" />
-            <span id="toleranceVal">25%</span>
+      <!-- Multi-Tier Clean Ribbon Toolbar -->
+      <div class="canvas-ribbon">
+        <!-- Row 1: Active Tools & Options -->
+        <div class="ribbon-row">
+          <!-- Tool Selection -->
+          <div class="ribbon-group">
+            <span class="ribbon-label">Werkzeug:</span>
+            <button type="button" id="toolWand" class="tool-btn active" onclick="setTool('wand')" title="Klicke auf den Hintergrund, um ihn transparent zu machen">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+              <span>Hintergrund löschen</span>
+            </button>
+            <button type="button" id="toolEraser" class="tool-btn" onclick="setTool('eraser')" title="Pixel manuell wegradieren">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 2l4 4-14 14H4v-4L18 2z"></path></svg>
+              <span>Radiergummi</span>
+            </button>
+            <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Bild im Canvas verschieben">
+              <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+              <span>Verschieben</span>
+            </button>
           </div>
 
-          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer; margin-left:6px;">
-            <input type="checkbox" id="contiguousWand" checked />
-            <span>Zusammenhängend</span>
-          </label>
+          <!-- Wand Tool Parameters -->
+          <div class="ribbon-group" id="wandParams">
+            <span class="ribbon-label">Toleranz:</span>
+            <div class="slider-box">
+              <input type="range" id="toleranceRange" min="0" max="100" value="25" oninput="updateToleranceLabel(this.value)" />
+              <span id="toleranceVal" style="font-weight:700; color:var(--primary); min-width:34px;">25%</span>
+            </div>
 
-          <button type="button" class="tool-btn" onclick="applyMagicWandToAllFrames()" style="background:rgba(16, 185, 129, 0.15); border-color:#10b981; color:#34d399;" title="Entfernt dieselbe Hintergrundfarbe bei allen Frames gleichzeitig!">
-            <span>⚡ Auf alle Frames anwenden</span>
-          </button>
-        </div>
+            <label class="checkbox-label" style="margin-left:4px;">
+              <input type="checkbox" id="contiguousWand" checked />
+              <span>Zusammenhängend</span>
+            </label>
 
-        <!-- Eraser Size -->
-        <div class="tool-group" id="eraserParams" style="display:none;">
-          <span class="tool-label">Pinselgröße:</span>
-          <div class="tool-slider-box">
-            <input type="range" id="eraserSizeRange" min="1" max="40" value="8" oninput="document.getElementById('eraserSizeVal').textContent = this.value + 'px'" />
-            <span id="eraserSizeVal">8px</span>
+            <button type="button" class="tool-btn" onclick="applyMagicWandToAllFrames()" style="background:rgba(16, 185, 129, 0.2); border-color:#10b981; color:#34d399; font-weight:700;" title="Entfernt dieselbe Hintergrundfarbe bei allen Frames gleichzeitig!">
+              <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Auf alle Frames anwenden</span>
+            </button>
+          </div>
+
+          <!-- Eraser Size Parameters -->
+          <div class="ribbon-group" id="eraserParams" style="display:none;">
+            <span class="ribbon-label">Pinselgröße:</span>
+            <div class="slider-box">
+              <input type="range" id="eraserSizeRange" min="1" max="40" value="8" oninput="document.getElementById('eraserSizeVal').textContent = this.value + 'px'" />
+              <span id="eraserSizeVal" style="font-weight:700; color:var(--primary); min-width:34px;">8px</span>
+            </div>
           </div>
         </div>
 
-        <!-- Canvas Resolution -->
-        <div class="tool-group">
-          <span class="tool-label">Größe:</span>
-          <select id="canvasResSelect" onchange="changeCanvasResolution(this.value)">
-            <option value="64">64 × 64 px</option>
-            <option value="80">80 × 80 px</option>
-            <option value="96" selected>96 × 96 px</option>
-            <option value="128">128 × 128 px</option>
-            <option value="160">160 × 160 px</option>
-          </select>
-        </div>
+        <!-- Row 2: Canvas Size, Guides & View Options -->
+        <div class="ribbon-row">
+          <div class="ribbon-group">
+            <span class="ribbon-label">Leinwand-Größe:</span>
+            <select id="canvasResSelect" onchange="changeCanvasResolution(this.value)" style="padding:4px 8px;">
+              <option value="64">64 × 64 px</option>
+              <option value="80">80 × 80 px</option>
+              <option value="96" selected>96 × 96 px (Standard)</option>
+              <option value="128">128 × 128 px</option>
+              <option value="160">160 × 160 px</option>
+            </select>
+          </div>
 
-        <!-- Guides & Helpers -->
-        <div class="tool-group">
-          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;">
-            <input type="checkbox" id="guideBaseline" checked onchange="drawActiveFrame()" />
-            <span>Bodenlinie</span>
-          </label>
-          <label style="display:flex; align-items:center; gap:4px; font-size:0.72rem; cursor:pointer;">
-            <input type="checkbox" id="guideGrid" checked onchange="drawActiveFrame()" />
-            <span>Gitter</span>
-          </label>
-        </div>
+          <div class="ribbon-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="guideBaseline" checked onchange="drawActiveFrame()" />
+              <span style="color:#f87171;">Bodenlinie anzeigen</span>
+            </label>
+            <label class="checkbox-label" style="margin-left:8px;">
+              <input type="checkbox" id="guideGrid" checked onchange="drawActiveFrame()" />
+              <span>Pixelgitter</span>
+            </label>
+          </div>
 
-        <!-- Zoom -->
-        <div class="tool-group">
-          <span class="tool-label">Zoom:</span>
-          <button type="button" class="btn-icon" onclick="changeZoom(-1)">➖</button>
-          <span id="zoomLevelText" style="font-size:0.72rem; min-width:38px; text-align:center;">400%</span>
-          <button type="button" class="btn-icon" onclick="changeZoom(1)">➕</button>
-        </div>
+          <div class="ribbon-group">
+            <span class="ribbon-label">Zoom:</span>
+            <button type="button" class="btn-icon" onclick="changeZoom(-1)" title="Verkleinern">
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <span id="zoomLevelText" style="font-size:0.82rem; font-weight:700; color:#ffffff; min-width:44px; text-align:center;">400%</span>
+            <button type="button" class="btn-icon" onclick="changeZoom(1)" title="Vergrößern">
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+          </div>
 
-        <!-- Undo -->
-        <div class="tool-group">
-          <button type="button" class="tool-btn" onclick="undo()" title="Schritt rückgängig machen (Strg+Z)">
-            <span>↩️ Zurück</span>
-          </button>
+          <div class="ribbon-group">
+            <button type="button" class="tool-btn" onclick="undo()" title="Schritt rückgängig machen (Strg+Z)">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+              <span>Rückgängig</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -734,9 +814,9 @@
       </div>
 
       <!-- Footer Info Bar -->
-      <div style="background:rgba(18,24,36,0.95); height:28px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 14px; font-size:0.7rem; color:var(--text-muted);">
-        <span id="canvasStatusText">Klicke auf den Hintergrund, um die Farbe transparent zu machen.</span>
-        <span id="mouseCoordsText">X: 0, Y: 0</span>
+      <div style="background:#111827; height:32px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 18px; font-size:0.78rem; color:var(--text-sub);">
+        <span id="canvasStatusText" style="font-weight:600;">Klicke auf den Hintergrund im Bild, um die Farbe transparent zu machen.</span>
+        <span id="mouseCoordsText" style="font-family:monospace; color:var(--primary); font-weight:700;">X: 0, Y: 0</span>
       </div>
     </section>
 
@@ -744,7 +824,7 @@
     <section class="panel">
       <div class="panel-header">
         <span class="panel-title">
-          <span>👀</span>
+          <svg class="icon-svg" style="color:var(--accent);" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           <span>Vorschau & Begleiter-Info</span>
         </span>
       </div>
@@ -758,24 +838,25 @@
           </div>
 
           <div class="preview-controls">
-            <button type="button" id="btnPlayPause" onclick="togglePlay()" class="primary" style="padding:4px 10px;">
-              <span>⏸️ Pause</span>
+            <button type="button" id="btnPlayPause" onclick="togglePlay()" class="primary" style="padding:6px 12px;">
+              <svg class="icon-svg" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              <span>Pause</span>
             </button>
 
-            <div style="display:flex; align-items:center; gap:6px; font-size:0.72rem;">
+            <div style="display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:600;">
               <span>Tempo:</span>
-              <input type="range" id="fpsRange" min="1" max="24" value="7" oninput="updateFps(this.value)" style="width:70px;" />
-              <span id="fpsVal">7 FPS</span>
+              <input type="range" id="fpsRange" min="1" max="24" value="7" oninput="updateFps(this.value)" style="width:75px; accent-color:var(--primary);" />
+              <span id="fpsVal" style="color:var(--primary); font-weight:700; min-width:44px;">7 FPS</span>
             </div>
           </div>
 
-          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-size:0.72rem; color:var(--text-muted);">
-            <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-size:0.8rem;">
+            <label class="checkbox-label">
               <input type="checkbox" id="previewWalkMode" checked />
               <span>Hin- & herlaufen</span>
             </label>
 
-            <div style="display:flex; gap:4px;">
+            <div style="display:flex; gap:6px;">
               <button type="button" class="btn-icon" onclick="setPreviewBg('check')" title="Transparenz-Karo">🏁</button>
               <button type="button" class="btn-icon" onclick="setPreviewBg('dark')" title="Dunkler Desktop">⬛</button>
               <button type="button" class="btn-icon" onclick="setPreviewBg('green')" title="Chroma-Grün">🟩</button>
@@ -785,7 +866,7 @@
         </div>
 
         <!-- Companion Metadata Form -->
-        <div style="border-top:1px solid var(--border); padding-top:12px; display:flex; flex-direction:column; gap:10px;">
+        <div style="border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:12px;">
           <div class="form-group">
             <label class="form-label">Begleiter-Name:</label>
             <input type="text" id="compName" value="Mein Begleiter" oninput="onMetaChange()" placeholder="z. B. Kuschelbär" />
@@ -793,8 +874,8 @@
 
           <div class="form-group">
             <label class="form-label">Symbol / Icon:</label>
-            <div style="display:flex; gap:6px;">
-              <input type="text" id="compIcon" value="✨" maxlength="4" style="width:50px; text-align:center; font-size:1.1rem;" oninput="onMetaChange()" />
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="compIcon" value="✨" maxlength="4" style="width:52px; text-align:center; font-size:1.2rem;" oninput="onMetaChange()" />
               <div class="emoji-row" style="flex:1;">
                 <span class="emoji-btn" onclick="setEmoji('🐉')">🐉</span>
                 <span class="emoji-btn" onclick="setEmoji('🦖')">🦖</span>
@@ -812,12 +893,12 @@
           <div class="form-group">
             <label class="form-label">ID (Dateiname):</label>
             <input type="text" id="compId" value="mein_begleiter" oninput="onMetaChange()" placeholder="z. B. kuschelbaer" />
-            <span style="font-size:0.65rem; color:var(--text-muted);">Ergibt: <code id="filenamePreview" style="color:var(--primary);">mein_begleiter.companion.json</code></span>
+            <span style="font-size:0.72rem; color:var(--text-sub); margin-top:2px;">Ergibt: <code id="filenamePreview" style="color:var(--primary); font-weight:700;">mein_begleiter.companion.json</code></span>
           </div>
 
           <div class="form-group">
             <label class="form-label">Beschreibung:</label>
-            <textarea id="compDesc" oninput="onMetaChange()" placeholder="Niedlicher Begleiter für den Desktop"></textarea>
+            <textarea id="compDesc" oninput="onMetaChange()" placeholder="Niedlicher Begleiter für das Dino-Widget-Desk"></textarea>
           </div>
 
           <div class="form-group">
@@ -825,28 +906,29 @@
             <input type="text" id="compAuthor" value="Dino Desk Team" oninput="onMetaChange()" placeholder="z. B. Dino Desk Team oder Dein Name" />
           </div>
 
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
             <div class="form-group">
               <label class="form-label">Standard-Größe:</label>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <input type="range" id="compScale" min="50" max="160" step="5" value="100" oninput="document.getElementById('compScaleVal').textContent = this.value + '%'" style="width:100%;" />
-                <span id="compScaleVal" style="font-size:0.7rem; min-width:32px;">100%</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="range" id="compScale" min="50" max="160" step="5" value="100" oninput="document.getElementById('compScaleVal').textContent = this.value + '%'" style="width:100%; accent-color:var(--primary);" />
+                <span id="compScaleVal" style="font-size:0.78rem; font-weight:700; color:var(--primary); min-width:38px;">100%</span>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label">Lauf-Tempo:</label>
-              <div style="display:flex; align-items:center; gap:4px;">
-                <input type="range" id="compSpeed" min="50" max="160" step="5" value="100" oninput="document.getElementById('compSpeedVal').textContent = this.value + '%'" style="width:100%;" />
-                <span id="compSpeedVal" style="font-size:0.7rem; min-width:32px;">100%</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="range" id="compSpeed" min="50" max="160" step="5" value="100" oninput="document.getElementById('compSpeedVal').textContent = this.value + '%'" style="width:100%; accent-color:var(--primary);" />
+                <span id="compSpeedVal" style="font-size:0.78rem; font-weight:700; color:var(--primary); min-width:38px;">100%</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Quick Export Action -->
-        <button type="button" onclick="exportCompanionJson()" class="primary" style="margin-top:auto; padding:10px 14px; justify-content:center;">
-          <span>💾 Als .companion.json speichern</span>
+        <button type="button" onclick="exportCompanionJson()" class="primary" style="margin-top:auto; padding:12px 16px; justify-content:center; font-size:0.88rem;">
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Als .companion.json speichern</span>
         </button>
       </div>
     </section>
@@ -854,17 +936,17 @@
 
   <!-- Notification Toast -->
   <div id="toast" class="toast">
-    <span>✅</span>
+    <svg class="icon-svg" viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
     <span id="toastMsg">Erfolgreich gespeichert!</span>
   </div>
 
   <script>
     // --- Application State ---
-    let frames = []; // Array of { id, name, canvas, ctx }
+    let frames = [];
     let activeFrameIndex = 0;
     let targetResolution = 96;
-    let currentZoom = 4; // 400%
-    let activeTool = 'wand'; // 'wand', 'eraser', 'move'
+    let currentZoom = 4;
+    let activeTool = 'wand';
     let undoHistory = [];
     let isDrawing = false;
     let lastColorPicked = null;
@@ -890,7 +972,19 @@
       initJsonInput();
       startAnimationLoop();
 
-      // Load a friendly starter sprite (a cute 4-frame animated buddy)
+      // Check if an existing companion was sent from the app for editing or copying
+      const autoImport = localStorage.getItem('companion_studio_import');
+      if (autoImport) {
+        try {
+          const parsed = JSON.parse(autoImport);
+          localStorage.removeItem('companion_studio_import');
+          loadCompanionData(parsed);
+          return;
+        } catch (e) {
+          console.error('Failed to parse companion_studio_import', e);
+        }
+      }
+
       createDefaultFrames();
     });
 
@@ -901,7 +995,7 @@
       setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
-    // --- Starter Companion Generator (Cute Blob Buddy) ---
+    // --- Starter Companion Generator (Cute Friendly Blob) ---
     function createDefaultFrames() {
       frames = [];
       const colors = ['#38bdf8', '#0ea5e9'];
@@ -912,7 +1006,6 @@
         c.height = targetResolution;
         const ctx = c.getContext('2d');
 
-        // Draw cute little friendly round companion
         const cx = targetResolution / 2;
         const cy = targetResolution - 32;
         const bounce = (i === 1 || i === 3) ? -4 : 0;
@@ -937,7 +1030,7 @@
         ctx.ellipse(cx, cy + 4 + bounce, 16, 14, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Cute Big Eyes
+        // Big Cute Eyes
         ctx.fillStyle = '#0f172a';
         ctx.beginPath();
         ctx.arc(cx - 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
@@ -1021,9 +1114,9 @@
       }
 
       const filesToLoad = files.slice(0, remainingSlots);
-
       let loadedCount = 0;
-      filesToLoad.forEach((file, index) => {
+
+      filesToLoad.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = new Image();
@@ -1031,7 +1124,7 @@
             addFrameFromImage(img, file.name.replace(/\.[^/.]+$/, ''));
             loadedCount++;
             if (loadedCount === filesToLoad.length) {
-              showToast(`${loadedCount} Bild(er) erfolgreich geladen!`);
+              showToast(`${loadedCount} Bild(er) geladen!`);
             }
           };
           img.src = e.target.result;
@@ -1048,12 +1141,11 @@
       c.height = targetResolution;
       const ctx = c.getContext('2d');
 
-      // Draw image fitted and bottom-aligned (feet on the ground!)
       const scale = Math.min((targetResolution - 12) / img.width, (targetResolution - 12) / img.height);
       const nw = img.width * scale;
       const nh = img.height * scale;
       const nx = (targetResolution - nw) / 2;
-      const ny = targetResolution - nh - 10; // Align slightly above bottom
+      const ny = targetResolution - nh - 8;
 
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(img, nx, ny, nw, nh);
@@ -1147,7 +1239,7 @@
         info.className = 'frame-info';
         info.innerHTML = `
           <div class="frame-name">${frame.name}</div>
-          <div class="frame-dim">Frame #${idx + 1} • ${targetResolution}×${targetResolution}</div>
+          <div class="frame-dim">Frame #${idx + 1} • ${targetResolution}×${targetResolution} px</div>
         `;
 
         const actions = document.createElement('div');
@@ -1207,7 +1299,7 @@
       mainCanvas.height = targetResolution;
       updateFramesList();
       drawActiveFrame();
-      showToast('Auflösung auf ' + targetResolution + 'x' + targetResolution + ' geändert');
+      showToast('Auflösung auf ' + targetResolution + '×' + targetResolution + ' px geändert');
     }
 
     function drawActiveFrame() {
@@ -1229,11 +1321,10 @@
 
       if (showBaseline) {
         mainCtx.save();
-        mainCtx.strokeStyle = 'rgba(239, 68, 68, 0.75)';
+        mainCtx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
         mainCtx.lineWidth = 1;
         mainCtx.setLineDash([2, 2]);
         mainCtx.beginPath();
-        // Baseline is placed at targetResolution - 8px
         const groundY = targetResolution - 8;
         mainCtx.moveTo(0, groundY);
         mainCtx.lineTo(targetResolution, groundY);
@@ -1243,7 +1334,7 @@
 
       if (showGrid && currentZoom >= 3) {
         mainCtx.save();
-        mainCtx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        mainCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
         mainCtx.lineWidth = 0.5;
         for (let x = 0; x < targetResolution; x += 8) {
           mainCtx.beginPath();
@@ -1272,9 +1363,9 @@
       document.getElementById('eraserParams').style.display = (tool === 'eraser' ? 'flex' : 'none');
 
       const statusEl = document.getElementById('canvasStatusText');
-      if (tool === 'wand') statusEl.textContent = 'Klicke auf eine Farbe im Bild, um sie transparent zu machen.';
+      if (tool === 'wand') statusEl.textContent = 'Klicke auf den Hintergrund im Bild, um die Farbe transparent zu machen.';
       if (tool === 'eraser') statusEl.textContent = 'Klicke und ziehe mit der Maus, um Pixel wegzuradieren.';
-      if (tool === 'move') statusEl.textContent = 'Bewege das Bild mit den Pfeiltasten oder durch Ziehen.';
+      if (tool === 'move') statusEl.textContent = 'Bewege das Bild mit den Pfeiltasten auf deiner Tastatur.';
     }
 
     function updateToleranceLabel(val) {
@@ -1398,11 +1489,10 @@
       const targetB = data[startIndex + 2];
       const targetA = data[startIndex + 3];
 
-      if (targetA === 0) return; // Already transparent
+      if (targetA === 0) return;
 
       lastColorPicked = { r: targetR, g: targetG, b: targetB, a: targetA };
 
-      // Max color distance in RGB cube is sqrt(255^2 * 3) ~ 441.67
       const maxDist = 441.67;
       const threshold = (tolerancePercent / 100) * maxDist;
 
@@ -1417,14 +1507,12 @@
       }
 
       if (!contiguous) {
-        // Global color replacement
         for (let i = 0; i < data.length; i += 4) {
           if (colorMatch(i)) {
-            data[i + 3] = 0; // Transparent
+            data[i + 3] = 0;
           }
         }
       } else {
-        // Connected Flood Fill (Magic Wand)
         const visited = new Uint8Array(w * h);
         const queue = [startY * w + startX];
         visited[startY * w + startX] = 1;
@@ -1435,7 +1523,7 @@
           const cy = Math.floor(pos / w);
           const idx = pos * 4;
 
-          data[idx + 3] = 0; // Make transparent
+          data[idx + 3] = 0;
 
           const neighbors = [
             [cx + 1, cy],
@@ -1506,11 +1594,10 @@
         previewSprite.src = f.canvas.toDataURL();
       }
 
-      // Horizontal walk simulation
       const walkMode = document.getElementById('previewWalkMode').checked;
       if (walkMode) {
         const stageWidth = previewStage.clientWidth;
-        const maxWalk = (stageWidth / 2) - 30;
+        const maxWalk = (stageWidth / 2) - 34;
         walkPosition += walkDirection * 2.5;
 
         if (walkPosition > maxWalk) {
@@ -1529,7 +1616,12 @@
 
     function togglePlay() {
       isPlaying = !isPlaying;
-      document.getElementById('btnPlayPause').innerHTML = isPlaying ? '<span>⏸️ Pause</span>' : '<span>▶️ Abspielen</span>';
+      const btn = document.getElementById('btnPlayPause');
+      if (isPlaying) {
+        btn.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span>Pause</span>`;
+      } else {
+        btn.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Abspielen</span>`;
+      }
     }
 
     function updateFps(fps) {
@@ -1569,7 +1661,14 @@
         return;
       }
 
-      const id = document.getElementById('compId').value.trim() || 'mein_begleiter';
+      let id = document.getElementById('compId').value.trim() || 'mein_begleiter';
+      const rawId = id.toLowerCase();
+      if (rawId === 'drache' || rawId === 'ankylosaurus') {
+        alert('Der Standard-Begleiter "' + id + '" ist geschützt und kann nicht direkt überschrieben werden! Bitte wähle eine andere ID (z. B. ' + rawId + '_kopie).');
+        document.getElementById('compId').value = rawId + '_kopie';
+        onMetaChange();
+        return;
+      }
       const name = document.getElementById('compName').value.trim() || 'Mein Begleiter';
       const icon = document.getElementById('compIcon').value.trim() || '✨';
       const desc = document.getElementById('compDesc').value.trim() || 'Ein individueller Begleiter für das Dino-Widget-Desk';
@@ -1577,7 +1676,6 @@
       const scale = parseInt(document.getElementById('compScale').value, 10) || 100;
       const speed = parseInt(document.getElementById('compSpeed').value, 10) || 100;
 
-      // Extract Base64 sprites
       const walkSprites = frames.map(f => f.canvas.toDataURL('image/png'));
       const previewUrl = walkSprites[0];
 
@@ -1643,11 +1741,19 @@
         return;
       }
 
-      document.getElementById('compId').value = data.id || 'begleiter';
-      document.getElementById('compName').value = data.name || 'Begleiter';
+      let id = data.id || 'begleiter';
+      let name = data.name || 'Begleiter';
+      const isLocked = (id.toLowerCase() === 'drache' || id.toLowerCase() === 'ankylosaurus');
+      if (isLocked) {
+        id = id.toLowerCase() + '_kopie';
+        name = name + ' (Kopie)';
+      }
+
+      document.getElementById('compId').value = id;
+      document.getElementById('compName').value = name;
       document.getElementById('compIcon').value = data.icon || '✨';
       document.getElementById('compDesc').value = data.description || '';
-      document.getElementById('compAuthor').value = data.author || 'Dino Desk Team';
+      document.getElementById('compAuthor').value = isLocked ? 'Mein Begleiter' : (data.author || 'Dino Desk Team');
       if (data.scale) {
         document.getElementById('compScale').value = data.scale;
         document.getElementById('compScaleVal').textContent = data.scale + '%';
@@ -1691,7 +1797,7 @@
       });
     }
 
-    // --- Export as PNGs (Downloads each frame) ---
+    // --- Export as PNGs ---
     function downloadAllFramesZip() {
       if (frames.length === 0) return;
       const compId = document.getElementById('compId').value.trim() || 'begleiter';

@@ -41,6 +41,7 @@ export interface AddonCompanionInfo {
   sprites?: CompanionSprites;
   scale?: number;
   speed?: number;
+  is_flying?: boolean;
 }
 
 export interface WidgetOffset {
@@ -73,6 +74,8 @@ export interface ThemeConfig {
   font_scale: number;
   use_custom_text_color: boolean;
   text_color: string;
+  use_custom_secondary_color?: boolean;
+  secondary_text_color?: string;
 }
 
 export interface SlideshowModuleConfig {

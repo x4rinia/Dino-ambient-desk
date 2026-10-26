@@ -290,10 +290,17 @@ export const App: React.FC = () => {
       fontFamily: fontFam,
     };
 
-    if (config.theme?.use_custom_text_color && config.theme?.text_color) {
-      styleObj['--text-primary'] = config.theme.text_color;
-    } else if (config.theme?.color_mode === 'rainbow') {
-      styleObj['--text-primary'] = `hsl(${Math.round(rainbowHue)}, 85%, 92%)`;
+    if (config.theme?.color_mode === 'rainbow') {
+      const h1 = Math.round(rainbowHue);
+      const h2 = Math.round((rainbowHue + 70) % 360);
+      const h3 = Math.round((rainbowHue + 140) % 360);
+      styleObj['--text-primary'] = `hsl(${h1}, 95%, 95%)`;
+      styleObj['--text-secondary'] = `hsl(${h2}, 85%, 88%)`;
+      styleObj['--text-muted'] = `hsl(${h3}, 75%, 80%)`;
+    } else {
+      styleObj['--text-primary'] = '#ffffff';
+      styleObj['--text-secondary'] = `color-mix(in srgb, ${primary} 28%, #f8fafc)`;
+      styleObj['--text-muted'] = `color-mix(in srgb, ${primary} 22%, #e2e8f0)`;
     }
 
     return styleObj as React.CSSProperties;
@@ -576,10 +583,11 @@ export const App: React.FC = () => {
                   position: 'absolute',
                   right: '14px',
                   bottom: '6px',
-                  fontSize: '0.62rem',
-                  fontWeight: 500,
-                  letterSpacing: '0.03em',
-                  color: 'var(--text-muted, rgba(148, 163, 184, 0.55))',
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  color: 'var(--text-muted)',
+                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
                   userSelect: 'none',
                 }}
               >

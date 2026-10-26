@@ -237,6 +237,12 @@ public class StorageService
         {
             config.Theme.FontScale = 100;
         }
+        if (config.Theme.ColorMode == "custom")
+        {
+            config.Theme.ColorMode = "cyber_blue";
+        }
+        config.Theme.UseCustomTextColor = false;
+        config.Theme.UseCustomSecondaryColor = false;
         if (string.IsNullOrWhiteSpace(config.Modules.CycleTracker.LastPeriodStart))
         {
             config.Modules.CycleTracker.LastPeriodStart = DateTime.Now.AddDays(-11).ToString("yyyy-MM-dd");
@@ -441,6 +447,20 @@ public class StorageService
                 try { File.Delete(legacyStub); } catch { }
             }
 
+            // Clean up old experimental addons removed by user request
+            string[] deprecatedAddons = { "diddl", "elfe", "hund1", "hund2", "katze1", "katze2", "optimus", "robot", "troll" };
+            foreach (var dep in deprecatedAddons)
+            {
+                try
+                {
+                    string p1 = Path.Combine(appData, $"{dep}.companion.json");
+                    if (File.Exists(p1)) File.Delete(p1);
+                    string p2 = Path.Combine(appData, $"{dep}.json");
+                    if (File.Exists(p2)) File.Delete(p2);
+                }
+                catch { }
+            }
+
             // Find source bundled companions folder
             var candidateSourceDirs = new[]
             {
@@ -468,8 +488,56 @@ public class StorageService
                     }
                 }
             }
+            // Also sync companion-editor to AppData so it is ALWAYS available
+            try
+            {
+                string dstEditorDir = Path.Combine(AppDataFolder, "companion-editor");
+                string? srcEditorPath = ResolveCompanionEditorPath();
+                if (!string.IsNullOrEmpty(srcEditorPath) && File.Exists(srcEditorPath))
+                {
+                    string srcEditorDir = Path.GetDirectoryName(srcEditorPath)!;
+                    if (!Path.GetFullPath(srcEditorDir).Equals(Path.GetFullPath(dstEditorDir), StringComparison.OrdinalIgnoreCase))
+                    {
+                        Directory.CreateDirectory(dstEditorDir);
+                        foreach (var f in Directory.EnumerateFiles(srcEditorDir))
+                        {
+                            string target = Path.Combine(dstEditorDir, Path.GetFileName(f));
+                            if (!File.Exists(target) || File.GetLastWriteTimeUtc(f) > File.GetLastWriteTimeUtc(target))
+                            {
+                                File.Copy(f, target, true);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
         }
         catch { }
+    }
+
+    public string? ResolveCompanionEditorPath()
+    {
+        var candidates = new List<string>
+        {
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "companion-editor", "index.html"),
+            Path.Combine(Environment.CurrentDirectory, "companion-editor", "index.html"),
+            Path.Combine(Path.GetDirectoryName(Environment.ProcessPath ?? "") ?? "", "companion-editor", "index.html"),
+            Path.Combine(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..")), "companion-editor", "index.html"),
+            Path.Combine(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..")), "companion-editor", "index.html"),
+            Path.Combine(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..")), "companion-editor", "index.html"),
+            Path.Combine(AppDataFolder, "companion-editor", "index.html")
+        };
+
+        foreach (var c in candidates)
+        {
+            try
+            {
+                if (File.Exists(c)) return Path.GetFullPath(c);
+            }
+            catch { }
+        }
+
+        return null;
     }
 
     public string? ResolveAddonSpritesDirectory()
@@ -534,8 +602,13 @@ public class StorageService
                         string icon = root.TryGetProperty("icon", out var pIcon) ? (pIcon.GetString() ?? "✨") : "✨";
                         string author = root.TryGetProperty("author", out var pAuth) ? (pAuth.GetString() ?? "Addon") : "Addon";
                         string previewUrl = root.TryGetProperty("preview", out var pPrev) ? (pPrev.GetString() ?? "") : "";
+                        if (string.IsNullOrEmpty(previewUrl) && root.TryGetProperty("preview_url", out var pPrevUrl))
+                        {
+                            previewUrl = pPrevUrl.GetString() ?? "";
+                        }
                         int scale = root.TryGetProperty("scale", out var pScale) ? pScale.GetInt32() : 100;
                         int speed = root.TryGetProperty("speed", out var pSpd) ? pSpd.GetInt32() : 100;
+                        bool isFlying = (root.TryGetProperty("is_flying", out var pFly) && pFly.GetBoolean()) || id.Equals("biene", StringComparison.OrdinalIgnoreCase);
 
                         CompanionSprites? sprites = null;
                         if (root.TryGetProperty("sprites", out var pSprites) && pSprites.ValueKind == JsonValueKind.Object)
@@ -567,6 +640,13 @@ public class StorageService
                             }
                         }
 
+                        // Fallback: If only preview image was provided, use it as walk frame
+                        if ((sprites == null || sprites.Walk.Count == 0) && !string.IsNullOrEmpty(previewUrl))
+                        {
+                            sprites ??= new CompanionSprites();
+                            sprites.Walk.Add(previewUrl);
+                        }
+
                         if (sprites != null && sprites.Walk.Count > 0)
                         {
                             if (sprites.Jump.Count == 0) sprites.Jump.AddRange(sprites.Walk);
@@ -591,6 +671,7 @@ public class StorageService
                             TailFrames = sprites.Tail.Count,
                             Scale = scale,
                             Speed = speed,
+                            IsFlying = isFlying,
                             Sprites = sprites
                         });
                     }
@@ -600,93 +681,7 @@ public class StorageService
             catch { }
         }
 
-        // 2. Scan legacy folder-based companions in Addon_sprites
-        string? addonDir = ResolveAddonSpritesDirectory();
-        if (!string.IsNullOrEmpty(addonDir) && Directory.Exists(addonDir))
-        {
-            try
-            {
-                foreach (var subDir in Directory.EnumerateDirectories(addonDir))
-                {
-                    string dirName = Path.GetFileName(subDir);
-                    if (dirName.Equals("sprites", StringComparison.OrdinalIgnoreCase) ||
-                        dirName.StartsWith(".") ||
-                        dirName.StartsWith("_"))
-                    {
-                        continue;
-                    }
-
-                    if (!File.Exists(Path.Combine(subDir, "walk_0.png")))
-                    {
-                        continue;
-                    }
-
-                    string id = dirName.ToLowerInvariant();
-                    if (list.Any(x => x.Id == id)) continue;
-
-                    string name = char.ToUpper(dirName[0]) + (dirName.Length > 1 ? dirName.Substring(1) : "");
-                    string desc = "Zusätzlicher Addon-Begleiter";
-                    string icon = "✨";
-                    int walkFrames = 4;
-                    int jumpFrames = 4;
-                    int tailFrames = 4;
-
-                    string metaFile = Path.Combine(subDir, "companion.json");
-                    if (File.Exists(metaFile))
-                    {
-                        try
-                        {
-                            using var doc = JsonDocument.Parse(File.ReadAllText(metaFile));
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("name", out var pName)) name = pName.GetString() ?? name;
-                            if (root.TryGetProperty("description", out var pDesc)) desc = pDesc.GetString() ?? desc;
-                            if (root.TryGetProperty("icon", out var pIcon)) icon = pIcon.GetString() ?? icon;
-                            if (root.TryGetProperty("walk_frames", out var pWf)) walkFrames = pWf.GetInt32();
-                            if (root.TryGetProperty("jump_frames", out var pJf)) jumpFrames = pJf.GetInt32();
-                            if (root.TryGetProperty("tail_frames", out var pTf)) tailFrames = pTf.GetInt32();
-                        }
-                        catch { }
-                    }
-
-                    string previewUrl = File.Exists(Path.Combine(subDir, "preview.png"))
-                        ? $"https://addons.ambientdeck.local/{Uri.EscapeDataString(dirName)}/preview.png"
-                        : $"https://addons.ambientdeck.local/{Uri.EscapeDataString(dirName)}/walk_0.png";
-
-                    string baseUrl = $"https://addons.ambientdeck.local/{Uri.EscapeDataString(dirName)}";
-
-                    list.Add(new AddonCompanionInfo
-                    {
-                        Id = id,
-                        Name = name,
-                        Description = desc,
-                        Icon = icon,
-                        PreviewUrl = previewUrl,
-                        BaseUrl = baseUrl,
-                        WalkFrames = walkFrames,
-                        JumpFrames = jumpFrames,
-                        TailFrames = tailFrames
-                    });
-                }
-            }
-            catch { }
-        }
-
-        // 3. Ensure Ankylosaurus is present
-        if (!list.Any(x => x.Id == "ankylosaurus"))
-        {
-            list.Insert(0, new AddonCompanionInfo
-            {
-                Id = "ankylosaurus",
-                Name = "Ankylosaurus",
-                Description = "Der treue Standard-Dino: Läuft ruhig, wedelt sanft mit seiner Keule und springt vor Freude hoch!",
-                Icon = "🦖",
-                PreviewUrl = "/dino/walk_0.png",
-                WalkFrames = 4,
-                JumpFrames = 4,
-                TailFrames = 4
-            });
-        }
-
+        // 2. Legacy folder-based companions in Addon_sprites are discontinued; only single-file packages are used.
         return list;
     }
 

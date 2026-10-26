@@ -22,6 +22,8 @@ import {
   Upload,
   Check,
   Sparkles,
+  Copy,
+  Lock,
 } from 'lucide-react';
 import {
   AddonCompanionInfo,
@@ -71,7 +73,6 @@ const COLOR_THEMES: {
   { id: 'amethyst', label: 'Neon Violett', swatch: 'linear-gradient(135deg, #c084fc, #f472b6)' },
   { id: 'crimson', label: 'Rubin Rose', swatch: 'linear-gradient(135deg, #fb7185, #e11d48)' },
   { id: 'frost', label: 'Arktis Weiß', swatch: 'linear-gradient(135deg, #f8fafc, #94a3b8)' },
-  { id: 'custom', label: 'Eigene Farbe', swatch: 'linear-gradient(135deg, #6366f1, #ec4899)' },
   {
     id: 'rainbow',
     label: '🌈 Regenbogen-Fade (Auto)',
@@ -416,7 +417,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       });
     }
 
-    // Sort order: Drache first (#1), Ankylosaurus second (#2), then others alphabetically
+    // Ensure Biene is present as standard companion #3
+    const hasBiene = list.some((c) => c.id.toLowerCase() === 'biene');
+    if (!hasBiene) {
+      list.push({
+        id: 'biene',
+        name: 'Biene',
+        description: 'Flotte kleine Honigbiene vom Dino Desk Team: Summt und schwebt sanft über deinen Desktop!',
+        icon: '🐝',
+        author: 'Dino Desk Team',
+        preview_url: '/dino/walk_0.png',
+        walk_frames: 4,
+        jump_frames: 0,
+        tail_frames: 0,
+        scale: 72,
+        is_flying: true,
+      });
+    }
+
+    // Sort order: Drache first (#1), Ankylosaurus second (#2), Biene third (#3), then others alphabetically
     return list.sort((a, b) => {
       const idA = a.id.toLowerCase();
       const idB = b.id.toLowerCase();
@@ -424,9 +443,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       if (idB === 'drache') return 1;
       if (idA === 'ankylosaurus') return -1;
       if (idB === 'ankylosaurus') return 1;
+      if (idA === 'biene') return -1;
+      if (idB === 'biene') return 1;
       return a.name.localeCompare(b.name);
     });
   }, [addonCompanions]);
+
+  const handleOpenInEditor = (comp: AddonCompanionInfo, asCopy: boolean) => {
+    try {
+      const isLocked = comp.id.toLowerCase() === 'drache' || comp.id.toLowerCase() === 'ankylosaurus';
+      const targetId = asCopy || isLocked ? `${comp.id.toLowerCase()}_kopie` : comp.id.toLowerCase();
+      const targetName = asCopy || isLocked ? `${comp.name} (Kopie)` : comp.name;
+
+      let walkFrames: string[] = [];
+      if (comp.sprites?.walk && comp.sprites.walk.length > 0) {
+        walkFrames = comp.sprites.walk;
+      } else if (comp.id.toLowerCase() === 'drache') {
+        walkFrames = ['/drache/walk_0.png', '/drache/walk_1.png', '/drache/walk_2.png', '/drache/walk_3.png'];
+      } else if (comp.id.toLowerCase() === 'ankylosaurus') {
+        walkFrames = ['/dino/walk_0.png', '/dino/walk_1.png', '/dino/walk_2.png', '/dino/walk_3.png'];
+      } else if (comp.preview_url) {
+        walkFrames = [comp.preview_url];
+      }
+
+      const pkg = {
+        id: targetId,
+        name: targetName,
+        title: `${comp.icon || '✨'} ${targetName}`,
+        icon: comp.icon || '✨',
+        description: comp.description || '',
+        author: asCopy || isLocked ? 'Mein Begleiter' : (comp.author || 'Dino Desk Team'),
+        version: '1.0.0',
+        scale: comp.scale || 100,
+        speed: comp.speed || 100,
+        is_flying: comp.is_flying || comp.id.toLowerCase() === 'biene',
+        sprites: {
+          walk: walkFrames,
+          jump: walkFrames,
+          tail: walkFrames,
+        },
+      };
+
+      localStorage.setItem('companion_studio_import', JSON.stringify(pkg));
+      Bridge.openCompanionEditor();
+    } catch (err) {
+      console.error('Failed to prepare companion for editor', err);
+      Bridge.openCompanionEditor();
+    }
+  };
 
   const currentCycleVariants: DinoVariant[] =
     config.modules.dino_companion?.cycle_variants &&
@@ -944,36 +1008,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 />
                 <span className="widget-badge">{config.theme.font_scale ?? 100}%</span>
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 6 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={config.theme.use_custom_text_color ?? false}
-                    onChange={(e) =>
-                      onUpdateConfig({
-                        ...config,
-                        theme: { ...config.theme, use_custom_text_color: e.target.checked },
-                      })
-                    }
-                  />
-                  <span>Eigene feste Schriftfarbe:</span>
-                </label>
-                <input
-                  type="color"
-                  value={config.theme.text_color || '#f3f5f9'}
-                  onChange={(e) =>
-                    onUpdateConfig({
-                      ...config,
-                      theme: {
-                        ...config.theme,
-                        use_custom_text_color: true,
-                        text_color: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
             </div>
           </div>
 
@@ -992,37 +1026,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             ))}
           </div>
-
-          {config.theme.color_mode === 'custom' && (
-            <div style={{ display: 'flex', gap: 16, marginTop: 10, alignItems: 'center' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem' }}>
-                <span>Haupt-Akzentfarbe:</span>
-                <input
-                  type="color"
-                  value={config.theme.custom_primary}
-                  onChange={(e) =>
-                    onUpdateConfig({
-                      ...config,
-                      theme: { ...config.theme, custom_primary: e.target.value },
-                    })
-                  }
-                />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.78rem' }}>
-                <span>Zweit-Akzentfarbe:</span>
-                <input
-                  type="color"
-                  value={config.theme.custom_secondary}
-                  onChange={(e) =>
-                    onUpdateConfig({
-                      ...config,
-                      theme: { ...config.theme, custom_secondary: e.target.value },
-                    })
-                  }
-                />
-              </label>
-            </div>
-          )}
 
           {config.theme.color_mode === 'rainbow' && (
             <div style={{ display: 'flex', gap: 12, marginTop: 10, alignItems: 'center' }}>
@@ -1589,28 +1592,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <Sparkles size={14} />
                   <span>Begleiter auswählen ({allAvailableCompanions.length} erkannt)</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => Bridge.openCompanionsFolder()}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    padding: '6px 12px',
-                    borderRadius: '7px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.14)',
-                    color: '#cbd5e1',
-                    fontSize: '0.72rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  title="Öffnet den Begleiter-Ordner im Windows Explorer zum Hinzufügen von .companion.json Dateien"
-                >
-                  <FolderOpen size={12} color="#38bdf8" />
-                  <span>Ordner öffnen</span>
-                </button>
               </div>
 
               {/* Animationen einzeln aktivieren / deaktivieren */}
@@ -2113,6 +2094,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <button
                   type="button"
+                  onClick={() => Bridge.openCompanionEditor()}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 13px',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+                    border: '1px solid rgba(236, 72, 153, 0.4)',
+                    color: '#ffffff',
+                    fontSize: '0.74rem',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    boxShadow: '0 2px 10px rgba(139, 92, 246, 0.35)',
+                    transition: 'all 0.15s ease',
+                  }}
+                  title="Öffnet den Begleiter- & Sprite-Editor direkt im Browser"
+                >
+                  <Sparkles size={13} color="#fff" />
+                  <span>Begleiter-Editor öffnen</span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => Bridge.refreshCompanions()}
                   style={{
                     padding: '6px 10px',
@@ -2167,6 +2172,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {allAvailableCompanions.map((comp) => {
                 const isSelected =
                   (config.modules.dino_companion?.variant || 'drache').toLowerCase() === comp.id.toLowerCase();
+                const isLocked = comp.id.toLowerCase() === 'drache' || comp.id.toLowerCase() === 'ankylosaurus';
                 return (
                   <div
                     key={comp.id}
@@ -2196,7 +2202,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       cursor: 'pointer',
                       transition: 'all 0.18s ease',
                       position: 'relative',
-                      gap: 10,
+                      gap: 8,
                     }}
                   >
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
@@ -2215,7 +2221,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         }}
                       >
                         <img
-                          src={comp.preview_url || comp.sprites?.walk?.[0] || '/dino/walk_0.png'}
+                          src={comp.preview_url || (comp as any).preview || comp.sprites?.walk?.[0] || '/dino/walk_0.png'}
                           alt={comp.name}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src = '/dino/walk_0.png';
@@ -2228,8 +2234,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#f3f5f9', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
                           {comp.icon || '🦖'} {comp.name}
                         </div>
-                        <div style={{ fontSize: '0.67rem', color: '#94a3b8' }}>
-                          {comp.author || 'Begleiter-Addon'}
+                        <div style={{ fontSize: '0.66rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 2 }}>
+                          <span>{comp.author || 'Begleiter'}</span>
+                          {isLocked ? (
+                            <span style={{ fontSize: '0.60rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                              <Lock size={9} /> Standard
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.60rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.15)', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
+                              Anpassbar
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -2274,7 +2289,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 6,
-                        marginTop: 4,
+                        marginTop: 2,
                         transition: 'all 0.15s ease',
                       }}
                     >
@@ -2287,6 +2302,90 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <span>Als Begleiter aktivieren</span>
                       )}
                     </button>
+
+                    {/* Action Row: Bearbeiten & Kopieren */}
+                    <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
+                      {isLocked ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenInEditor(comp, true);
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '5px 8px',
+                            borderRadius: '6px',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(255, 255, 255, 0.12)',
+                            color: '#cbd5e1',
+                            fontSize: '0.70rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 5,
+                            fontWeight: 600,
+                          }}
+                          title="Original-Begleiter ist geschützt. Erstellt eine Kopie und öffnet sie direkt im Begleiter-Editor!"
+                        >
+                          <Copy size={11} color="#fbbf24" />
+                          <span>Kopieren & Bearbeiten</span>
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenInEditor(comp, false);
+                            }}
+                            style={{
+                              flex: 1,
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25))',
+                              border: '1px solid rgba(139, 92, 246, 0.45)',
+                              color: '#c084fc',
+                              fontSize: '0.70rem',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: 5,
+                            }}
+                            title="Öffnet diesen Begleiter direkt im Editor zum Anpassen von Farben & Sprites"
+                          >
+                            <Sparkles size={11} color="#c084fc" />
+                            <span>Im Editor bearbeiten</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenInEditor(comp, true);
+                            }}
+                            style={{
+                              padding: '5px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              color: '#94a3b8',
+                              fontSize: '0.70rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 4,
+                            }}
+                            title="Erstellt eine Kopie dieses Begleiters"
+                          >
+                            <Copy size={11} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}

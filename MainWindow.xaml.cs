@@ -716,6 +716,38 @@ public partial class MainWindow : Window
                     break;
                 }
 
+                case "open_companion_editor":
+                {
+                    try
+                    {
+                        string? editorPath = _storage.ResolveCompanionEditorPath();
+                        if (!string.IsNullOrEmpty(editorPath) && File.Exists(editorPath))
+                        {
+                            string abs = Path.GetFullPath(editorPath);
+                            try
+                            {
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = abs,
+                                    UseShellExecute = true
+                                });
+                            }
+                            catch
+                            {
+                                Process.Start(new ProcessStartInfo
+                                {
+                                    FileName = "cmd.exe",
+                                    Arguments = $"/c start \"\" \"{abs}\"",
+                                    CreateNoWindow = true,
+                                    UseShellExecute = false
+                                });
+                            }
+                        }
+                    }
+                    catch { }
+                    break;
+                }
+
                 case "import_companion_file":
                 {
                     using var dlg = new OpenFileDialog

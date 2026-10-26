@@ -27,6 +27,7 @@
   <ItemGroup>
     <None Include="frontend\dist\**\*" LinkBase="wwwroot" CopyToOutputDirectory="PreserveNewest" />
     <None Include="companions\**\*" LinkBase="companions" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="companion-editor\**\*" LinkBase="companion-editor" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

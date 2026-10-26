@@ -63,6 +63,8 @@ export const DEFAULT_CONFIG: AmbientDeckConfig = {
     font_scale: 100,
     use_custom_text_color: false,
     text_color: '#f3f5f9',
+    use_custom_secondary_color: false,
+    secondary_text_color: '#1e293b',
   },
   modules: {
     header_title: {
@@ -187,6 +189,7 @@ export const Bridge = {
   syncGoogleCalendar: (icalUrl: string) =>
     sendToBackend('sync_google_calendar', { ical_url: icalUrl }),
   openCompanionsFolder: () => sendToBackend('open_companions_folder'),
+  openCompanionEditor: () => sendToBackend('open_companion_editor'),
   importCompanionFile: () => sendToBackend('import_companion_file'),
   refreshCompanions: () => sendToBackend('refresh_companions'),
   openWindowsNotificationSettings: () =>

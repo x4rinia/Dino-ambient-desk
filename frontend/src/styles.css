@@ -4,9 +4,9 @@
   --bg-glass-subtle: rgba(18, 20, 28, 0.45);
   --border-glass: rgba(255, 255, 255, 0.08);
   --border-glass-hover: rgba(255, 255, 255, 0.18);
-  --text-primary: #f3f5f9;
-  --text-secondary: rgba(226, 232, 240, 0.75);
-  --text-muted: rgba(148, 163, 184, 0.55);
+  --text-primary: #f8fafc;
+  --text-secondary: rgba(241, 245, 249, 0.9);
+  --text-muted: rgba(203, 213, 225, 0.75);
   --accent-blue: #38bdf8;
   --accent-blue-glow: rgba(56, 189, 248, 0.28);
   --accent-emerald: #34d399;
@@ -78,12 +78,12 @@ body,
 
 /* 🌫️ Geblurrt — Only the individual widgets are blurred, wallpaper between them stays sharp */
 .ambient-deck.bg-mode-wallpaper_blur .glass-panel {
-  background: rgba(14, 18, 28, 0.38);
+  background: rgba(14, 18, 28, 0.44);
   backdrop-filter: blur(var(--widget-blur-px, 18px)) saturate(135%);
   -webkit-backdrop-filter: blur(var(--widget-blur-px, 18px)) saturate(135%);
   border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.72);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
 /* Background Layer — Always shows the sharp desktop wallpaper between the widgets */
@@ -98,6 +98,8 @@ body,
 /* ⬛ Schwarz — Only the individual widgets are solid black, wallpaper between them stays visible */
 .ambient-deck.bg-mode-black {
   background: transparent;
+  --text-secondary: rgba(226, 232, 240, 0.82);
+  --text-muted: rgba(148, 163, 184, 0.65);
 }
 
 .ambient-deck.bg-mode-black .glass-panel {
@@ -479,11 +481,12 @@ body,
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.74rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--text-secondary);
+  color: var(--accent-blue);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .widget-badge {
@@ -542,14 +545,15 @@ body,
 }
 
 .live-date {
-  font-size: 0.86rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
   color: var(--text-secondary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 /* Compact Month Calendar */
 .calendar-matrix-wrap.compact {
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
   padding-left: 12px;
   width: 195px;
 }
@@ -561,8 +565,9 @@ body,
   margin-bottom: 4px;
   font-family: var(--font-mono);
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--accent-blue);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .calendar-grid.compact {
@@ -574,27 +579,32 @@ body,
 
 .calendar-weekday {
   font-family: var(--font-mono);
-  font-size: 0.56rem;
+  font-size: 0.62rem;
+  font-weight: 700;
   color: var(--text-muted);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   padding-bottom: 2px;
 }
 
 .calendar-day {
   position: relative;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.66rem;
+  font-weight: 600;
   height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   color: var(--text-secondary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   border: 1.5px solid transparent;
   box-sizing: border-box;
 }
 
 .calendar-day.other-month {
-  opacity: 0.24;
+  color: var(--text-muted);
+  opacity: 0.55;
 }
 
 .calendar-day.today {
@@ -1331,6 +1341,15 @@ body,
   border-right: 2px solid var(--accent-blue);
   border-bottom: 2px solid var(--accent-blue);
   opacity: 0.7;
+}
+
+@keyframes dinoBeeHover {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(2.5deg);
+  }
 }
 
 /* Portrait (Hochkant) Layout Adjustments */

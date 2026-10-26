@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dino Companion Studio — Begleiter & Sprite Editor</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-card-hover: #1c263f;
+      --bg-surface: #18223a;
+      --border: rgba(255, 255, 255, 0.12);
+      --border-focus: #38bdf8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-sub: #cbd5e1;
+      --text-muted: #94a3b8;
+      --checker-1: #1e293b;
+      --checker-2: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: #111827;
+      border-bottom: 1px solid var(--border);
+      height: 58px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+    }
+
+    .logo-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.18);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      box-shadow: 0 3px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    button.primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+      box-shadow: 0 5px 16px rgba(16, 185, 129, 0.5);
+    }
+
+    button.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: var(--danger);
+      color: #fca5a5;
+    }
+
+    /* Main Workspace Layout */
+    main {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      flex: 1;
+      height: calc(100vh - 58px);
+      overflow: hidden;
+    }
+
+    /* Column Panels */
+    .panel {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel:last-child {
+      border-right: none;
+      border-left: 1px solid var(--border);
+    }
+
+    .panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Left Sidebar: Frames */
+    .drop-zone {
+      border: 2px dashed rgba(56, 189, 248, 0.45);
+      border-radius: 12px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(56, 189, 248, 0.05);
+      transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+    }
+
+    .drop-zone-icon {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .drop-zone-text {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .drop-zone-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .frames-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .frame-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      position: relative;
+    }
+
+    .frame-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .frame-card.active {
+      background: rgba(56, 189, 248, 0.18);
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .frame-thumb-box {
+      width: 54px;
+      height: 54px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background-image: linear-gradient(45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(-45deg, var(--checker-1) 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, var(--checker-1) 75%),
+                        linear-gradient(-45deg, transparent 75%, var(--checker-1) 75%);
+      background-size: 10px 10px;
+      background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+      background-color: var(--checker-2);
+      overflow: hidden;
+    }
+
+    .frame-thumb-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .frame-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .frame-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .frame-dim {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+    }
+
+    .frame-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .btn-icon {
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+    }
+
+    .btn-icon:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Center Panel: Canvas & Multi-Tier Toolbar */
+    .canvas-panel {
+      display: flex;
+      flex-direction: column;
+      background: #080b13;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ribbon / Dual Tier Toolbar */
+    .canvas-ribbon {
+      background: #111827;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .ribbon-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      overflow-x: auto;
+    }
+
+    .ribbon-row:last-child {
+      border-bottom: none;
+    }
+
+    .ribbon-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      padding-right: 16px;
+      flex-shrink: 0;
+    }
+
+    .ribbon-group:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+
+    .ribbon-label {
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tool-btn {
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text-sub);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .tool-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    .tool-btn.active {
+      background: rgba(56, 189, 248, 0.22);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+    }
+
+    .slider-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+    }
+
+    .slider-box input[type="range"] {
+      width: 90px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .checkbox-label input {
+      accent-color: var(--primary);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .canvas-viewport {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      padding: 24px;
+      position: relative;
+      background-image: linear-gradient(45deg, #131924 25%, transparent 25%),
+                        linear-gradient(-45deg, #131924 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #131924 75%),
+                        linear-gradient(-45deg, transparent 75%, #131924 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      background-color: #0b0f17;
+    }
+
+    #mainCanvas {
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.7);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      image-rendering: pixelated;
+      cursor: crosshair;
+      background-image: linear-gradient(45deg, #242f40 25%, transparent 25%),
+                        linear-gradient(-45deg, #242f40 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #242f40 75%),
+                        linear-gradient(-45deg, transparent 75%, #242f40 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+      background-color: #171f2c;
+    }
+
+    /* Right Sidebar: Preview & Config */
+    .preview-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-stage {
+      width: 100%;
+      height: 150px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #0b0f17;
+      background-image: linear-gradient(45deg, #182232 25%, transparent 25%),
+                        linear-gradient(-45deg, #182232 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #182232 75%),
+                        linear-gradient(-45deg, transparent 75%, #182232 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
+    }
+
+    .preview-stage.bg-dark {
+      background: #090d14;
+      background-image: none;
+    }
+
+    .preview-stage.bg-green {
+      background: #10b981;
+      background-image: none;
+    }
+
+    .preview-stage.bg-white {
+      background: #f8fafc;
+      background-image: none;
+    }
+
+    .preview-ground {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    #previewSprite {
+      position: absolute;
+      bottom: 26px;
+      image-rendering: pixelated;
+      transition: transform 0.05s linear;
+      transform-origin: bottom center;
+    }
+
+    .preview-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    /* Form Fields */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    input[type="text"], textarea, select {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 0.84rem;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--border-focus);
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 52px;
+    }
+
+    .emoji-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
+    }
+
+    .emoji-btn {
+      padding: 4px 8px;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .emoji-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* SVG Icon Helpers */
+    .icon-svg {
+      width: 15px;
+      height: 15px;
+      stroke-width: 2.2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      display: inline-block;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon-box">
+        <svg class="icon-svg" style="width:20px; height:20px; color:#ffffff;" viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="logo-title">
+        <span>Dino Companion Studio</span>
+        <span class="logo-badge">Begleiter & Sprite Editor</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <input type="file" id="fileJsonInput" accept=".json,.companion.json" style="display:none;" />
+      <button type="button" onclick="document.getElementById('fileJsonInput').click()">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        <span>Addon laden (.companion.json)</span>
+      </button>
+
+      <button type="button" onclick="resetAll()" class="danger" title="Alles leeren und neu anfangen">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
+        <span>Neu</span>
+      </button>
+
+      <button type="button" onclick="exportCompanionJson()" class="primary">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <span>Als .companion.json speichern</span>
+      </button>
+
+      <button type="button" onclick="downloadAllFramesZip()">
+        <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+        <span>Frames als PNGs</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 3-Column Studio -->
+  <main>
+    <!-- Left Column: Frames & Layer List -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg class="icon-svg" style="color:var(--primary);" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+          <span>Frames (max. 8)</span>
+        </span>
+        <span id="frameCountBadge" style="font-size:0.8rem; color:var(--primary); font-weight:800; background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:999px;">0 / 8</span>
+      </div>
+
+      <div class="panel-body">
+        <input type="file" id="fileImageInput" accept="image/png,image/jpeg,image/webp,image/gif" multiple style="display:none;" />
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileImageInput').click()">
+          <div class="drop-zone-icon">🖼️</div>
+          <div class="drop-zone-text">Bilder hierher ziehen</div>
+          <div class="drop-zone-hint">Oder klicken zum Auswählen (bis zu 8 Bilder)</div>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <button type="button" onclick="document.getElementById('fileImageInput').click()" style="flex:1; justify-content:center;">
+            <svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Frame laden</span>
+          </button>
+          <button type="button" onclick="duplicateCurrentFrame()" title="Aktuellen Frame duplizieren">
+            <svg class="icon-svg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </button>
+          <button type="button" onclick="deleteCurrentFrame()" class="danger" title="Aktuellen Frame löschen">
+            <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+
+        <div class="frames-list" id="framesList">
+          <!-- Dynamically filled frame cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Center Column: Canvas Editor -->
+    <section class="canvas-panel">
+      <!-- Multi-Tier Clean Ribbon Toolbar -->
+      <div class="canvas-ribbon">
+        <!-- Row 1: Active Tools & Options -->
+        <div class="ribbon-row">
+          <!-- Tool Selection -->
+          <div class="ribbon-group">
+            <span class="ribbon-label">Werkzeug:</span>
+            <button type="button" id="toolWand" class="tool-btn active" onclick="setTool('wand')" title="Klicke auf den Hintergrund, um ihn transparent zu machen">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle></svg>
+              <span>Hintergrund löschen</span>
+            </button>
+            <button type="button" id="toolEraser" class="tool-btn" onclick="setTool('eraser')" title="Pixel manuell wegradieren">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M18 2l4 4-14 14H4v-4L18 2z"></path></svg>
+              <span>Radiergummi</span>
+            </button>
+            <button type="button" id="toolMove" class="tool-btn" onclick="setTool('move')" title="Bild im Canvas verschieben">
+              <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+              <span>Verschieben</span>
+            </button>
+          </div>
+
+          <!-- Wand Tool Parameters -->
+          <div class="ribbon-group" id="wandParams">
+            <span class="ribbon-label">Toleranz:</span>
+            <div class="slider-box">
+              <input type="range" id="toleranceRange" min="0" max="100" value="25" oninput="updateToleranceLabel(this.value)" />
+              <span id="toleranceVal" style="font-weight:700; color:var(--primary); min-width:34px;">25%</span>
+            </div>
+
+            <label class="checkbox-label" style="margin-left:4px;">
+              <input type="checkbox" id="contiguousWand" checked />
+              <span>Zusammenhängend</span>
+            </label>
+
+            <button type="button" class="tool-btn" onclick="applyMagicWandToAllFrames()" style="background:rgba(16, 185, 129, 0.2); border-color:#10b981; color:#34d399; font-weight:700;" title="Entfernt dieselbe Hintergrundfarbe bei allen Frames gleichzeitig!">
+              <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Auf alle Frames anwenden</span>
+            </button>
+          </div>
+
+          <!-- Eraser Size Parameters -->
+          <div class="ribbon-group" id="eraserParams" style="display:none;">
+            <span class="ribbon-label">Pinselgröße:</span>
+            <div class="slider-box">
+              <input type="range" id="eraserSizeRange" min="1" max="40" value="8" oninput="document.getElementById('eraserSizeVal').textContent = this.value + 'px'" />
+              <span id="eraserSizeVal" style="font-weight:700; color:var(--primary); min-width:34px;">8px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Canvas Size, Guides & View Options -->
+        <div class="ribbon-row">
+          <div class="ribbon-group">
+            <span class="ribbon-label">Leinwand-Größe:</span>
+            <select id="canvasResSelect" onchange="changeCanvasResolution(this.value)" style="padding:4px 8px;">
+              <option value="64">64 × 64 px</option>
+              <option value="80">80 × 80 px</option>
+              <option value="96" selected>96 × 96 px (Standard)</option>
+              <option value="128">128 × 128 px</option>
+              <option value="160">160 × 160 px</option>
+            </select>
+          </div>
+
+          <div class="ribbon-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="guideBaseline" checked onchange="drawActiveFrame()" />
+              <span style="color:#f87171;">Bodenlinie anzeigen</span>
+            </label>
+            <label class="checkbox-label" style="margin-left:8px;">
+              <input type="checkbox" id="guideGrid" checked onchange="drawActiveFrame()" />
+              <span>Pixelgitter</span>
+            </label>
+          </div>
+
+          <div class="ribbon-group">
+            <span class="ribbon-label">Zoom:</span>
+            <button type="button" class="btn-icon" onclick="changeZoom(-1)" title="Verkleinern">
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+            <span id="zoomLevelText" style="font-size:0.82rem; font-weight:700; color:#ffffff; min-width:44px; text-align:center;">400%</span>
+            <button type="button" class="btn-icon" onclick="changeZoom(1)" title="Vergrößern">
+              <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+            </button>
+          </div>
+
+          <div class="ribbon-group">
+            <button type="button" class="tool-btn" onclick="undo()" title="Schritt rückgängig machen (Strg+Z)">
+              <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+              <span>Rückgängig</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Canvas Viewport -->
+      <div class="canvas-viewport" id="canvasViewport">
+        <canvas id="mainCanvas" width="96" height="96"></canvas>
+      </div>
+
+      <!-- Footer Info Bar -->
+      <div style="background:#111827; height:32px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 18px; font-size:0.78rem; color:var(--text-sub);">
+        <span id="canvasStatusText" style="font-weight:600;">Klicke auf den Hintergrund im Bild, um die Farbe transparent zu machen.</span>
+        <span id="mouseCoordsText" style="font-family:monospace; color:var(--primary); font-weight:700;">X: 0, Y: 0</span>
+      </div>
+    </section>
+
+    <!-- Right Column: Live Preview & Metadata -->
+    <section class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <svg class="icon-svg" style="color:var(--accent);" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <span>Vorschau & Begleiter-Info</span>
+        </span>
+      </div>
+
+      <div class="panel-body">
+        <!-- Live Animation Preview Box -->
+        <div class="preview-box">
+          <div class="preview-stage" id="previewStage">
+            <div class="preview-ground"></div>
+            <img id="previewSprite" src="" alt="Vorschau" />
+          </div>
+
+          <div class="preview-controls">
+            <button type="button" id="btnPlayPause" onclick="togglePlay()" class="primary" style="padding:6px 12px;">
+              <svg class="icon-svg" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+              <span>Pause</span>
+            </button>
+
+            <div style="display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:600;">
+              <span>Tempo:</span>
+              <input type="range" id="fpsRange" min="1" max="24" value="7" oninput="updateFps(this.value)" style="width:75px; accent-color:var(--primary);" />
+              <span id="fpsVal" style="color:var(--primary); font-weight:700; min-width:44px;">7 FPS</span>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-size:0.8rem;">
+            <label class="checkbox-label">
+              <input type="checkbox" id="previewWalkMode" checked />
+              <span>Hin- & herlaufen</span>
+            </label>
+
+            <div style="display:flex; gap:6px;">
+              <button type="button" class="btn-icon" onclick="setPreviewBg('check')" title="Transparenz-Karo">🏁</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('dark')" title="Dunkler Desktop">⬛</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('green')" title="Chroma-Grün">🟩</button>
+              <button type="button" class="btn-icon" onclick="setPreviewBg('white')" title="Hell">⬜</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Companion Metadata Form -->
+        <div style="border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Begleiter-Name:</label>
+            <input type="text" id="compName" value="Mein Begleiter" oninput="onMetaChange()" placeholder="z. B. Kuschelbär" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Symbol / Icon:</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="compIcon" value="✨" maxlength="4" style="width:52px; text-align:center; font-size:1.2rem;" oninput="onMetaChange()" />
+              <div class="emoji-row" style="flex:1;">
+                <span class="emoji-btn" onclick="setEmoji('🐉')">🐉</span>
+                <span class="emoji-btn" onclick="setEmoji('🦖')">🦖</span>
+                <span class="emoji-btn" onclick="setEmoji('🐾')">🐾</span>
+                <span class="emoji-btn" onclick="setEmoji('🐱')">🐱</span>
+                <span class="emoji-btn" onclick="setEmoji('🐶')">🐶</span>
+                <span class="emoji-btn" onclick="setEmoji('🦊')">🦊</span>
+                <span class="emoji-btn" onclick="setEmoji('🤖')">🤖</span>
+                <span class="emoji-btn" onclick="setEmoji('🐝')">🐝</span>
+                <span class="emoji-btn" onclick="setEmoji('✨')">✨</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">ID (Dateiname):</label>
+            <input type="text" id="compId" value="mein_begleiter" oninput="onMetaChange()" placeholder="z. B. kuschelbaer" />
+            <span style="font-size:0.72rem; color:var(--text-sub); margin-top:2px;">Ergibt: <code id="filenamePreview" style="color:var(--primary); font-weight:700;">mein_begleiter.companion.json</code></span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Beschreibung:</label>
+            <textarea id="compDesc" oninput="onMetaChange()" placeholder="Niedlicher Begleiter für das Dino-Widget-Desk"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ersteller / Autor:</label>
+            <input type="text" id="compAuthor" value="Dino Desk Team" oninput="onMetaChange()" placeholder="z. B. Dino Desk Team oder Dein Name" />
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Standard-Größe:</label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="range" id="compScale" min="50" max="160" step="5" value="100" oninput="document.getElementById('compScaleVal').textContent = this.value + '%'" style="width:100%; accent-color:var(--primary);" />
+                <span id="compScaleVal" style="font-size:0.78rem; font-weight:700; color:var(--primary); min-width:38px;">100%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Lauf-Tempo:</label>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <input type="range" id="compSpeed" min="50" max="160" step="5" value="100" oninput="document.getElementById('compSpeedVal').textContent = this.value + '%'" style="width:100%; accent-color:var(--primary);" />
+                <span id="compSpeedVal" style="font-size:0.78rem; font-weight:700; color:var(--primary); min-width:38px;">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Export Action -->
+        <button type="button" onclick="exportCompanionJson()" class="primary" style="margin-top:auto; padding:12px 16px; justify-content:center; font-size:0.88rem;">
+          <svg class="icon-svg" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Als .companion.json speichern</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">
+    <svg class="icon-svg" viewBox="0 0 24 24" style="width:18px; height:18px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toastMsg">Erfolgreich gespeichert!</span>
+  </div>
+
+  <script>
+    // --- Application State ---
+    let frames = [];
+    let activeFrameIndex = 0;
+    let targetResolution = 96;
+    let currentZoom = 4;
+    let activeTool = 'wand';
+    let undoHistory = [];
+    let isDrawing = false;
+    let lastColorPicked = null;
+
+    // Animation preview state
+    let isPlaying = true;
+    let previewFrameIndex = 0;
+    let animFps = 7;
+    let animInterval = null;
+    let walkDirection = 1;
+    let walkPosition = 0;
+
+    // Elements
+    const mainCanvas = document.getElementById('mainCanvas');
+    const mainCtx = mainCanvas.getContext('2d');
+    const previewSprite = document.getElementById('previewSprite');
+    const previewStage = document.getElementById('previewStage');
+
+    // --- Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvasEvents();
+      initDragAndDrop();
+      initJsonInput();
+      startAnimationLoop();
+
+      // Check if an existing companion was sent from the app for editing or copying
+      const autoImport = localStorage.getItem('companion_studio_import');
+      if (autoImport) {
+        try {
+          const parsed = JSON.parse(autoImport);
+          localStorage.removeItem('companion_studio_import');
+          loadCompanionData(parsed);
+          return;
+        } catch (e) {
+          console.error('Failed to parse companion_studio_import', e);
+        }
+      }
+
+      createDefaultFrames();
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // --- Starter Companion Generator (Cute Friendly Blob) ---
+    function createDefaultFrames() {
+      frames = [];
+      const colors = ['#38bdf8', '#0ea5e9'];
+
+      for (let i = 0; i < 4; i++) {
+        const c = document.createElement('canvas');
+        c.width = targetResolution;
+        c.height = targetResolution;
+        const ctx = c.getContext('2d');
+
+        const cx = targetResolution / 2;
+        const cy = targetResolution - 32;
+        const bounce = (i === 1 || i === 3) ? -4 : 0;
+        const legOffset = (i === 0 || i === 2) ? 6 : -6;
+
+        // Feet / legs
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.ellipse(cx - 10 + (i === 1 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 10 + (i === 3 ? legOffset : -legOffset), cy + 24 + bounce, 7, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Round Body
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + bounce, 24, 22, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Belly highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 4 + bounce, 16, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Big Cute Eyes
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(cx - 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
+        ctx.arc(cx + 8, cy - 2 + bounce, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eye reflections
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(cx - 9, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
+        ctx.arc(cx + 7, cy - 3 + bounce, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Smile
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 5 + bounce, 5, 0.1 * Math.PI, 0.9 * Math.PI);
+        ctx.stroke();
+
+        // Cheeks
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.55)';
+        ctx.beginPath();
+        ctx.arc(cx - 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
+        ctx.arc(cx + 14, cy + 3 + bounce, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        frames.push({
+          id: 'frame_' + i,
+          name: 'Schritt ' + (i + 1),
+          canvas: c,
+          ctx: ctx
+        });
+      }
+
+      activeFrameIndex = 0;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    // --- Drag & Drop and Image Import ---
+    function initDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+      const input = document.getElementById('fileImageInput');
+
+      ['dragenter', 'dragover'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dragover');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(name => {
+        dropZone.addEventListener(name, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dragover');
+        });
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        if (e.dataTransfer && e.dataTransfer.files) {
+          handleImageFiles(e.dataTransfer.files);
+        }
+      });
+
+      input.addEventListener('change', (e) => {
+        if (e.target.files) {
+          handleImageFiles(e.target.files);
+        }
+      });
+    }
+
+    function handleImageFiles(fileList) {
+      const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+      if (files.length === 0) return;
+
+      const remainingSlots = 8 - frames.length;
+      if (remainingSlots <= 0) {
+        alert('Maximal 8 Frames erlaubt! Bitte lösche zuerst nicht benötigte Frames.');
+        return;
+      }
+
+      const filesToLoad = files.slice(0, remainingSlots);
+      let loadedCount = 0;
+
+      filesToLoad.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            addFrameFromImage(img, file.name.replace(/\.[^/.]+$/, ''));
+            loadedCount++;
+            if (loadedCount === filesToLoad.length) {
+              showToast(`${loadedCount} Bild(er) geladen!`);
+            }
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function addFrameFromImage(img, frameName) {
+      if (frames.length >= 8) return;
+
+      const c = document.createElement('canvas');
+      c.width = targetResolution;
+      c.height = targetResolution;
+      const ctx = c.getContext('2d');
+
+      const scale = Math.min((targetResolution - 12) / img.width, (targetResolution - 12) / img.height);
+      const nw = img.width * scale;
+      const nh = img.height * scale;
+      const nx = (targetResolution - nw) / 2;
+      const ny = targetResolution - nh - 8;
+
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, nx, ny, nw, nh);
+
+      frames.push({
+        id: 'frame_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        name: frameName || ('Frame ' + (frames.length + 1)),
+        canvas: c,
+        ctx: ctx
+      });
+
+      activeFrameIndex = frames.length - 1;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function duplicateCurrentFrame() {
+      if (frames.length >= 8) {
+        alert('Maximal 8 Frames erlaubt.');
+        return;
+      }
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      const c = document.createElement('canvas');
+      c.width = targetResolution;
+      c.height = targetResolution;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(cur.canvas, 0, 0);
+
+      frames.splice(activeFrameIndex + 1, 0, {
+        id: 'frame_' + Date.now(),
+        name: cur.name + ' (Kopie)',
+        canvas: c,
+        ctx: ctx
+      });
+
+      activeFrameIndex++;
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Frame dupliziert');
+    }
+
+    function deleteCurrentFrame() {
+      if (frames.length <= 1) {
+        alert('Mindestens 1 Frame muss erhalten bleiben.');
+        return;
+      }
+      frames.splice(activeFrameIndex, 1);
+      if (activeFrameIndex >= frames.length) {
+        activeFrameIndex = frames.length - 1;
+      }
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Frame gelöscht');
+    }
+
+    function moveFrame(index, dir) {
+      const target = index + dir;
+      if (target < 0 || target >= frames.length) return;
+      const temp = frames[index];
+      frames[index] = frames[target];
+      frames[target] = temp;
+      activeFrameIndex = target;
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function updateFramesList() {
+      const list = document.getElementById('framesList');
+      list.innerHTML = '';
+
+      document.getElementById('frameCountBadge').textContent = `${frames.length} / 8`;
+
+      frames.forEach((frame, idx) => {
+        const card = document.createElement('div');
+        card.className = 'frame-card' + (idx === activeFrameIndex ? ' active' : '');
+        card.onclick = () => {
+          activeFrameIndex = idx;
+          updateFramesList();
+          drawActiveFrame();
+        };
+
+        const thumb = document.createElement('div');
+        thumb.className = 'frame-thumb-box';
+        const img = document.createElement('img');
+        img.src = frame.canvas.toDataURL();
+        thumb.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'frame-info';
+        info.innerHTML = `
+          <div class="frame-name">${frame.name}</div>
+          <div class="frame-dim">Frame #${idx + 1} • ${targetResolution}×${targetResolution} px</div>
+        `;
+
+        const actions = document.createElement('div');
+        actions.className = 'frame-actions';
+        actions.onclick = (e) => e.stopPropagation();
+
+        if (idx > 0) {
+          const upBtn = document.createElement('button');
+          upBtn.className = 'btn-icon';
+          upBtn.innerHTML = '▲';
+          upBtn.title = 'Nach oben verschieben';
+          upBtn.onclick = () => moveFrame(idx, -1);
+          actions.appendChild(upBtn);
+        }
+
+        if (idx < frames.length - 1) {
+          const downBtn = document.createElement('button');
+          downBtn.className = 'btn-icon';
+          downBtn.innerHTML = '▼';
+          downBtn.title = 'Nach unten verschieben';
+          downBtn.onclick = () => moveFrame(idx, 1);
+          actions.appendChild(downBtn);
+        }
+
+        card.appendChild(thumb);
+        card.appendChild(info);
+        card.appendChild(actions);
+        list.appendChild(card);
+      });
+    }
+
+    // --- Canvas Drawing & Zoom ---
+    function changeZoom(delta) {
+      const levels = [1, 2, 3, 4, 6, 8];
+      let idx = levels.indexOf(currentZoom);
+      if (idx === -1) idx = 3;
+      idx = Math.max(0, Math.min(levels.length - 1, idx + delta));
+      currentZoom = levels[idx];
+      document.getElementById('zoomLevelText').textContent = (currentZoom * 100) + '%';
+      drawActiveFrame();
+    }
+
+    function changeCanvasResolution(newRes) {
+      targetResolution = parseInt(newRes, 10);
+      frames.forEach(frame => {
+        const oldC = frame.canvas;
+        const newC = document.createElement('canvas');
+        newC.width = targetResolution;
+        newC.height = targetResolution;
+        const newCtx = newC.getContext('2d');
+        newCtx.imageSmoothingEnabled = false;
+        newCtx.drawImage(oldC, 0, 0, targetResolution, targetResolution);
+        frame.canvas = newC;
+        frame.ctx = newCtx;
+      });
+      mainCanvas.width = targetResolution;
+      mainCanvas.height = targetResolution;
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Auflösung auf ' + targetResolution + '×' + targetResolution + ' px geändert');
+    }
+
+    function drawActiveFrame() {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      mainCanvas.width = targetResolution;
+      mainCanvas.height = targetResolution;
+      mainCanvas.style.width = (targetResolution * currentZoom) + 'px';
+      mainCanvas.style.height = (targetResolution * currentZoom) + 'px';
+
+      mainCtx.clearRect(0, 0, targetResolution, targetResolution);
+      mainCtx.imageSmoothingEnabled = false;
+      mainCtx.drawImage(cur.canvas, 0, 0);
+
+      // Draw overlay guides if enabled
+      const showBaseline = document.getElementById('guideBaseline').checked;
+      const showGrid = document.getElementById('guideGrid').checked;
+
+      if (showBaseline) {
+        mainCtx.save();
+        mainCtx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+        mainCtx.lineWidth = 1;
+        mainCtx.setLineDash([2, 2]);
+        mainCtx.beginPath();
+        const groundY = targetResolution - 8;
+        mainCtx.moveTo(0, groundY);
+        mainCtx.lineTo(targetResolution, groundY);
+        mainCtx.stroke();
+        mainCtx.restore();
+      }
+
+      if (showGrid && currentZoom >= 3) {
+        mainCtx.save();
+        mainCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        mainCtx.lineWidth = 0.5;
+        for (let x = 0; x < targetResolution; x += 8) {
+          mainCtx.beginPath();
+          mainCtx.moveTo(x, 0);
+          mainCtx.lineTo(x, targetResolution);
+          mainCtx.stroke();
+        }
+        for (let y = 0; y < targetResolution; y += 8) {
+          mainCtx.beginPath();
+          mainCtx.moveTo(0, y);
+          mainCtx.lineTo(targetResolution, y);
+          mainCtx.stroke();
+        }
+        mainCtx.restore();
+      }
+    }
+
+    // --- Tools & Event Handling ---
+    function setTool(tool) {
+      activeTool = tool;
+      document.getElementById('toolWand').classList.toggle('active', tool === 'wand');
+      document.getElementById('toolEraser').classList.toggle('active', tool === 'eraser');
+      document.getElementById('toolMove').classList.toggle('active', tool === 'move');
+
+      document.getElementById('wandParams').style.display = (tool === 'wand' ? 'flex' : 'none');
+      document.getElementById('eraserParams').style.display = (tool === 'eraser' ? 'flex' : 'none');
+
+      const statusEl = document.getElementById('canvasStatusText');
+      if (tool === 'wand') statusEl.textContent = 'Klicke auf den Hintergrund im Bild, um die Farbe transparent zu machen.';
+      if (tool === 'eraser') statusEl.textContent = 'Klicke und ziehe mit der Maus, um Pixel wegzuradieren.';
+      if (tool === 'move') statusEl.textContent = 'Bewege das Bild mit den Pfeiltasten auf deiner Tastatur.';
+    }
+
+    function updateToleranceLabel(val) {
+      document.getElementById('toleranceVal').textContent = val + '%';
+    }
+
+    function saveUndoState() {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      const snap = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+      undoHistory.push({ index: activeFrameIndex, data: snap });
+      if (undoHistory.length > 20) undoHistory.shift();
+    }
+
+    function undo() {
+      if (undoHistory.length === 0) return;
+      const last = undoHistory.pop();
+      if (frames[last.index]) {
+        frames[last.index].ctx.putImageData(last.data, 0, 0);
+        activeFrameIndex = last.index;
+        updateFramesList();
+        drawActiveFrame();
+        showToast('Schritt rückgängig gemacht');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undo();
+      }
+      if (activeTool === 'move') {
+        if (e.key === 'ArrowUp') { moveActiveFramePixels(0, -1); e.preventDefault(); }
+        if (e.key === 'ArrowDown') { moveActiveFramePixels(0, 1); e.preventDefault(); }
+        if (e.key === 'ArrowLeft') { moveActiveFramePixels(-1, 0); e.preventDefault(); }
+        if (e.key === 'ArrowRight') { moveActiveFramePixels(1, 0); e.preventDefault(); }
+      }
+    });
+
+    function moveActiveFramePixels(dx, dy) {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      saveUndoState();
+      const imgData = cur.ctx.getImageData(0, 0, targetResolution, targetResolution);
+      cur.ctx.clearRect(0, 0, targetResolution, targetResolution);
+      cur.ctx.putImageData(imgData, dx, dy);
+      updateFramesList();
+      drawActiveFrame();
+    }
+
+    function initCanvasEvents() {
+      mainCanvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        handleCanvasAction(e);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDrawing = false;
+      });
+
+      mainCanvas.addEventListener('mousemove', (e) => {
+        const rect = mainCanvas.getBoundingClientRect();
+        const px = Math.floor((e.clientX - rect.left) / currentZoom);
+        const py = Math.floor((e.clientY - rect.top) / currentZoom);
+        document.getElementById('mouseCoordsText').textContent = `X: ${Math.max(0, Math.min(targetResolution-1, px))}, Y: ${Math.max(0, Math.min(targetResolution-1, py))}`;
+
+        if (isDrawing && activeTool === 'eraser') {
+          eraseAt(px, py);
+        }
+      });
+    }
+
+    function handleCanvasAction(e) {
+      const rect = mainCanvas.getBoundingClientRect();
+      const px = Math.floor((e.clientX - rect.left) / currentZoom);
+      const py = Math.floor((e.clientY - rect.top) / currentZoom);
+      if (px < 0 || px >= targetResolution || py < 0 || py >= targetResolution) return;
+
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+
+      saveUndoState();
+
+      if (activeTool === 'wand') {
+        const tol = parseInt(document.getElementById('toleranceRange').value, 10);
+        const contiguous = document.getElementById('contiguousWand').checked;
+        removeBackgroundColor(cur, px, py, tol, contiguous);
+        updateFramesList();
+        drawActiveFrame();
+      } else if (activeTool === 'eraser') {
+        eraseAt(px, py);
+      }
+    }
+
+    function eraseAt(px, py) {
+      const cur = frames[activeFrameIndex];
+      if (!cur) return;
+      const size = parseInt(document.getElementById('eraserSizeRange').value, 10);
+      cur.ctx.save();
+      cur.ctx.globalCompositeOperation = 'destination-out';
+      cur.ctx.beginPath();
+      cur.ctx.arc(px, py, size / 2, 0, Math.PI * 2);
+      cur.ctx.fill();
+      cur.ctx.restore();
+
+      drawActiveFrame();
+      updateFramesList();
+    }
+
+    // --- Transparency & Magic Wand Algorithm ---
+    function removeBackgroundColor(frameObj, startX, startY, tolerancePercent, contiguous) {
+      const ctx = frameObj.ctx;
+      const w = targetResolution;
+      const h = targetResolution;
+      const imgData = ctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      const startIndex = (startY * w + startX) * 4;
+      const targetR = data[startIndex];
+      const targetG = data[startIndex + 1];
+      const targetB = data[startIndex + 2];
+      const targetA = data[startIndex + 3];
+
+      if (targetA === 0) return;
+
+      lastColorPicked = { r: targetR, g: targetG, b: targetB, a: targetA };
+
+      const maxDist = 441.67;
+      const threshold = (tolerancePercent / 100) * maxDist;
+
+      function colorMatch(idx) {
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        if (a === 0) return false;
+        const dist = Math.sqrt((r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2);
+        return dist <= threshold;
+      }
+
+      if (!contiguous) {
+        for (let i = 0; i < data.length; i += 4) {
+          if (colorMatch(i)) {
+            data[i + 3] = 0;
+          }
+        }
+      } else {
+        const visited = new Uint8Array(w * h);
+        const queue = [startY * w + startX];
+        visited[startY * w + startX] = 1;
+
+        while (queue.length > 0) {
+          const pos = queue.pop();
+          const cx = pos % w;
+          const cy = Math.floor(pos / w);
+          const idx = pos * 4;
+
+          data[idx + 3] = 0;
+
+          const neighbors = [
+            [cx + 1, cy],
+            [cx - 1, cy],
+            [cx, cy + 1],
+            [cx, cy - 1]
+          ];
+
+          for (let n = 0; n < neighbors.length; n++) {
+            const nx = neighbors[n][0];
+            const ny = neighbors[n][1];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const npos = ny * w + nx;
+              if (!visited[npos] && colorMatch(npos * 4)) {
+                visited[npos] = 1;
+                queue.push(npos);
+              }
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    function applyMagicWandToAllFrames() {
+      if (!lastColorPicked) {
+        alert('Klicke zuerst auf eine Farbe im aktiven Bild, die entfernt werden soll!');
+        return;
+      }
+
+      const tol = parseInt(document.getElementById('toleranceRange').value, 10);
+      const maxDist = 441.67;
+      const threshold = (tol / 100) * maxDist;
+
+      frames.forEach(f => {
+        const imgData = f.ctx.getImageData(0, 0, targetResolution, targetResolution);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const dist = Math.sqrt((r - lastColorPicked.r) ** 2 + (g - lastColorPicked.g) ** 2 + (b - lastColorPicked.b) ** 2);
+          if (dist <= threshold) {
+            data[i + 3] = 0;
+          }
+        }
+        f.ctx.putImageData(imgData, 0, 0);
+      });
+
+      updateFramesList();
+      drawActiveFrame();
+      showToast('Hintergrund bei allen ' + frames.length + ' Frames entfernt!');
+    }
+
+    // --- Live Animation Preview Loop ---
+    function startAnimationLoop() {
+      if (animInterval) clearInterval(animInterval);
+      animInterval = setInterval(stepAnimation, 1000 / animFps);
+    }
+
+    function stepAnimation() {
+      if (!isPlaying || frames.length === 0) return;
+
+      previewFrameIndex = (previewFrameIndex + 1) % frames.length;
+      const f = frames[previewFrameIndex];
+      if (f) {
+        previewSprite.src = f.canvas.toDataURL();
+      }
+
+      const walkMode = document.getElementById('previewWalkMode').checked;
+      if (walkMode) {
+        const stageWidth = previewStage.clientWidth;
+        const maxWalk = (stageWidth / 2) - 34;
+        walkPosition += walkDirection * 2.5;
+
+        if (walkPosition > maxWalk) {
+          walkPosition = maxWalk;
+          walkDirection = -1;
+        } else if (walkPosition < -maxWalk) {
+          walkPosition = -maxWalk;
+          walkDirection = 1;
+        }
+
+        previewSprite.style.transform = `translateX(${walkPosition}px) scaleX(${walkDirection})`;
+      } else {
+        previewSprite.style.transform = `translateX(0px) scaleX(1)`;
+      }
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      const btn = document.getElementById('btnPlayPause');
+      if (isPlaying) {
+        btn.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg><span>Pause</span>`;
+      } else {
+        btn.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span>Abspielen</span>`;
+      }
+    }
+
+    function updateFps(fps) {
+      animFps = parseInt(fps, 10);
+      document.getElementById('fpsVal').textContent = animFps + ' FPS';
+      startAnimationLoop();
+    }
+
+    function setPreviewBg(type) {
+      previewStage.className = 'preview-stage';
+      if (type === 'dark') previewStage.classList.add('bg-dark');
+      if (type === 'green') previewStage.classList.add('bg-green');
+      if (type === 'white') previewStage.classList.add('bg-white');
+    }
+
+    // --- Metadata & Emoji Picker ---
+    function setEmoji(em) {
+      document.getElementById('compIcon').value = em;
+      onMetaChange();
+    }
+
+    function onMetaChange() {
+      const name = document.getElementById('compName').value.trim();
+      const idInput = document.getElementById('compId');
+      let idVal = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      if (!idVal && name) {
+        idVal = name.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+      }
+      idInput.value = idVal;
+      document.getElementById('filenamePreview').textContent = (idVal || 'begleiter') + '.companion.json';
+    }
+
+    // --- Export as .companion.json ---
+    function exportCompanionJson() {
+      if (frames.length === 0) {
+        alert('Keine Frames vorhanden! Bitte füge mindestens 1 Bild hinzu.');
+        return;
+      }
+
+      let id = document.getElementById('compId').value.trim() || 'mein_begleiter';
+      const rawId = id.toLowerCase();
+      if (rawId === 'drache' || rawId === 'ankylosaurus') {
+        alert('Der Standard-Begleiter "' + id + '" ist geschützt und kann nicht direkt überschrieben werden! Bitte wähle eine andere ID (z. B. ' + rawId + '_kopie).');
+        document.getElementById('compId').value = rawId + '_kopie';
+        onMetaChange();
+        return;
+      }
+      const name = document.getElementById('compName').value.trim() || 'Mein Begleiter';
+      const icon = document.getElementById('compIcon').value.trim() || '✨';
+      const desc = document.getElementById('compDesc').value.trim() || 'Ein individueller Begleiter für das Dino-Widget-Desk';
+      const author = document.getElementById('compAuthor').value.trim() || 'Community Addon';
+      const scale = parseInt(document.getElementById('compScale').value, 10) || 100;
+      const speed = parseInt(document.getElementById('compSpeed').value, 10) || 100;
+
+      const walkSprites = frames.map(f => f.canvas.toDataURL('image/png'));
+      const previewUrl = walkSprites[0];
+
+      const companionPackage = {
+        id: id,
+        name: name,
+        title: `${icon} ${name}`,
+        icon: icon,
+        description: desc,
+        author: author,
+        version: "1.0.0",
+        scale: scale,
+        speed: speed,
+        preview: previewUrl,
+        walk_frames: walkSprites.length,
+        jump_frames: 0,
+        tail_frames: 0,
+        sprites: {
+          walk: walkSprites,
+          jump: walkSprites,
+          tail: walkSprites
+        }
+      };
+
+      const jsonStr = JSON.stringify(companionPackage, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${id}.companion.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Exportiert als ${id}.companion.json!`);
+    }
+
+    // --- Import existing .companion.json ---
+    function initJsonInput() {
+      const input = document.getElementById('fileJsonInput');
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            loadCompanionData(data);
+          } catch (err) {
+            alert('Fehler beim Lesen der JSON-Datei: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function loadCompanionData(data) {
+      if (!data || !data.sprites || !data.sprites.walk || data.sprites.walk.length === 0) {
+        alert('Ungültiges Begleiter-Format! Keine "sprites.walk" Frames gefunden.');
+        return;
+      }
+
+      let id = data.id || 'begleiter';
+      let name = data.name || 'Begleiter';
+      const isLocked = (id.toLowerCase() === 'drache' || id.toLowerCase() === 'ankylosaurus');
+      if (isLocked) {
+        id = id.toLowerCase() + '_kopie';
+        name = name + ' (Kopie)';
+      }
+
+      document.getElementById('compId').value = id;
+      document.getElementById('compName').value = name;
+      document.getElementById('compIcon').value = data.icon || '✨';
+      document.getElementById('compDesc').value = data.description || '';
+      document.getElementById('compAuthor').value = isLocked ? 'Mein Begleiter' : (data.author || 'Dino Desk Team');
+      if (data.scale) {
+        document.getElementById('compScale').value = data.scale;
+        document.getElementById('compScaleVal').textContent = data.scale + '%';
+      }
+      if (data.speed) {
+        document.getElementById('compSpeed').value = data.speed;
+        document.getElementById('compSpeedVal').textContent = data.speed + '%';
+      }
+      onMetaChange();
+
+      frames = [];
+      const walkList = data.sprites.walk.slice(0, 8);
+      let loaded = 0;
+
+      walkList.forEach((src, idx) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = targetResolution;
+          c.height = targetResolution;
+          const ctx = c.getContext('2d');
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, targetResolution, targetResolution);
+
+          frames.push({
+            id: 'frame_' + idx,
+            name: 'Frame ' + (idx + 1),
+            canvas: c,
+            ctx: ctx
+          });
+
+          loaded++;
+          if (loaded === walkList.length) {
+            activeFrameIndex = 0;
+            updateFramesList();
+            drawActiveFrame();
+            showToast(`Begleiter "${data.name}" mit ${loaded} Frames geladen!`);
+          }
+        };
+        img.src = src;
+      });
+    }
+
+    // --- Export as PNGs ---
+    function downloadAllFramesZip() {
+      if (frames.length === 0) return;
+      const compId = document.getElementById('compId').value.trim() || 'begleiter';
+
+      frames.forEach((f, idx) => {
+        const a = document.createElement('a');
+        a.href = f.canvas.toDataURL('image/png');
+        a.download = `${compId}_walk_${idx}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      showToast(`${frames.length} PNG-Dateien heruntergeladen!`);
+    }
+
+    function resetAll() {
+      if (confirm('Möchtest du wirklich alle Frames zurücksetzen und neu anfangen?')) {
+        createDefaultFrames();
+        document.getElementById('compName').value = 'Mein Begleiter';
+        document.getElementById('compId').value = 'mein_begleiter';
+        document.getElementById('compIcon').value = '✨';
+        document.getElementById('compDesc').value = '';
+        document.getElementById('compAuthor').value = 'Dino Desk Team';
+        onMetaChange();
+        showToast('Zurückgesetzt!');
+      }
+    }
+  </script>
+</body>
+</html>
