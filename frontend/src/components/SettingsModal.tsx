@@ -1489,7 +1489,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </span>
               </div>
               <div style={{ fontSize: '0.73rem', color: '#cbd5e1', lineHeight: '1.4' }}>
-                Läuft sanft um seinen Ankerpunkt hin und her, <strong>schaut nach vorn zu dir</strong>, <strong>wedelt fröhlich mit der Keule</strong> und <strong>springt ab und zu vor Freude hoch</strong>!
+                Läuft sanft um seinen Ankerpunkt hin und her, <strong>wedelt fröhlich mit der Keule</strong> und <strong>springt ab und zu vor Freude hoch</strong>!
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 3 }}>
                 <span style={{ fontSize: '0.65rem', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
@@ -1497,9 +1497,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </span>
                 <span style={{ fontSize: '0.65rem', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
                   ✨ Keulen-Wedeln & Glitzern
-                </span>
-                <span style={{ fontSize: '0.65rem', color: '#a78bfa', background: 'rgba(167, 139, 250, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
-                  👀 Schaut nach vorn
                 </span>
                 <span style={{ fontSize: '0.65rem', color: '#34d399', background: 'rgba(52, 211, 153, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
                   🦘 Freudensprung

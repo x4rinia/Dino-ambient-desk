@@ -15,12 +15,6 @@ export const DINO_SPRITES = {
     '/dino/jump_2.png',
     '/dino/jump_3.png',
   ],
-  look: [
-    '/dino/look_0.png',
-    '/dino/look_1.png',
-    '/dino/look_2.png',
-    '/dino/look_3.png',
-  ],
   tail: [
     '/dino/tail_0.png',
     '/dino/tail_1.png',
@@ -29,7 +23,7 @@ export const DINO_SPRITES = {
   ],
 };
 
-type DinoAction = 'walk' | 'jump' | 'look' | 'tail';
+type DinoAction = 'walk' | 'jump' | 'tail';
 
 interface DinoCompanionProps {
   speed?: number;
@@ -187,13 +181,12 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
       }
 
       // Action choices:
-      // 55% walk stroll in current direction
-      // 15% tail wag (stays in place, maintains direction)
-      // 15% look forward at user (stays in place)
-      // 15% jump & cheer (stays in place)
+      // 60% walk stroll in current direction
+      // 20% tail wag (stays in place, wedelt mit Keule)
+      // 20% jump & cheer (freudensprung)
       const rand = Math.random();
 
-      if (rand < 0.55) {
+      if (rand < 0.60) {
         // WALK: Take 10-16 continuous steps across the track
         setCurrentAction('walk');
         const numSteps = Math.floor(Math.random() * 7 + 10);
@@ -233,7 +226,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             );
           }
         }, stepInterval);
-      } else if (rand < 0.70) {
+      } else if (rand < 0.80) {
         // TAIL WAG: Wedelt fröhlich mit der Keule
         const sequence = [0, 1, 2, 3, 0, 1, 2, 3];
         const stepDelay = Math.max(50, Math.round(115 / speedMultiplier));
@@ -254,14 +247,6 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
           }
         };
         actionTimer = setTimeout(tick, stepDelay);
-      } else if (rand < 0.85) {
-        // LOOK FORWARD: Schaut nach vorn zu dir
-        playSequence('look', [180, 200, 2000, 200], () => {
-          actionTimer = setTimeout(
-            scheduleNextAction,
-            Math.max(400, Math.round(800 / speedMultiplier))
-          );
-        });
       } else {
         // JUMP & REJOICE: Springt fröhlich hoch und jubelt!
         playSequence('jump', [200, 220, 460, 220], () => {
