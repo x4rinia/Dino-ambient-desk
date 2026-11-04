@@ -375,22 +375,24 @@ body,
   position: relative;
   z-index: 10;
   flex: 1;
-  padding: 12px 14px 14px 14px;
+  padding: 12px 14px 140px 14px;
   min-height: 0;
 }
 
-.main-workspace.widgets-flow-grid.layout-landscape {
+.main-workspace.widgets-flow-grid.layout-landscape,
+.main-workspace.widgets-flow-grid.layout-portrait {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
   align-content: start;
   align-items: start;
   overflow-y: auto;
   overflow-x: hidden;
+  padding-bottom: 140px;
 }
 
-@media (min-width: 760px) {
-  .main-workspace.widgets-flow-grid.layout-landscape [data-widget-id="header_title"] {
+@media (min-width: 600px) {
+  .main-workspace.widgets-flow-grid [data-widget-id="header_title"] {
     grid-column: 1 / -1;
     justify-self: start;
     width: max-content;
@@ -399,7 +401,14 @@ body,
 }
 
 /* Individual Widget Card Proportions & Fit */
-.main-workspace [data-widget-id="clock"] {
+.main-workspace [data-widget-id="clock"],
+.main-workspace [data-widget-id="agenda"],
+.main-workspace [data-widget-id="calendar"],
+.main-workspace [data-widget-id="cycle_tracker"],
+.main-workspace [data-widget-id="moon_calendar"],
+.main-workspace [data-widget-id="system_vitals"],
+.main-workspace [data-widget-id="countdown"],
+.main-workspace [data-widget-id="notes"] {
   width: max-content;
   max-width: 100%;
   justify-self: start;
@@ -414,13 +423,6 @@ body,
 }
 
 /* Agenda / Next Appointments Widget: Compact & Square */
-.main-workspace [data-widget-id="agenda"] {
-  width: max-content;
-  max-width: 100%;
-  justify-self: start;
-  align-self: start;
-}
-
 .agenda-widget-card {
   width: 185px;
   height: 160px;
@@ -432,26 +434,10 @@ body,
 }
 
 /* Calendar Widget: Snug Fit */
-.main-workspace [data-widget-id="calendar"] {
-  width: max-content;
-  max-width: 100%;
-  justify-self: start;
-  align-self: start;
-}
-
 .calendar-widget-card {
   width: 260px;
   max-width: 100%;
   box-sizing: border-box;
-}
-
-.main-workspace.widgets-flow-grid.layout-portrait {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: stretch;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 /* Individual Draggable & Scalable Widget Item (Active when Settings Window is open) */

@@ -157,14 +157,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const maxMonitorH = targetMonitor ? targetMonitor.height : 2160;
 
   const toggleModule = (key: keyof AmbientDeckConfig['modules']) => {
-    const current = config.modules[key] as { enabled: boolean };
+    const current = (config.modules[key] || {}) as { enabled?: boolean };
+    const isCurrentlyEnabled = current.enabled ?? true;
     const nextConfig: AmbientDeckConfig = {
       ...config,
       modules: {
         ...config.modules,
         [key]: {
           ...current,
-          enabled: !current.enabled,
+          enabled: !isCurrentlyEnabled,
         },
       },
     };
@@ -1484,7 +1485,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
                 <input
                   type="text"
-                  value={config.modules.countdown.label}
+                  value={config.modules.countdown?.label ?? ''}
                   onChange={(e) =>
                     onUpdateConfig({
                       ...config,
@@ -1512,7 +1513,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 />
                 <input
                   type="datetime-local"
-                  value={config.modules.countdown.target_iso.slice(0, 16)}
+                  value={(config.modules.countdown?.target_iso ?? '').slice(0, 16)}
                   onChange={(e) =>
                     onUpdateConfig({
                       ...config,
@@ -2179,7 +2180,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>📊 System-Vitalwerte (CPU / RAM / GPU)</span>
               <input
                 type="checkbox"
-                checked={config.modules.system_vitals.enabled}
+                checked={config.modules.system_vitals?.enabled ?? true}
                 onChange={() => toggleModule('system_vitals')}
               />
             </label>
@@ -2188,7 +2189,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>⏳ Countdown anzeigen</span>
               <input
                 type="checkbox"
-                checked={config.modules.countdown.enabled}
+                checked={config.modules.countdown?.enabled ?? true}
                 onChange={() => toggleModule('countdown')}
               />
             </label>
@@ -2197,7 +2198,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>📝 Notizen-Karte anzeigen</span>
               <input
                 type="checkbox"
-                checked={config.modules.notes.enabled}
+                checked={config.modules.notes?.enabled ?? true}
                 onChange={() => toggleModule('notes')}
               />
             </label>

@@ -6,10 +6,10 @@ interface AmbientNotesWidgetProps {
 }
 
 export const AmbientNotesWidget: React.FC<AmbientNotesWidgetProps> = ({ notes }) => {
-  if (!notes || !notes.trim()) return null;
+  const hasNotes = Boolean(notes && notes.trim().length > 0);
 
   return (
-    <section className="glass-panel" style={{ padding: '12px 16px' }}>
+    <section className="glass-panel" style={{ padding: '12px 16px', width: 'max-content', minWidth: 200, maxWidth: 280 }}>
       <div className="widget-header" style={{ marginBottom: 6 }}>
         <div className="widget-title">
           <FileText size={13} color="var(--accent-emerald)" />
@@ -21,13 +21,14 @@ export const AmbientNotesWidget: React.FC<AmbientNotesWidgetProps> = ({ notes })
           fontFamily: 'var(--font-mono)',
           fontSize: '0.75rem',
           lineHeight: 1.48,
-          color: 'var(--text-secondary)',
+          color: hasNotes ? 'var(--text-secondary)' : 'var(--text-muted)',
           whiteSpace: 'pre-wrap',
           maxHeight: 110,
           overflow: 'hidden',
+          fontStyle: hasNotes ? 'normal' : 'italic',
         }}
       >
-        {notes}
+        {hasNotes ? notes : 'Keine Notizen eingetragen'}
       </div>
     </section>
   );

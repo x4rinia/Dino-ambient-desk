@@ -912,7 +912,7 @@ export const App: React.FC = () => {
           </DraggableWidgetBox>
         )}
 
-        {config.modules.system_vitals.enabled && (
+        {(config.modules.system_vitals?.enabled ?? true) && (
           <DraggableWidgetBox
             id="system_vitals"
             label="System-Vitalwerte"
@@ -925,7 +925,7 @@ export const App: React.FC = () => {
           </DraggableWidgetBox>
         )}
 
-        {config.modules.countdown.enabled && (
+        {(config.modules.countdown?.enabled ?? true) && (
           <DraggableWidgetBox
             id="countdown"
             label="Countdown"
@@ -935,13 +935,13 @@ export const App: React.FC = () => {
             onOffsetChange={handleWidgetOffsetChange}
           >
             <CountdownWidget
-              label={config.modules.countdown.label}
-              targetIso={config.modules.countdown.target_iso}
+              label={config.modules.countdown?.label || 'Countdown'}
+              targetIso={config.modules.countdown?.target_iso}
             />
           </DraggableWidgetBox>
         )}
 
-        {config.modules.notes.enabled && (
+        {(config.modules.notes?.enabled ?? true) && (
           <DraggableWidgetBox
             id="notes"
             label="Notizen"
@@ -956,7 +956,7 @@ export const App: React.FC = () => {
       </main>
 
       {/* L. Dino Companion (Transparent Ankylosaurus with Walking, Jumping & Tail Wagging) */}
-      {config.modules.dino_companion.enabled && (
+      {(config.modules.dino_companion?.enabled ?? true) && (
         <DinoCompanion
           speed={config.modules.dino_companion?.speed ?? 100}
           scale={config.modules.dino_companion?.scale ?? 100}
