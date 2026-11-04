@@ -45,28 +45,34 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const [liveOffset, setLiveOffset] = useState<WidgetOffset>(() => ({
-    x: offset.x ?? 0,
-    y: offset.y ?? 0,
-    scale: offset.scale ?? 1,
-    width: offset.width,
+    x: Number(offset?.x) || 0,
+    y: Number(offset?.y) || 0,
+    scale: Math.max(0.75, Math.min(1.35, Number(offset?.scale) || 1)),
+    width: offset?.width,
   }));
+
   const startRef = useRef<{
     mouseX: number;
     mouseY: number;
     baseX: number;
     baseY: number;
+    rectLeft: number;
+    rectTop: number;
+    rectWidth: number;
+    rectHeight: number;
   } | null>(null);
 
+  // Synchronize when positions are reset or updated externally
   useEffect(() => {
     if (!dragging && !resizing) {
       setLiveOffset({
-        x: offset.x ?? 0,
-        y: offset.y ?? 0,
-        scale: offset.scale ?? 1,
-        width: offset.width,
+        x: Number(offset?.x) || 0,
+        y: Number(offset?.y) || 0,
+        scale: Math.max(0.75, Math.min(1.35, Number(offset?.scale) || 1)),
+        width: offset?.width,
       });
     }
-  }, [offset, dragging, resizing]);
+  }, [offset?.x, offset?.y, offset?.scale, offset?.width, dragging, resizing]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isEditable || e.button !== 0) return;
@@ -76,23 +82,45 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
     }
     e.preventDefault();
     e.stopPropagation();
+
+    const rect = boxRef.current?.getBoundingClientRect();
     setDragging(true);
     startRef.current = {
       mouseX: e.clientX,
       mouseY: e.clientY,
-      baseX: liveOffset.x,
-      baseY: liveOffset.y,
+      baseX: Number(liveOffset.x) || 0,
+      baseY: Number(liveOffset.y) || 0,
+      rectLeft: rect?.left ?? 0,
+      rectTop: rect?.top ?? 0,
+      rectWidth: Math.max(80, rect?.width ?? 200),
+      rectHeight: Math.max(50, rect?.height ?? 150),
     };
 
     const handleMouseMove = (moveEv: MouseEvent) => {
       if (!startRef.current) return;
       const scaleRatio = fontScaleRatio || 1;
-      const dx = Math.round((moveEv.clientX - startRef.current.mouseX) / scaleRatio);
-      const dy = Math.round((moveEv.clientY - startRef.current.mouseY) / scaleRatio);
+      const rawDx = (moveEv.clientX - startRef.current.mouseX) / scaleRatio;
+      const rawDy = (moveEv.clientY - startRef.current.mouseY) / scaleRatio;
+
+      // Boundary clamping: keep widget fully within the desktop monitor view
+      const minLeft = 10;
+      const maxLeft = Math.max(minLeft, window.innerWidth - startRef.current.rectWidth - 10);
+      const minTop = 10;
+      const maxTop = Math.max(minTop, window.innerHeight - startRef.current.rectHeight - 10);
+
+      const targetLeft = startRef.current.rectLeft + rawDx;
+      const targetTop = startRef.current.rectTop + rawDy;
+
+      const clampedLeft = Math.max(minLeft, Math.min(maxLeft, targetLeft));
+      const clampedTop = Math.max(minTop, Math.min(maxTop, targetTop));
+
+      const clampedDx = clampedLeft - startRef.current.rectLeft;
+      const clampedDy = clampedTop - startRef.current.rectTop;
+
       setLiveOffset((prev) => ({
         ...prev,
-        x: startRef.current!.baseX + dx,
-        y: startRef.current!.baseY + dy,
+        x: Math.round(startRef.current!.baseX + clampedDx),
+        y: Math.round(startRef.current!.baseY + clampedDy),
       }));
     };
 
@@ -101,12 +129,28 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
       if (startRef.current) {
         const scaleRatio = fontScaleRatio || 1;
-        const dx = Math.round((upEv.clientX - startRef.current.mouseX) / scaleRatio);
-        const dy = Math.round((upEv.clientY - startRef.current.mouseY) / scaleRatio);
+        const rawDx = (upEv.clientX - startRef.current.mouseX) / scaleRatio;
+        const rawDy = (upEv.clientY - startRef.current.mouseY) / scaleRatio;
+
+        const minLeft = 10;
+        const maxLeft = Math.max(minLeft, window.innerWidth - startRef.current.rectWidth - 10);
+        const minTop = 10;
+        const maxTop = Math.max(minTop, window.innerHeight - startRef.current.rectHeight - 10);
+
+        const targetLeft = startRef.current.rectLeft + rawDx;
+        const targetTop = startRef.current.rectTop + rawDy;
+
+        const clampedLeft = Math.max(minLeft, Math.min(maxLeft, targetLeft));
+        const clampedTop = Math.max(minTop, Math.min(maxTop, targetTop));
+
+        const clampedDx = clampedLeft - startRef.current.rectLeft;
+        const clampedDy = clampedTop - startRef.current.rectTop;
+
         const finalPos = {
           ...liveOffset,
-          x: startRef.current.baseX + dx,
-          y: startRef.current.baseY + dy,
+          x: Math.round(startRef.current.baseX + clampedDx),
+          y: Math.round(startRef.current.baseY + clampedDy),
+          scale: Math.max(0.75, Math.min(1.35, Number(liveOffset.scale) || 1)),
         };
         setLiveOffset(finalPos);
         onOffsetChange(id, finalPos);
@@ -127,7 +171,7 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
 
     const startX = e.clientX;
     const startY = e.clientY;
-    const startScale = liveOffset.scale || 1.0;
+    const startScale = Math.max(0.75, Math.min(1.35, Number(liveOffset.scale) || 1));
 
     const handleMouseMove = (moveEv: MouseEvent) => {
       const scaleRatio = fontScaleRatio || 1;
@@ -135,7 +179,8 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       const dy = (moveEv.clientY - startY) / scaleRatio;
 
       const factor = (dx + dy) / 280;
-      const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
+      // Boundaries: min 75%, max 135%
+      const nextScale = Math.max(0.75, Math.min(1.35, Math.round((startScale + factor) * 20) / 20));
 
       setLiveOffset((prev) => ({
         ...prev,
@@ -151,7 +196,7 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       const dx = (upEv.clientX - startX) / scaleRatio;
       const dy = (upEv.clientY - startY) / scaleRatio;
       const factor = (dx + dy) / 280;
-      const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
+      const nextScale = Math.max(0.75, Math.min(1.35, Math.round((startScale + factor) * 20) / 20));
 
       const finalPos = {
         ...liveOffset,
@@ -166,6 +211,10 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
+  const safeScale = Math.max(0.75, Math.min(1.35, Number(liveOffset.scale) || 1));
+  const safeX = Number(liveOffset.x) || 0;
+  const safeY = Number(liveOffset.y) || 0;
+
   return (
     <div
       ref={boxRef}
@@ -176,7 +225,7 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       id={`widget-box-${id}`}
       onMouseDown={handleMouseDown}
       style={{
-        transform: `translate3d(${liveOffset.x}px, ${liveOffset.y}px, 0) scale(${liveOffset.scale || 1})`,
+        transform: `translate3d(${safeX}px, ${safeY}px, 0) scale(${safeScale})`,
         transformOrigin: 'top left',
         zIndex: dragging || resizing ? 50 : isEditable ? 20 : 10,
         maxWidth: '100%',
@@ -195,13 +244,13 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
                 className="widget-scale-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const cur = liveOffset.scale || 1;
-                  const nextScale = Math.max(0.6, Math.round((cur - 0.1) * 10) / 10);
+                  const cur = safeScale;
+                  const nextScale = Math.max(0.75, Math.round((cur - 0.05) * 100) / 100);
                   const next = { ...liveOffset, scale: nextScale };
                   setLiveOffset(next);
                   onOffsetChange(id, next);
                 }}
-                title="Widget verkleinern (-10%)"
+                title="Widget verkleinern (Mindestgröße: 75%)"
               >
                 -
               </button>
@@ -209,26 +258,27 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
                 className="widget-scale-label"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const next = { ...liveOffset, scale: 1 };
+                  // Reset widget to 100% and back to default grid position (0, 0)
+                  const next = { x: 0, y: 0, scale: 1 };
                   setLiveOffset(next);
                   onOffsetChange(id, next);
                 }}
-                title="Klick zum Zurücksetzen auf 100%"
+                title="Klick zum Zurücksetzen auf Standard-Größe (100%)"
               >
-                {Math.round((liveOffset.scale || 1) * 100)}%
+                {Math.round(safeScale * 100)}%
               </span>
               <button
                 type="button"
                 className="widget-scale-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const cur = liveOffset.scale || 1;
-                  const nextScale = Math.min(2.5, Math.round((cur + 0.1) * 10) / 10);
+                  const cur = safeScale;
+                  const nextScale = Math.min(1.35, Math.round((cur + 0.05) * 100) / 100);
                   const next = { ...liveOffset, scale: nextScale };
                   setLiveOffset(next);
                   onOffsetChange(id, next);
                 }}
-                title="Widget vergrößern (+10%)"
+                title="Widget vergrößern (Maximalgröße: 135%)"
               >
                 +
               </button>
@@ -238,7 +288,7 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
           <div
             className={`widget-resize-grip ${resizing ? 'resizing' : ''}`}
             onMouseDown={handleResizeMouseDown}
-            title={`${label} vergrößern / verkleinern (ziehen)`}
+            title={`${label} vergrößern / verkleinern (ziehen: 75% - 135%)`}
           >
             <Maximize2 size={11} />
           </div>
@@ -650,10 +700,24 @@ export const App: React.FC = () => {
   const bgMode: BackgroundMode =
     rawBg === 'glass' || rawBg === 'color' || rawBg === 'black' ? rawBg : 'wallpaper_blur';
 
-  const getOffset = (id: string): WidgetOffset =>
-    config.window.widget_positions?.[id] ||
-    (id === 'clock' ? config.window.widget_positions?.['clock_calendar'] : undefined) ||
-    { x: 0, y: 0 };
+  const getOffset = (id: string): WidgetOffset => {
+    const saved = config.window.widget_positions?.[id];
+    if (
+      saved &&
+      typeof saved.x === 'number' &&
+      !isNaN(saved.x) &&
+      typeof saved.y === 'number' &&
+      !isNaN(saved.y)
+    ) {
+      return {
+        x: saved.x,
+        y: saved.y,
+        scale: Math.max(0.75, Math.min(1.35, Number(saved.scale) || 1)),
+        width: saved.width,
+      };
+    }
+    return { x: 0, y: 0, scale: 1 };
+  };
 
   // Separate Settings Window on Primary Monitor: Neutral styling
   if (isSettingsWindow) {

@@ -258,6 +258,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleResetPositions = () => {
+    onResetWidgetPositions();
     onUpdateConfig({
       ...config,
       window: {
@@ -265,6 +266,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         widget_positions: {},
       },
     });
+    setStatusBanner('Widget-Positionen auf Standard-Raster zurückgesetzt!');
+    setTimeout(() => setStatusBanner(''), 3000);
   };
 
   const handleLiveSizeChange = (nextW: number, nextH: number, center = false) => {

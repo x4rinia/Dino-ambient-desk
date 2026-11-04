@@ -567,11 +567,9 @@ public partial class MainWindow : Window
                         if (root.TryGetProperty("widget_positions", out JsonElement wpEl))
                         {
                             var positions = JsonSerializer.Deserialize<Dictionary<string, WidgetOffset>>(wpEl.GetRawText(), JsonOptions);
-                            if (positions != null)
-                            {
-                                _config.Window.WidgetPositions = positions;
-                                _storage.SaveConfig(_config);
-                            }
+                            _config.Window.WidgetPositions = positions ?? new();
+                            _storage.SaveConfig(_config);
+                            SendToFrontend("config_updated", new { config = _config });
                         }
                     }
                     catch
@@ -589,11 +587,7 @@ public partial class MainWindow : Window
                             var updated = JsonSerializer.Deserialize<AmbientDeckConfig>(cfgEl.GetRawText(), JsonOptions);
                             if (updated != null)
                             {
-                                if ((updated.Window.WidgetPositions == null || updated.Window.WidgetPositions.Count == 0) &&
-                                    _config.Window.WidgetPositions != null && _config.Window.WidgetPositions.Count > 0)
-                                {
-                                    updated.Window.WidgetPositions = _config.Window.WidgetPositions;
-                                }
+                                updated.Window.WidgetPositions ??= new();
                                 _config = updated;
                                 ApplyWindowLayerState(_config.Window.LayerMode);
                                 _storage.SaveConfig(_config);
