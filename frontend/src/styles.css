@@ -66,30 +66,37 @@ body,
 
 /* Individual Widget Card Base — Default: 🪟 Glas-Effekt */
 .glass-panel {
-  background: linear-gradient(135deg, rgba(22, 27, 42, 0.56) 0%, rgba(14, 18, 28, 0.64) 100%);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(15, 20, 32, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 14px;
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-/* 🌫️ Geblurrt — Only the individual widgets are blurred, wallpaper between them stays sharp */
+/* 🌫️ Geblurrt — Soft translucent glass letting the blurred wallpaper shine through */
 .ambient-deck.bg-mode-wallpaper_blur .glass-panel {
-  background: rgba(14, 18, 28, 0.44);
-  backdrop-filter: blur(var(--widget-blur-px, 18px)) saturate(135%);
-  -webkit-backdrop-filter: blur(var(--widget-blur-px, 18px)) saturate(135%);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  background: rgba(12, 16, 26, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
-/* Background Layer — The desktop wallpaper is completely managed by Windows and shines through transparently */
-.slideshow-layer,
-.desktop-wallpaper-mirror {
-  display: none !important;
+/* 🪟 Glas — Highly transparent glass */
+.ambient-deck.bg-mode-glass .glass-panel {
+  background: rgba(16, 22, 35, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+/* Background Layer — Shows the sharp or blurred wallpaper */
+.slideshow-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 /* ⬛ Schwarz — Only the individual widgets are solid black, wallpaper between them stays visible */

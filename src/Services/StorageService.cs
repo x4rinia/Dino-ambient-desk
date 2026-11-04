@@ -361,10 +361,65 @@ public class StorageService
         return DefaultWallpapersFolder;
     }
 
-    public string? SyncWindowsDesktopWallpaper(string configuredPath)
+    public string? SyncWindowsDesktopWallpaper(string configuredPath, int monitorId = 1)
     {
-        // Desktop wallpaper is managed directly and natively by Windows.
-        // We do not mirror or copy wallpaper files into the application.
+        try
+        {
+            string roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string themesDir = Path.Combine(roaming, "Microsoft", "Windows", "Themes");
+            string? srcFile = null;
+
+            int monIdx = Math.Max(0, monitorId - 1);
+            string perMonFile = Path.Combine(themesDir, $"Transcoded_{monIdx:D3}");
+
+            if (File.Exists(perMonFile))
+            {
+                srcFile = perMonFile;
+            }
+            else
+            {
+                // Try decoding path from registry TranscodedImageCache_00X
+                try
+                {
+                    using var deskKey = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop");
+                    if (deskKey?.GetValue($"TranscodedImageCache_{monIdx:D3}") is byte[] bytes && bytes.Length > 24)
+                    {
+                        string decoded = System.Text.Encoding.Unicode.GetString(bytes, 24, bytes.Length - 24);
+                        int nullIdx = decoded.IndexOf('\0');
+                        if (nullIdx > 0) decoded = decoded.Substring(0, nullIdx);
+                        decoded = decoded.Trim();
+                        if (File.Exists(decoded))
+                        {
+                            srcFile = decoded;
+                        }
+                    }
+                }
+                catch { }
+
+                if (srcFile == null)
+                {
+                    string transcoded = Path.Combine(themesDir, "TranscodedWallpaper");
+                    if (File.Exists(transcoded))
+                    {
+                        srcFile = transcoded;
+                    }
+                }
+            }
+
+            if (srcFile != null && File.Exists(srcFile))
+            {
+                string folder = ResolveWallpaperDirectory(configuredPath);
+                Directory.CreateDirectory(folder);
+                string dstFile = Path.Combine(folder, $"_windows_desktop_wallpaper_mon{monitorId}.jpg");
+                File.Copy(srcFile, dstFile, overwrite: true);
+                long ticks = File.GetLastWriteTimeUtc(srcFile).Ticks;
+                return $"https://wallpapers.ambientdeck.local/_windows_desktop_wallpaper_mon{monitorId}.jpg?v={ticks}";
+            }
+        }
+        catch
+        {
+        }
+
         return null;
     }
 
@@ -381,7 +436,7 @@ public class StorageService
         return Directory
             .EnumerateFiles(folder)
             .Where(f => allowed.Contains(Path.GetExtension(f)) &&
-                        !Path.GetFileName(f).Equals("_windows_desktop_wallpaper.jpg", StringComparison.OrdinalIgnoreCase))
+                        !Path.GetFileName(f).StartsWith("_windows_desktop_wallpaper", StringComparison.OrdinalIgnoreCase))
             .OrderBy(f => f)
             .Select(f => $"https://wallpapers.ambientdeck.local/{Uri.EscapeDataString(Path.GetFileName(f))}")
             .ToList();

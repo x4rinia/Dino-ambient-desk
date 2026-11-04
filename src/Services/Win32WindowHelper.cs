@@ -36,6 +36,25 @@ public static class Win32WindowHelper
     public const int HTBOTTOMRIGHT = 17;
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct MARGINS
+    {
+        public int cxLeftWidth;
+        public int cxRightWidth;
+        public int cyTopHeight;
+        public int cyBottomHeight;
+    }
+
+    [DllImport("dwmapi.dll")]
+    public static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
+
+    public static void EnableWindowTransparency(IntPtr hwnd)
+    {
+        if (hwnd == IntPtr.Zero) return;
+        var margins = new MARGINS { cxLeftWidth = -1, cxRightWidth = -1, cyTopHeight = -1, cyBottomHeight = -1 };
+        DwmExtendFrameIntoClientArea(hwnd, ref margins);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {
         public int Left;

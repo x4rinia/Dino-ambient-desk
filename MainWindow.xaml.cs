@@ -144,6 +144,12 @@ public partial class MainWindow : Window
 
         // Always hide Dashboard from Taskbar & enable 100% click-through wallpaper mode
         Win32WindowHelper.SetToolWindowAndClickThrough(_hwnd, clickThrough: true);
+        Win32WindowHelper.EnableWindowTransparency(_hwnd);
+        var hwndSource = HwndSource.FromHwnd(_hwnd);
+        if (hwndSource?.CompositionTarget != null)
+        {
+            hwndSource.CompositionTarget.BackgroundColor = System.Windows.Media.Colors.Transparent;
+        }
         ApplyWindowLayerState(_config.Window.LayerMode);
 
         _monitors = Win32WindowHelper.GetConnectedMonitors();
@@ -292,7 +298,7 @@ public partial class MainWindow : Window
             // Inject initial config and wallpaper before HTML loads so frontend renders synchronously without black flash
             try
             {
-                string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath) ?? "";
+                string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
                 var initialPayload = new
                 {
                     config = _config,
@@ -462,7 +468,7 @@ public partial class MainWindow : Window
                 {
                     _monitors = Win32WindowHelper.GetConnectedMonitors();
                     var vitals = _vitalsService.PollVitals();
-                    string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath) ?? "";
+                    string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
                     var fastPayload = new
                     {
                         config = _config,
@@ -545,7 +551,7 @@ public partial class MainWindow : Window
                             _storage.SaveConfig(_config);
                             _vitalsTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(500, _config.Modules.SystemVitals.RefreshMs));
                             UpdateWallpapersVirtualHostMapping();
-                            string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath) ?? "";
+                            string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
                             SendToFrontend("config_updated", new { config = _config });
                             SendToFrontend("wallpapers_updated", new
                             {
@@ -710,7 +716,7 @@ public partial class MainWindow : Window
                         _config.Modules.Slideshow.UseWindowsWallpaper = false;
                         _storage.SaveConfig(_config);
                         UpdateWallpapersVirtualHostMapping();
-                        string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath) ?? "";
+                        string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
                         SendToFrontend("config_updated", new { config = _config });
                         SendToFrontend("wallpapers_updated", new
                         {
@@ -718,6 +724,31 @@ public partial class MainWindow : Window
                             windows_wallpaper_url = winWp
                         });
                     }
+                    break;
+                }
+                case "reset_to_windows_wallpaper":
+                {
+                    string targetDir = _storage.ResolveWallpaperDirectory(_config.Modules.Slideshow.FolderPath);
+                    if (Directory.Exists(targetDir))
+                    {
+                        foreach (var f in Directory.EnumerateFiles(targetDir))
+                        {
+                            if (!Path.GetFileName(f).StartsWith("_windows_desktop_wallpaper", StringComparison.OrdinalIgnoreCase))
+                            {
+                                try { File.Delete(f); } catch { }
+                            }
+                        }
+                    }
+                    _config.Modules.Slideshow.UseWindowsWallpaper = true;
+                    _storage.SaveConfig(_config);
+                    UpdateWallpapersVirtualHostMapping();
+                    string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
+                    SendToFrontend("config_updated", new { config = _config });
+                    SendToFrontend("wallpapers_updated", new
+                    {
+                        wallpapers = _storage.GetWallpaperUrls(_config.Modules.Slideshow.FolderPath),
+                        windows_wallpaper_url = winWp
+                    });
                     break;
                 }
 
@@ -986,6 +1017,8 @@ public partial class MainWindow : Window
 
         _storage.SaveConfig(_config);
         SendToFrontend("config_updated", new { config = _config });
+        string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, target.Id) ?? "";
+        SendToFrontend("wallpapers_updated", new { wallpapers = _storage.GetWallpaperUrls(_config.Modules.Slideshow.FolderPath), windows_wallpaper_url = winWp });
     }
 
     private void InitializeSystemTray()

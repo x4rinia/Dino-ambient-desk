@@ -535,6 +535,17 @@ export const App: React.FC = () => {
       }`}
       style={dashboardThemeStyle}
     >
+      <SlideshowBackground
+        backgroundMode={bgMode}
+        blurPx={config.theme?.wallpaper_blur_px ?? 14}
+        intervalSec={config.modules.slideshow?.interval_sec ?? 30}
+        useWindowsWallpaper={true}
+        windowsWallpaperUrl={windowsWallpaperUrl}
+        wallpapers={wallpapers}
+        windowConfig={config.window}
+        monitors={monitors}
+      />
+
       {/* Floating Edit-Mode Banner (Visible ONLY when Settings Window is open) */}
       {isSettingsOpen && (
         <div className="edit-mode-floating-bar">

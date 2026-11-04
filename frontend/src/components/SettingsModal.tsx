@@ -680,7 +680,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="settings-section">
           <div className="widget-title" style={{ marginBottom: 8 }}>
             <ImageIcon size={13} color="#38bdf8" />
-            <span>1. Widget-Optik (Desktop-Hintergrundbild wird direkt von Windows verwaltet und bleibt transparent sichtbar)</span>
+            <span>1. Widget-Optik & Hintergrundbild (Quer- & Hochformat)</span>
           </div>
 
           <div
@@ -706,7 +706,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {currentBgMode === 'wallpaper_blur' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-                Blur-Stärke der einzelnen Widgets:
+                Weichzeichnung (Blur-Stärke):
               </span>
               <input
                 type="range"
@@ -726,6 +726,69 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span className="widget-badge">{config.theme?.wallpaper_blur_px ?? 18} px</span>
             </div>
           )}
+
+          {/* Hintergrundbild Steuerung (Eigenes Bild hochladen oder Windows-Hintergrund nutzen) */}
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 600 }}>
+              Hintergrundbild (scheint im Quer- & Hochformat transparent durch):
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="icon-btn"
+                style={{
+                  flex: 1,
+                  padding: '7px 12px',
+                  background: 'rgba(56, 189, 248, 0.15)',
+                  border: '1px solid rgba(56, 189, 248, 0.4)',
+                  color: '#38bdf8',
+                  fontWeight: 600,
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => {
+                  Bridge.pickWallpaperFile();
+                  setStatusBanner('Dateiauswahl geöffnet — wähle dein Hintergrundbild aus!');
+                  setTimeout(() => setStatusBanner(''), 4000);
+                }}
+                title="Wähle ein eigenes Bild von deinem PC aus, das im Quer- oder Hochformat als Hintergrund angezeigt wird."
+              >
+                <Upload size={13} />
+                <span>🖼️ Eigenes Hintergrundbild hochladen / auswählen</span>
+              </button>
+
+              <button
+                type="button"
+                className="icon-btn"
+                style={{
+                  flex: 1,
+                  padding: '7px 12px',
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => {
+                  Bridge.resetToWindowsWallpaper();
+                  setStatusBanner('Windows-Desktophintergrund für diesen Monitor wird verwendet!');
+                  setTimeout(() => setStatusBanner(''), 4000);
+                }}
+                title="Verwendet automatisch das aktuelle Desktop-Hintergrundbild dieses Windows-Monitors."
+              >
+                <span>🪟 Windows-Desktop Hintergrund nutzen</span>
+              </button>
+
+              <button
+                type="button"
+                className="icon-btn"
+                style={{
+                  padding: '7px 10px',
+                  fontSize: '0.75rem',
+                }}
+                onClick={() => Bridge.openWallpapersFolder()}
+                title="Öffnet den Ordner mit den gespeicherten Hintergrundbildern im Windows Explorer."
+              >
+                <FolderOpen size={13} />
+                <span>Ordner öffnen</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* 2. Monitor, Freie Fenstergröße, Ausrichtung (Hochkant / Quer) & Vorder-/Hintergrund */}
