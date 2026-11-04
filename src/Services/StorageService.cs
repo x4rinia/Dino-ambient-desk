@@ -297,7 +297,7 @@ public class StorageService
         return DefaultWallpapersFolder;
     }
 
-    public string? SyncWindowsDesktopWallpaper(string configuredPath, int monitorId = 1)
+    public string? GetWindowsWallpaperSourcePath(int monitorId = 1)
     {
         try
         {
@@ -341,7 +341,17 @@ public class StorageService
                     }
                 }
             }
+            return (srcFile != null && File.Exists(srcFile)) ? srcFile : null;
+        }
+        catch { }
+        return null;
+    }
 
+    public string? SyncWindowsDesktopWallpaper(string configuredPath, int monitorId = 1)
+    {
+        try
+        {
+            string? srcFile = GetWindowsWallpaperSourcePath(monitorId);
             if (srcFile != null && File.Exists(srcFile))
             {
                 string folder = ResolveWallpaperDirectory(configuredPath);
@@ -359,6 +369,90 @@ public class StorageService
         return null;
     }
 
+    public string? StageWallpaperFile(string configuredPath, string srcFile)
+    {
+        try
+        {
+            if (!File.Exists(srcFile)) return null;
+            string folder = ResolveWallpaperDirectory(configuredPath);
+            Directory.CreateDirectory(folder);
+
+            // Clean previous staging files
+            foreach (var existing in Directory.EnumerateFiles(folder, "_preview_staging.*"))
+            {
+                try { File.Delete(existing); } catch { }
+            }
+
+            string ext = Path.GetExtension(srcFile);
+            if (string.IsNullOrWhiteSpace(ext)) ext = ".jpg";
+            string dest = Path.Combine(folder, "_preview_staging" + ext);
+            File.Copy(srcFile, dest, overwrite: true);
+            long ticks = DateTime.UtcNow.Ticks;
+            return $"https://wallpapers.ambientdeck.local/{Path.GetFileName(dest)}?v={ticks}";
+        }
+        catch { }
+        return null;
+    }
+
+    public string? StageWindowsWallpaper(string configuredPath, int monitorId = 1)
+    {
+        try
+        {
+            string? srcFile = GetWindowsWallpaperSourcePath(monitorId);
+            if (srcFile != null && File.Exists(srcFile))
+            {
+                return StageWallpaperFile(configuredPath, srcFile);
+            }
+        }
+        catch { }
+        return null;
+    }
+
+    public bool CommitStagedWallpaper(string configuredPath, bool isWindowsWallpaper)
+    {
+        try
+        {
+            string folder = ResolveWallpaperDirectory(configuredPath);
+            if (!Directory.Exists(folder)) return false;
+            var stagedFiles = Directory.GetFiles(folder, "_preview_staging.*");
+            if (stagedFiles.Length == 0) return false;
+
+            string stagedFile = stagedFiles[0];
+            string ext = Path.GetExtension(stagedFile);
+
+            // Delete existing permanent files in wallpapers folder except staged files
+            foreach (var file in Directory.EnumerateFiles(folder))
+            {
+                if (!Path.GetFileName(file).StartsWith("_preview_staging", StringComparison.OrdinalIgnoreCase))
+                {
+                    try { File.Delete(file); } catch { }
+                }
+            }
+
+            string targetName = isWindowsWallpaper ? "windows_wallpaper.jpg" : ("wallpaper" + ext);
+            string finalDest = Path.Combine(folder, targetName);
+            if (File.Exists(finalDest)) { try { File.Delete(finalDest); } catch { } }
+            File.Move(stagedFile, finalDest);
+            return true;
+        }
+        catch { }
+        return false;
+    }
+
+    public void DiscardStagedWallpaper(string configuredPath)
+    {
+        try
+        {
+            string folder = ResolveWallpaperDirectory(configuredPath);
+            if (!Directory.Exists(folder)) return;
+            foreach (var staged in Directory.EnumerateFiles(folder, "_preview_staging.*"))
+            {
+                try { File.Delete(staged); } catch { }
+            }
+        }
+        catch { }
+    }
+
     public List<string> GetWallpaperUrls(string configuredPath)
     {
         string folder = ResolveWallpaperDirectory(configuredPath);
@@ -371,7 +465,7 @@ public class StorageService
 
         return Directory
             .EnumerateFiles(folder)
-            .Where(f => allowed.Contains(Path.GetExtension(f)))
+            .Where(f => allowed.Contains(Path.GetExtension(f)) && !Path.GetFileName(f).StartsWith("_preview_staging", StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(f => File.GetLastWriteTimeUtc(f))
             .Select(f => $"https://wallpapers.ambientdeck.local/{Uri.EscapeDataString(Path.GetFileName(f))}?v={File.GetLastWriteTimeUtc(f).Ticks}")
             .ToList();

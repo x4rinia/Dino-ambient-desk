@@ -392,6 +392,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleCancelAndClose = () => {
+    Bridge.cancelWallpaper();
     if (initialSnapshotRef.current) {
       onUpdateConfig(initialSnapshotRef.current);
       Bridge.setWindowBounds(
@@ -405,6 +406,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleSaveAndClose = () => {
+    Bridge.commitWallpaper();
     onUpdateConfig(config);
     onClose();
   };
@@ -863,10 +865,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   }}
                   onClick={() => {
                     Bridge.pickWallpaperFile();
-                    setStatusBanner('Dateiauswahl geöffnet — wähle dein Bild aus!');
-                    setTimeout(() => setStatusBanner(''), 4000);
+                    onUpdateConfig({
+                      ...config,
+                      theme: {
+                        ...config.theme,
+                        background_mode: 'wallpaper_blur',
+                      },
+                    });
+                    setStatusBanner('Dateiauswahl geöffnet — gewähltes Bild wird sofort in Live-Vorschau angezeigt!');
+                    setTimeout(() => setStatusBanner(''), 4500);
                   }}
-                  title="Wähle ein Bild von deinem PC aus. Es wird direkt in den Programmordner kopiert und gespeichert."
+                  title="Wähle ein Bild von deinem PC aus. Es wird sofort live als Vorschau angezeigt und erst beim Klick auf 'Speichern' fest übernommen."
                 >
                   <Upload size={13} />
                   <span>🖼️ Eigenes Hintergrundbild hochladen</span>
@@ -882,10 +891,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   }}
                   onClick={() => {
                     Bridge.resetToWindowsWallpaper();
-                    setStatusBanner('Windows-Desktop Hintergrund wurde in den Programmordner gespeichert!');
-                    setTimeout(() => setStatusBanner(''), 4000);
+                    onUpdateConfig({
+                      ...config,
+                      theme: {
+                        ...config.theme,
+                        background_mode: 'wallpaper_blur',
+                      },
+                    });
+                    setStatusBanner('Windows-Desktop Hintergrund als Live-Vorschau aktiv — klicke auf "Speichern", um es dauerhaft zu übernehmen!');
+                    setTimeout(() => setStatusBanner(''), 4500);
                   }}
-                  title="Kopiert das aktuelle Desktop-Hintergrundbild deines Windows-Monitors und speichert es im Programmordner."
+                  title="Kopiert das aktuelle Desktop-Hintergrundbild deines Windows-Monitors als Live-Vorschau. Erst beim Klick auf 'Speichern' wird es dauerhaft übernommen."
                 >
                   <span>🪟 Windows-Desktop Hintergrund übernehmen</span>
                 </button>

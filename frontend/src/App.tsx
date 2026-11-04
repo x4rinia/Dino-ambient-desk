@@ -408,6 +408,13 @@ export const App: React.FC = () => {
           }
           break;
         }
+        case 'wallpapers_preview': {
+          if (payload.wallpapers) setWallpapers(payload.wallpapers);
+          if (payload.preview_url) {
+            setWallpapers([payload.preview_url]);
+          }
+          break;
+        }
         case 'monitors_updated': {
           if (payload.monitors) setMonitors(payload.monitors);
           break;
