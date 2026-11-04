@@ -126,21 +126,18 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
     const startX = e.clientX;
     const startY = e.clientY;
     const startScale = liveOffset.scale || 1.0;
-    const startWidth = boxRef.current ? boxRef.current.offsetWidth : 340;
 
     const handleMouseMove = (moveEv: MouseEvent) => {
       const scaleRatio = fontScaleRatio || 1;
       const dx = (moveEv.clientX - startX) / scaleRatio;
       const dy = (moveEv.clientY - startY) / scaleRatio;
 
-      const factor = (dx + dy) / 320;
+      const factor = (dx + dy) / 280;
       const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
-      const nextWidth = Math.max(180, Math.round(startWidth + dx));
 
       setLiveOffset((prev) => ({
         ...prev,
         scale: nextScale,
-        width: id === 'header_title' || prev.width ? nextWidth : undefined,
       }));
     };
 
@@ -151,14 +148,12 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       const scaleRatio = fontScaleRatio || 1;
       const dx = (upEv.clientX - startX) / scaleRatio;
       const dy = (upEv.clientY - startY) / scaleRatio;
-      const factor = (dx + dy) / 320;
+      const factor = (dx + dy) / 280;
       const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
-      const nextWidth = Math.max(180, Math.round(startWidth + dx));
 
       const finalPos = {
         ...liveOffset,
         scale: nextScale,
-        width: id === 'header_title' || liveOffset.width ? nextWidth : undefined,
       };
       setLiveOffset(finalPos);
       onOffsetChange(id, finalPos);
@@ -179,9 +174,9 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       id={`widget-box-${id}`}
       onMouseDown={handleMouseDown}
       style={{
-        transform: `translate3d(${liveOffset.x}px, ${liveOffset.y}px, 0)`,
+        transform: `translate3d(${liveOffset.x}px, ${liveOffset.y}px, 0) scale(${liveOffset.scale || 1})`,
+        transformOrigin: 'top left',
         zIndex: dragging || resizing ? 50 : isEditable ? 20 : 10,
-        width: liveOffset.width ? `${liveOffset.width}px` : undefined,
         maxWidth: '100%',
       }}
     >
@@ -212,11 +207,11 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
                 className="widget-scale-label"
                 onClick={(e) => {
                   e.stopPropagation();
-                  const next = { ...liveOffset, scale: 1, width: undefined };
+                  const next = { ...liveOffset, scale: 1 };
                   setLiveOffset(next);
                   onOffsetChange(id, next);
                 }}
-                title="Klick zum Zurücksetzen auf 100% / Auto-Breite"
+                title="Klick zum Zurücksetzen auf 100%"
               >
                 {Math.round((liveOffset.scale || 1) * 100)}%
               </span>
@@ -247,16 +242,7 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
           </div>
         </>
       )}
-      <div
-        className="widget-content-scaler"
-        style={{
-          zoom: liveOffset.scale || 1,
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        {children}
-      </div>
+      {children}
     </div>
   );
 };

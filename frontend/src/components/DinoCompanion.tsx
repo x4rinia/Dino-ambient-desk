@@ -121,56 +121,29 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
   }, [trackWidth]);
 
   const [resizingTrack, setResizingTrack] = useState(false);
-  const trackResizeStartRef = useRef<{
-    startX: number;
-    startWidth: number;
-    side: 'left' | 'right' | 'both';
-  } | null>(null);
 
-  const startTrackResize = (e: React.MouseEvent, side: 'left' | 'right' | 'both') => {
+  const startTrackResize = (e: React.MouseEvent) => {
     if (!isEditable || e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
     setResizingTrack(true);
-    trackResizeStartRef.current = {
-      startX: e.clientX,
-      startWidth: liveTrackWidth,
-      side,
-    };
+    const startX = e.clientX;
+    const startW = liveTrackWidth;
 
     const handleMouseMove = (moveEv: MouseEvent) => {
-      if (!trackResizeStartRef.current) return;
-      const dx = moveEv.clientX - trackResizeStartRef.current.startX;
-      let newW = trackResizeStartRef.current.startWidth;
-      if (trackResizeStartRef.current.side === 'right') {
-        newW = trackResizeStartRef.current.startWidth + dx * 2;
-      } else if (trackResizeStartRef.current.side === 'left') {
-        newW = trackResizeStartRef.current.startWidth - dx * 2;
-      } else {
-        newW = trackResizeStartRef.current.startWidth + dx * 2;
-      }
-      const clamped = Math.max(200, Math.min(1400, Math.round(newW / 10) * 10));
-      setLiveTrackWidth(clamped);
+      // Dragging left expands width, dragging right decreases width
+      const dx = startX - moveEv.clientX;
+      const nextW = Math.max(200, Math.min(1400, Math.round((startW + dx) / 10) * 10));
+      setLiveTrackWidth(nextW);
     };
 
     const handleMouseUp = (upEv: MouseEvent) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      if (trackResizeStartRef.current) {
-        const dx = upEv.clientX - trackResizeStartRef.current.startX;
-        let newW = trackResizeStartRef.current.startWidth;
-        if (trackResizeStartRef.current.side === 'right') {
-          newW = trackResizeStartRef.current.startWidth + dx * 2;
-        } else if (trackResizeStartRef.current.side === 'left') {
-          newW = trackResizeStartRef.current.startWidth - dx * 2;
-        } else {
-          newW = trackResizeStartRef.current.startWidth + dx * 2;
-        }
-        const finalW = Math.max(200, Math.min(1400, Math.round(newW / 10) * 10));
-        setLiveTrackWidth(finalW);
-        onTrackWidthChange?.(finalW);
-      }
-      trackResizeStartRef.current = null;
+      const dx = startX - upEv.clientX;
+      const finalW = Math.max(200, Math.min(1400, Math.round((startW + dx) / 10) * 10));
+      setLiveTrackWidth(finalW);
+      onTrackWidthChange?.(finalW);
       setResizingTrack(false);
     };
 
@@ -491,24 +464,24 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
             pointerEvents: 'none',
           }}
         >
-          {/* Left Double-Arrow Handle */}
+          {/* Einziger, intuitiver Doppelpfeil-Griff (zieht den Bereich flüssig nach links/rechts) */}
           <div
             className={`dino-track-resize-handle ${resizingTrack ? 'resizing' : ''}`}
-            style={{ left: '-12px' }}
-            onMouseDown={(e) => startTrackResize(e, 'left')}
-            title="Laufbereich nach links vergrößern / verkleinern (Doppelpfeil ziehen)"
+            style={{
+              left: '-16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'ew-resize',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '4px 8px',
+            }}
+            onMouseDown={startTrackResize}
+            title="Laufbereich vergrößern / verkleinern (Doppelpfeil nach links oder rechts ziehen)"
           >
-            <ArrowLeftRight size={13} />
-          </div>
-
-          {/* Right Double-Arrow Handle */}
-          <div
-            className={`dino-track-resize-handle ${resizingTrack ? 'resizing' : ''}`}
-            style={{ right: '-12px' }}
-            onMouseDown={(e) => startTrackResize(e, 'right')}
-            title="Laufbereich nach rechts vergrößern / verkleinern (Doppelpfeil ziehen)"
-          >
-            <ArrowLeftRight size={13} />
+            <ArrowLeftRight size={14} color="#34d399" />
+            <span style={{ fontSize: '0.66rem', fontWeight: 700 }}>Laufbereich ziehen</span>
           </div>
 
           {/* Top Info Bar with interactive double arrow controls */}
@@ -547,7 +520,7 @@ export const DinoCompanion: React.FC<DinoCompanionProps> = ({
                 cursor: 'ew-resize',
                 userSelect: 'none',
               }}
-              onMouseDown={(e) => startTrackResize(e, 'both')}
+              onMouseDown={startTrackResize}
               title="Laufbereich mit Doppelpfeil ziehen oder +/- klicken"
             >
               <button

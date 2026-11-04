@@ -393,7 +393,7 @@ body,
   .main-workspace.widgets-flow-grid.layout-landscape [data-widget-id="header_title"] {
     grid-column: 1 / -1;
     justify-self: start;
-    width: auto;
+    width: max-content;
     max-width: 100%;
   }
 }
