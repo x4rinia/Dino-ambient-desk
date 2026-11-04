@@ -48,6 +48,8 @@ export interface AddonCompanionInfo {
 export interface WidgetOffset {
   x: number;
   y: number;
+  scale?: number;
+  width?: number;
 }
 
 export interface WindowConfig {

@@ -24,6 +24,7 @@ import {
   Sparkles,
   Copy,
   Lock,
+  ArrowLeftRight,
 } from 'lucide-react';
 import {
   AddonCompanionInfo,
@@ -2053,35 +2054,59 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#f3f5f9' }}>
-                <span>📏 Laufbereich-Breite:</span>
-                <strong style={{ color: '#fbbf24' }}>{config.modules.dino_companion?.track_width ?? 480} px</strong>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.03)',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#f3f5f9' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <ArrowLeftRight size={13} color="#38bdf8" />
+                  <span>Laufbereich des Begleiters:</span>
+                </span>
+                <strong style={{ color: '#fbbf24', fontSize: '0.85rem' }}>
+                  {config.modules.dino_companion?.track_width ?? 480} px
+                </strong>
               </div>
-              <input
-                type="range"
-                min="300"
-                max="850"
-                step="20"
-                value={config.modules.dino_companion?.track_width ?? 480}
-                onChange={(e) =>
-                  onUpdateConfig({
-                    ...config,
-                    modules: {
-                      ...config.modules,
-                      dino_companion: {
-                        ...config.modules.dino_companion,
-                        track_width: parseInt(e.target.value, 10),
-                      },
-                    },
-                  })
-                }
-                style={{ width: '100%', accentColor: '#fbbf24' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.66rem', color: '#64748b' }}>
-                <span>Kompakt (300px)</span>
-                <span>Standard (480px)</span>
-                <span>Breit (850px)</span>
+              <div style={{ fontSize: '0.72rem', color: '#94a3b8', lineHeight: 1.4 }}>
+                ↔ <strong>Direkte Steuerung:</strong> Du kannst den Laufbereich jetzt direkt auf dem Desktop mit den <strong>Doppelpfeil-Griffen (◀ ↔ ▶)</strong> stufenlos breiter oder schmaler ziehen!
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
+                {[300, 480, 640, 850].map((w) => (
+                  <button
+                    key={w}
+                    type="button"
+                    className="icon-btn"
+                    style={{
+                      flex: 1,
+                      padding: '5px 8px',
+                      fontSize: '0.72rem',
+                      fontWeight: (config.modules.dino_companion?.track_width ?? 480) === w ? 700 : 500,
+                      borderColor: (config.modules.dino_companion?.track_width ?? 480) === w ? '#38bdf8' : undefined,
+                      color: (config.modules.dino_companion?.track_width ?? 480) === w ? '#38bdf8' : undefined,
+                    }}
+                    onClick={() =>
+                      onUpdateConfig({
+                        ...config,
+                        modules: {
+                          ...config.modules,
+                          dino_companion: {
+                            ...config.modules.dino_companion,
+                            track_width: w,
+                          },
+                        },
+                      })
+                    }
+                  >
+                    {w} px
+                  </button>
+                ))}
               </div>
             </div>
           </div>

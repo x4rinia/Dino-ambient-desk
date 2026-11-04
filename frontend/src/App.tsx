@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Move, RotateCcw } from 'lucide-react';
+import { Move, RotateCcw, Maximize2 } from 'lucide-react';
 import {
   AddonCompanionInfo,
   AmbientDeckConfig,
@@ -39,8 +39,15 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
   onOffsetChange,
   children,
 }) => {
+  const boxRef = useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [liveOffset, setLiveOffset] = useState<WidgetOffset>(offset);
+  const [resizing, setResizing] = useState(false);
+  const [liveOffset, setLiveOffset] = useState<WidgetOffset>(() => ({
+    x: offset.x ?? 0,
+    y: offset.y ?? 0,
+    scale: offset.scale ?? 1,
+    width: offset.width,
+  }));
   const startRef = useRef<{
     mouseX: number;
     mouseY: number;
@@ -49,13 +56,22 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
   } | null>(null);
 
   useEffect(() => {
-    if (!dragging) {
-      setLiveOffset(offset);
+    if (!dragging && !resizing) {
+      setLiveOffset({
+        x: offset.x ?? 0,
+        y: offset.y ?? 0,
+        scale: offset.scale ?? 1,
+        width: offset.width,
+      });
     }
-  }, [offset, dragging]);
+  }, [offset, dragging, resizing]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!isEditable || e.button !== 0) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.widget-scale-btn, .widget-scale-label, .widget-resize-grip')) {
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     setDragging(true);
@@ -68,23 +84,25 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
 
     const handleMouseMove = (moveEv: MouseEvent) => {
       if (!startRef.current) return;
-      const scale = fontScaleRatio || 1;
-      const dx = Math.round((moveEv.clientX - startRef.current.mouseX) / scale);
-      const dy = Math.round((moveEv.clientY - startRef.current.mouseY) / scale);
-      setLiveOffset({
-        x: startRef.current.baseX + dx,
-        y: startRef.current.baseY + dy,
-      });
+      const scaleRatio = fontScaleRatio || 1;
+      const dx = Math.round((moveEv.clientX - startRef.current.mouseX) / scaleRatio);
+      const dy = Math.round((moveEv.clientY - startRef.current.mouseY) / scaleRatio);
+      setLiveOffset((prev) => ({
+        ...prev,
+        x: startRef.current!.baseX + dx,
+        y: startRef.current!.baseY + dy,
+      }));
     };
 
     const handleMouseUp = (upEv: MouseEvent) => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       if (startRef.current) {
-        const scale = fontScaleRatio || 1;
-        const dx = Math.round((upEv.clientX - startRef.current.mouseX) / scale);
-        const dy = Math.round((upEv.clientY - startRef.current.mouseY) / scale);
+        const scaleRatio = fontScaleRatio || 1;
+        const dx = Math.round((upEv.clientX - startRef.current.mouseX) / scaleRatio);
+        const dy = Math.round((upEv.clientY - startRef.current.mouseY) / scaleRatio);
         const finalPos = {
+          ...liveOffset,
           x: startRef.current.baseX + dx,
           y: startRef.current.baseY + dy,
         };
@@ -99,26 +117,146 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
     window.addEventListener('mouseup', handleMouseUp);
   };
 
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
+    if (!isEditable || e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setResizing(true);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startScale = liveOffset.scale || 1.0;
+    const startWidth = boxRef.current ? boxRef.current.offsetWidth : 340;
+
+    const handleMouseMove = (moveEv: MouseEvent) => {
+      const scaleRatio = fontScaleRatio || 1;
+      const dx = (moveEv.clientX - startX) / scaleRatio;
+      const dy = (moveEv.clientY - startY) / scaleRatio;
+
+      const factor = (dx + dy) / 320;
+      const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
+      const nextWidth = Math.max(180, Math.round(startWidth + dx));
+
+      setLiveOffset((prev) => ({
+        ...prev,
+        scale: nextScale,
+        width: id === 'header_title' || prev.width ? nextWidth : undefined,
+      }));
+    };
+
+    const handleMouseUp = (upEv: MouseEvent) => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+
+      const scaleRatio = fontScaleRatio || 1;
+      const dx = (upEv.clientX - startX) / scaleRatio;
+      const dy = (upEv.clientY - startY) / scaleRatio;
+      const factor = (dx + dy) / 320;
+      const nextScale = Math.max(0.6, Math.min(2.5, Math.round((startScale + factor) * 20) / 20));
+      const nextWidth = Math.max(180, Math.round(startWidth + dx));
+
+      const finalPos = {
+        ...liveOffset,
+        scale: nextScale,
+        width: id === 'header_title' || liveOffset.width ? nextWidth : undefined,
+      };
+      setLiveOffset(finalPos);
+      onOffsetChange(id, finalPos);
+      setResizing(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
   return (
     <div
+      ref={boxRef}
       className={`draggable-widget-item ${isEditable ? 'editable' : ''} ${
         dragging ? 'dragging' : ''
-      }`}
+      } ${resizing ? 'resizing' : ''}`}
       data-widget-id={id}
       id={`widget-box-${id}`}
       onMouseDown={handleMouseDown}
       style={{
         transform: `translate3d(${liveOffset.x}px, ${liveOffset.y}px, 0)`,
-        zIndex: dragging ? 50 : isEditable ? 20 : 10,
+        zIndex: dragging || resizing ? 50 : isEditable ? 20 : 10,
+        width: liveOffset.width ? `${liveOffset.width}px` : undefined,
+        maxWidth: '100%',
       }}
     >
       {isEditable && (
-        <div className="widget-drag-handle-pill">
-          <Move size={11} />
-          <span>{label} verschieben</span>
-        </div>
+        <>
+          <div className="widget-drag-handle-pill">
+            <div className="widget-move-trigger" title={`${label} verschieben (ziehen)`}>
+              <Move size={11} />
+              <span>{label}</span>
+            </div>
+            <div className="widget-scale-controls">
+              <button
+                type="button"
+                className="widget-scale-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const cur = liveOffset.scale || 1;
+                  const nextScale = Math.max(0.6, Math.round((cur - 0.1) * 10) / 10);
+                  const next = { ...liveOffset, scale: nextScale };
+                  setLiveOffset(next);
+                  onOffsetChange(id, next);
+                }}
+                title="Widget verkleinern (-10%)"
+              >
+                -
+              </button>
+              <span
+                className="widget-scale-label"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const next = { ...liveOffset, scale: 1, width: undefined };
+                  setLiveOffset(next);
+                  onOffsetChange(id, next);
+                }}
+                title="Klick zum Zurücksetzen auf 100% / Auto-Breite"
+              >
+                {Math.round((liveOffset.scale || 1) * 100)}%
+              </span>
+              <button
+                type="button"
+                className="widget-scale-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const cur = liveOffset.scale || 1;
+                  const nextScale = Math.min(2.5, Math.round((cur + 0.1) * 10) / 10);
+                  const next = { ...liveOffset, scale: nextScale };
+                  setLiveOffset(next);
+                  onOffsetChange(id, next);
+                }}
+                title="Widget vergrößern (+10%)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div
+            className={`widget-resize-grip ${resizing ? 'resizing' : ''}`}
+            onMouseDown={handleResizeMouseDown}
+            title={`${label} vergrößern / verkleinern (ziehen)`}
+          >
+            <Maximize2 size={11} />
+          </div>
+        </>
       )}
-      {children}
+      <div
+        className="widget-content-scaler"
+        style={{
+          zoom: liveOffset.scale || 1,
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };
@@ -735,6 +873,22 @@ export const App: React.FC = () => {
           isEditable={isSettingsOpen}
           anchorOffset={getOffset('dino_companion')}
           onAnchorChange={(next) => handleWidgetOffsetChange('dino_companion', next)}
+          onTrackWidthChange={(nextWidth) => {
+            setConfig((prev) => {
+              const updated = {
+                ...prev,
+                modules: {
+                  ...prev.modules,
+                  dino_companion: {
+                    ...prev.modules.dino_companion,
+                    track_width: nextWidth,
+                  },
+                },
+              };
+              Bridge.saveConfig(updated);
+              return updated;
+            });
+          }}
           variant={config.modules.dino_companion?.variant}
           addonCompanions={addonCompanions}
         />
