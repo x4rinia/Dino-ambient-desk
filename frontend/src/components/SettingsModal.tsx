@@ -58,8 +58,8 @@ const BACKGROUND_MODES: {
   label: string;
   desc: string;
 }[] = [
-  { id: 'wallpaper_blur', label: '🌫️ Bild (Geblurrt)', desc: 'Hintergrundbild weichgezeichnet hinter den Widgets' },
-  { id: 'glass', label: '🪟 Bild (Klar / Glas)', desc: 'Hintergrundbild scheint scharf und klar durch' },
+  { id: 'wallpaper_blur', label: '🌫️ Widgets geblurrt', desc: 'Widgets sind weichgezeichnet, Windows-Hintergrundbild bleibt 100% scharf' },
+  { id: 'glass', label: '🪟 Widgets Glas (Klar)', desc: 'Widgets sind klares Glas, Hintergrundbild scheint komplett scharf durch' },
   { id: 'color', label: '🎨 Feste Farbe', desc: 'Einfarbiger Hintergrund (Farbe frei wählbar)' },
 ];
 
@@ -707,7 +707,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {currentBgMode === 'wallpaper_blur' && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-                Weichzeichnung (Blur-Stärke):
+                Blur-Stärke der Widgets:
               </span>
               <input
                 type="range"

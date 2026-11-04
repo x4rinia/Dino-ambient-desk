@@ -16,7 +16,6 @@ interface SlideshowBackgroundProps {
 export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
   backgroundMode,
   customBgColor = '#090b10',
-  blurPx,
   windowsWallpaperUrl,
   wallpapers,
   windowConfig,
@@ -39,7 +38,7 @@ export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
     );
   }
 
-  // Option: Hintergrundbild (Geblurrt oder Klar)
+  // Option: Windows-Hintergrundbild oder eigenes hochgeladenes Bild (bleibt IMMER gestochen scharf)
   const wallpaperSrc =
     wallpapers.length > 0
       ? wallpapers[0]
@@ -58,8 +57,6 @@ export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
   const offsetX = targetMonitor ? -(windowConfig.x - targetMonitor.x) / dpr : 0;
   const offsetY = targetMonitor ? -(windowConfig.y - targetMonitor.y) / dpr : 0;
 
-  const isBlurred = backgroundMode === 'wallpaper_blur';
-
   return (
     <div
       className="slideshow-layer"
@@ -71,6 +68,7 @@ export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
         pointerEvents: 'none',
       }}
     >
+      {/* The wallpaper itself stays 100% sharp. Only widget cards blur their own backdrop in CSS */}
       <div
         className="desktop-wallpaper-mirror"
         style={{
@@ -84,10 +82,6 @@ export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           pointerEvents: 'none',
-          filter: isBlurred ? `blur(${blurPx || 14}px)` : 'none',
-          transform: isBlurred ? 'scale(1.05)' : 'none',
-          opacity: 0.96,
-          transition: 'filter 0.3s ease, opacity 0.3s ease',
         }}
       />
     </div>

@@ -74,17 +74,21 @@ body,
   transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
-/* 🌫️ Geblurrt — Soft translucent glass letting the blurred wallpaper shine through */
+/* 🌫️ Geblurrt — Only the individual widget cards have a blurred frosted background; the Windows wallpaper between widgets stays 100% sharp */
 .ambient-deck.bg-mode-wallpaper_blur .glass-panel {
-  background: rgba(12, 16, 26, 0.30);
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  background: rgba(14, 18, 28, 0.44);
+  backdrop-filter: blur(var(--widget-blur-px, 16px)) saturate(135%);
+  -webkit-backdrop-filter: blur(var(--widget-blur-px, 16px)) saturate(135%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
-/* 🪟 Glas — Highly transparent glass */
+/* 🪟 Glas — Highly transparent glass without blurring */
 .ambient-deck.bg-mode-glass .glass-panel {
   background: rgba(16, 22, 35, 0.26);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
