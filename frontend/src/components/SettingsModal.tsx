@@ -183,12 +183,84 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleOrientationChange = (mode: OrientationMode, resizeWindow = false) => {
+    const targetMon = monitors.find((m) => m.id === config.window.monitor_id) || monitors[0];
+    let newW = config.window.width;
+    let newH = config.window.height;
+    let newX = config.window.x;
+    let newY = config.window.y;
+
+    if (resizeWindow && targetMon) {
+      newX = targetMon.x;
+      newY = targetMon.y;
+      if (mode === 'landscape') {
+        newW = targetMon.width;
+        newH = targetMon.height;
+      } else if (mode === 'portrait') {
+        newW = Math.min(720, targetMon.width);
+        newH = targetMon.height;
+      } else { // auto
+        if (targetMon.width >= targetMon.height) {
+          newW = targetMon.width;
+          newH = targetMon.height;
+        } else {
+          newW = Math.min(720, targetMon.width);
+          newH = targetMon.height;
+        }
+      }
+      setCustomX(newX);
+      setCustomY(newY);
+      setCustomWidth(newW);
+      setCustomHeight(newH);
+      Bridge.setWindowBounds(newX, newY, newW, newH);
+    }
+
     Bridge.setOrientationMode(mode, resizeWindow);
     onUpdateConfig({
       ...config,
       window: {
         ...config.window,
         orientation_mode: mode,
+        x: newX,
+        y: newY,
+        width: newW,
+        height: newH,
+        widget_positions: {},
+      },
+    });
+  };
+
+  const handleFitToMonitor = () => {
+    const targetMon = monitors.find((m) => m.id === config.window.monitor_id) || monitors[0];
+    if (!targetMon) return;
+    const newX = targetMon.x;
+    const newY = targetMon.y;
+    const newW = targetMon.width;
+    const newH = targetMon.height;
+    setCustomX(newX);
+    setCustomY(newY);
+    setCustomWidth(newW);
+    setCustomHeight(newH);
+    Bridge.setWindowBounds(newX, newY, newW, newH);
+    onUpdateConfig({
+      ...config,
+      window: {
+        ...config.window,
+        x: newX,
+        y: newY,
+        width: newW,
+        height: newH,
+        orientation_mode: newW >= newH ? 'landscape' : 'portrait',
+        widget_positions: {},
+      },
+    });
+  };
+
+  const handleResetPositions = () => {
+    onUpdateConfig({
+      ...config,
+      window: {
+        ...config.window,
+        widget_positions: {},
       },
     });
   };
@@ -604,11 +676,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* 1. Widget-Darstellung (Glas, Geblurrt, Schwarz — dazwischen das Hintergrundbild) */}
+        {/* 1. Widget-Darstellung (Glas, Geblurrt, Schwarz — Hintergrundbild wird von Windows verwaltet) */}
         <div className="settings-section">
           <div className="widget-title" style={{ marginBottom: 8 }}>
             <ImageIcon size={13} color="#38bdf8" />
-            <span>1. Widget-Optik (Zwischen den Widgets ist immer dein Hintergrundbild sichtbar)</span>
+            <span>1. Widget-Optik (Desktop-Hintergrundbild wird direkt von Windows verwaltet und bleibt transparent sichtbar)</span>
           </div>
 
           <div
@@ -742,6 +814,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onClick={() => handleOrientationChange('portrait', true)}
                 >
                   <span>Hochkant</span>
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                <button
+                  type="button"
+                  className="icon-btn flex-1"
+                  style={{ fontSize: '0.72rem', padding: '6px 8px' }}
+                  onClick={handleFitToMonitor}
+                  title="Füllt den gesamten Monitor aus, damit Widgets flexibel im Querformat angeordnet werden können."
+                >
+                  <span>🖥️ Auf Monitor anpassen (Vollbild)</span>
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn flex-1"
+                  style={{ fontSize: '0.72rem', padding: '6px 8px' }}
+                  onClick={handleResetPositions}
+                  title="Setzt manuell verschobene Widgets auf das Standard-Raster zurück."
+                >
+                  <span>🔄 Positionen auf Raster anordnen</span>
                 </button>
               </div>
             </div>

@@ -363,49 +363,8 @@ public class StorageService
 
     public string? SyncWindowsDesktopWallpaper(string configuredPath)
     {
-        try
-        {
-            string roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string transcoded = Path.Combine(roaming, "Microsoft", "Windows", "Themes", "TranscodedWallpaper");
-            string? srcFile = null;
-
-            if (File.Exists(transcoded))
-            {
-                srcFile = transcoded;
-            }
-            else
-            {
-                string cachedDir = Path.Combine(roaming, "Microsoft", "Windows", "Themes", "CachedFiles");
-                if (Directory.Exists(cachedDir))
-                {
-                    srcFile = Directory.EnumerateFiles(cachedDir, "*.jpg").FirstOrDefault();
-                }
-
-                if (srcFile == null)
-                {
-                    using RegistryKey? deskKey = Registry.CurrentUser.OpenSubKey(@"Control Panel\Desktop");
-                    string? regPath = deskKey?.GetValue("WallPaper") as string;
-                    if (!string.IsNullOrWhiteSpace(regPath) && File.Exists(regPath))
-                    {
-                        srcFile = regPath;
-                    }
-                }
-            }
-
-            if (srcFile != null && File.Exists(srcFile))
-            {
-                string folder = ResolveWallpaperDirectory(configuredPath);
-                Directory.CreateDirectory(folder);
-                string dstFile = Path.Combine(folder, "_windows_desktop_wallpaper.jpg");
-                File.Copy(srcFile, dstFile, overwrite: true);
-                long ticks = File.GetLastWriteTimeUtc(srcFile).Ticks;
-                return $"https://wallpapers.ambientdeck.local/_windows_desktop_wallpaper.jpg?v={ticks}";
-            }
-        }
-        catch
-        {
-        }
-
+        // Desktop wallpaper is managed directly and natively by Windows.
+        // We do not mirror or copy wallpaper files into the application.
         return null;
     }
 

@@ -146,6 +146,43 @@ public partial class MainWindow : Window
         Win32WindowHelper.SetToolWindowAndClickThrough(_hwnd, clickThrough: true);
         ApplyWindowLayerState(_config.Window.LayerMode);
 
+        _monitors = Win32WindowHelper.GetConnectedMonitors();
+        var targetMon = _monitors.FirstOrDefault(m => m.Id == _config.Window.MonitorId) ?? _monitors.FirstOrDefault();
+        if (targetMon != null)
+        {
+            // If window coordinates are completely off the target monitor or uninitialized
+            bool isOffscreen = _config.Window.X < targetMon.X - 200 ||
+                               _config.Window.X > targetMon.X + targetMon.Width ||
+                               _config.Window.Y < targetMon.Y - 200 ||
+                               _config.Window.Y > targetMon.Y + targetMon.Height ||
+                               _config.Window.Width <= 0 ||
+                               _config.Window.Height <= 0;
+
+            if (isOffscreen)
+            {
+                _config.Window.X = targetMon.X;
+                _config.Window.Y = targetMon.Y;
+                if (_config.Window.OrientationMode == "landscape" ||
+                    (_config.Window.OrientationMode == "auto" && targetMon.Width >= targetMon.Height))
+                {
+                    _config.Window.Width = targetMon.Width;
+                    _config.Window.Height = targetMon.Height;
+                }
+                else
+                {
+                    _config.Window.Width = Math.Min(720, targetMon.Width);
+                    _config.Window.Height = targetMon.Height;
+                }
+                _storage.SaveConfig(_config);
+            }
+        }
+
+        // Keep WPF properties in sync
+        this.Left = _config.Window.X;
+        this.Top = _config.Window.Y;
+        this.Width = _config.Window.Width;
+        this.Height = _config.Window.Height;
+
         // Restore window position & size immediately from config.json
         Win32WindowHelper.MoveAndResizeWindow(
             _hwnd,
@@ -538,17 +575,26 @@ public partial class MainWindow : Window
                     if (applyResize)
                     {
                         var mon = _monitors.FirstOrDefault(m => m.Id == _config.Window.MonitorId) ?? _monitors.First();
-                        if (mode == "portrait" && _config.Window.Width > _config.Window.Height)
+                        if (mode == "portrait")
                         {
                             int newW = Math.Min(720, mon.Width);
-                            int newH = Math.Min(1200, mon.Height);
-                            ResizeAndPositionWindow(newW, newH, centerOnMonitor: true);
+                            ResizeAndPositionWindow(newW, mon.Height, centerOnMonitor: true);
                         }
-                        else if (mode == "landscape" && _config.Window.Height > _config.Window.Width)
+                        else if (mode == "landscape")
                         {
-                            int newW = Math.Min(1440, mon.Width);
-                            int newH = Math.Min(860, mon.Height);
-                            ResizeAndPositionWindow(newW, newH, centerOnMonitor: true);
+                            ResizeAndPositionWindow(mon.Width, mon.Height, centerOnMonitor: true);
+                        }
+                        else // auto
+                        {
+                            if (mon.Width >= mon.Height)
+                            {
+                                ResizeAndPositionWindow(mon.Width, mon.Height, centerOnMonitor: true);
+                            }
+                            else
+                            {
+                                int newW = Math.Min(720, mon.Width);
+                                ResizeAndPositionWindow(newW, mon.Height, centerOnMonitor: true);
+                            }
                         }
                     }
 
@@ -579,6 +625,13 @@ public partial class MainWindow : Window
                     _config.Window.Height = h;
 
                     Win32WindowHelper.MoveAndResizeWindow(_hwnd, x, y, w, h, _config.Window.LayerMode);
+                    Dispatcher.Invoke(() =>
+                    {
+                        this.Left = x;
+                        this.Top = y;
+                        this.Width = w;
+                        this.Height = h;
+                    });
                     _storage.SaveConfig(_config);
                     SendToFrontend("config_updated", new { config = _config });
                     break;
@@ -875,6 +928,13 @@ public partial class MainWindow : Window
         _config.Window.Height = h;
 
         Win32WindowHelper.MoveAndResizeWindow(_hwnd, x, y, w, h, _config.Window.LayerMode);
+        Dispatcher.Invoke(() =>
+        {
+            this.Left = x;
+            this.Top = y;
+            this.Width = w;
+            this.Height = h;
+        });
         _storage.SaveConfig(_config);
         SendToFrontend("config_updated", new { config = _config });
     }

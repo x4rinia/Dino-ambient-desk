@@ -104,6 +104,8 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       className={`draggable-widget-item ${isEditable ? 'editable' : ''} ${
         dragging ? 'dragging' : ''
       }`}
+      data-widget-id={id}
+      id={`widget-box-${id}`}
       onMouseDown={handleMouseDown}
       style={{
         transform: `translate3d(${liveOffset.x}px, ${liveOffset.y}px, 0)`,
@@ -208,14 +210,20 @@ export const App: React.FC = () => {
     const mode = config.window.orientation_mode || 'auto';
     if (mode === 'portrait') return 'portrait';
     if (mode === 'landscape') return 'landscape';
+    const targetMon = monitors.find((m) => m.id === config.window.monitor_id);
+    if (targetMon) {
+      return targetMon.width >= targetMon.height ? 'landscape' : 'portrait';
+    }
     const w = isSettingsWindow ? config.window.width : viewport.w;
     const h = isSettingsWindow ? config.window.height : viewport.h;
-    return h > w || w < 920 ? 'portrait' : 'landscape';
+    return w >= h ? 'landscape' : 'portrait';
   }, [
     config.window.orientation_mode,
+    config.window.monitor_id,
     config.window.width,
     config.window.height,
     isSettingsWindow,
+    monitors,
     viewport.w,
     viewport.h,
   ]);
@@ -453,10 +461,32 @@ export const App: React.FC = () => {
 
   const handleSelectMonitor = (monitorId: number) => {
     Bridge.selectMonitor(monitorId);
-    setConfig((prev) => ({
-      ...prev,
-      window: { ...prev.window, monitor_id: monitorId },
-    }));
+    const target = monitors.find((m) => m.id === monitorId);
+    if (target) {
+      const isLandscape = target.width >= target.height;
+      const nextW = (config.window.orientation_mode === 'portrait')
+        ? Math.min(720, target.width)
+        : target.width;
+      const nextH = target.height;
+      Bridge.setWindowBounds(target.x, target.y, nextW, nextH);
+      setConfig((prev) => ({
+        ...prev,
+        window: {
+          ...prev.window,
+          monitor_id: monitorId,
+          x: target.x,
+          y: target.y,
+          width: nextW,
+          height: nextH,
+          widget_positions: {},
+        },
+      }));
+    } else {
+      setConfig((prev) => ({
+        ...prev,
+        window: { ...prev.window, monitor_id: monitorId },
+      }));
+    }
   };
 
   const handleChangeNotes = (content: string) => {
@@ -505,18 +535,6 @@ export const App: React.FC = () => {
       }`}
       style={dashboardThemeStyle}
     >
-      {/* Background Layer (Always shows sharp desktop wallpaper between the widgets) */}
-      <SlideshowBackground
-        backgroundMode={bgMode}
-        blurPx={config.theme?.wallpaper_blur_px ?? 16}
-        intervalSec={config.modules.slideshow.interval_sec}
-        wallpapers={wallpapers}
-        useWindowsWallpaper={config.modules.slideshow.use_windows_wallpaper ?? true}
-        windowsWallpaperUrl={windowsWallpaperUrl || null}
-        windowConfig={config.window}
-        monitors={monitors}
-      />
-
       {/* Floating Edit-Mode Banner (Visible ONLY when Settings Window is open) */}
       {isSettingsOpen && (
         <div className="edit-mode-floating-bar">

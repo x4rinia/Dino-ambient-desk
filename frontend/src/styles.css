@@ -86,13 +86,10 @@ body,
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
-/* Background Layer — Always shows the sharp desktop wallpaper between the widgets */
-.slideshow-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background: transparent;
+/* Background Layer — The desktop wallpaper is completely managed by Windows and shines through transparently */
+.slideshow-layer,
+.desktop-wallpaper-mirror {
+  display: none !important;
 }
 
 /* ⬛ Schwarz — Only the individual widgets are solid black, wallpaper between them stays visible */
@@ -358,12 +355,24 @@ body,
 
 .main-workspace.widgets-flow-grid.layout-landscape {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
   gap: 12px;
   align-content: start;
   align-items: start;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+@media (min-width: 760px) {
+  .main-workspace.widgets-flow-grid.layout-landscape [data-widget-id="header_title"] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 900px) {
+  .main-workspace.widgets-flow-grid.layout-landscape [data-widget-id="clock_calendar"] {
+    grid-column: span 2;
+  }
 }
 
 .main-workspace.widgets-flow-grid.layout-portrait {
