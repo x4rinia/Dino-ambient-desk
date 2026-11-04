@@ -65,7 +65,10 @@ public class ThemeConfig
     public string ColorMode { get; set; } = "cyber_blue";
 
     [JsonPropertyName("background_mode")]
-    public string BackgroundMode { get; set; } = "glass";
+    public string BackgroundMode { get; set; } = "wallpaper_blur";
+
+    [JsonPropertyName("custom_bg_color")]
+    public string CustomBgColor { get; set; } = "#090b10";
 
     [JsonPropertyName("wallpaper_blur_px")]
     public int WallpaperBlurPx { get; set; } = 16;

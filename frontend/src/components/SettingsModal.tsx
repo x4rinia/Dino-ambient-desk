@@ -58,8 +58,9 @@ const BACKGROUND_MODES: {
   label: string;
   desc: string;
 }[] = [
-  { id: 'wallpaper_blur', label: '🌫️ Geblurrt', desc: 'Widgets weichgezeichnet, dazwischen das Hintergrundbild' },
-  { id: 'black', label: '⬛ Schwarz', desc: 'Widgets tiefschwarz, dazwischen das Hintergrundbild' },
+  { id: 'wallpaper_blur', label: '🌫️ Bild (Geblurrt)', desc: 'Hintergrundbild weichgezeichnet hinter den Widgets' },
+  { id: 'glass', label: '🪟 Bild (Klar / Glas)', desc: 'Hintergrundbild scheint scharf und klar durch' },
+  { id: 'color', label: '🎨 Feste Farbe', desc: 'Einfarbiger Hintergrund (Farbe frei wählbar)' },
 ];
 
 const COLOR_THEMES: {
@@ -410,7 +411,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   const rawBg = config.theme?.background_mode as string | undefined;
   const currentBgMode: BackgroundMode =
-    rawBg === 'black' ? 'black' : 'wallpaper_blur';
+    rawBg === 'glass' || rawBg === 'color' || rawBg === 'black' ? rawBg : 'wallpaper_blur';
 
   const currentVariantId = (config.modules.dino_companion?.variant || 'drache').toLowerCase();
   const activeAddon = (addonCompanions || []).find((c) => c.id.toLowerCase() === currentVariantId);
@@ -724,6 +725,62 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 }
               />
               <span className="widget-badge">{config.theme?.wallpaper_blur_px ?? 18} px</span>
+            </div>
+          )}
+
+          {(currentBgMode === 'color' || currentBgMode === 'black') && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
+                Hintergrundfarbe wählen:
+              </span>
+              <input
+                type="color"
+                value={config.theme?.custom_bg_color || '#090b10'}
+                onChange={(e) =>
+                  onUpdateConfig({
+                    ...config,
+                    theme: {
+                      ...config.theme,
+                      custom_bg_color: e.target.value,
+                    },
+                  })
+                }
+                style={{ width: 34, height: 26, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: 'transparent' }}
+              />
+              <span className="widget-badge">{config.theme?.custom_bg_color || '#090b10'}</span>
+
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {[
+                  { label: 'Tiefschwarz', color: '#090b10' },
+                  { label: 'Mitternachtsblau', color: '#0f172a' },
+                  { label: 'Dunkelgrau', color: '#18181b' },
+                  { label: 'Tiefviolett', color: '#1e102a' },
+                  { label: 'Dunkelgrün', color: '#052e16' },
+                ].map((sw) => (
+                  <button
+                    key={sw.color}
+                    type="button"
+                    onClick={() =>
+                      onUpdateConfig({
+                        ...config,
+                        theme: {
+                          ...config.theme,
+                          custom_bg_color: sw.color,
+                        },
+                      })
+                    }
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 4,
+                      background: sw.color,
+                      border: config.theme?.custom_bg_color === sw.color ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.25)',
+                      cursor: 'pointer',
+                    }}
+                    title={sw.label}
+                  />
+                ))}
+              </div>
             </div>
           )}
 

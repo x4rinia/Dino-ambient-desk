@@ -114,6 +114,19 @@ body,
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
 }
 
+/* 🎨 Feste Farbe — Widgets with clean translucent contrast on solid color background */
+.ambient-deck.bg-mode-color {
+  background: transparent;
+  --text-secondary: rgba(226, 232, 240, 0.88);
+  --text-muted: rgba(148, 163, 184, 0.7);
+}
+
+.ambient-deck.bg-mode-color .glass-panel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
 /* Standalone Settings Window Root — Neutral Fixed Styling (Independent from Widget Rainbow/Fonts) */
 .settings-window-container,
 .standalone-settings-root {

@@ -1,8 +1,9 @@
 export type WindowLayerMode = 'background' | 'foreground';
 export type OrientationMode = 'auto' | 'portrait' | 'landscape';
 export type BackgroundMode =
-  | 'glass'
   | 'wallpaper_blur'
+  | 'glass'
+  | 'color'
   | 'black';
 
 export type ColorThemeMode =
@@ -66,6 +67,7 @@ export interface WindowConfig {
 export interface ThemeConfig {
   color_mode: ColorThemeMode;
   background_mode: BackgroundMode;
+  custom_bg_color?: string;
   wallpaper_blur_px: number;
   custom_primary: string;
   custom_secondary: string;

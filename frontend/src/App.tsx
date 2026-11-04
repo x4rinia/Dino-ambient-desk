@@ -500,7 +500,7 @@ export const App: React.FC = () => {
 
   const rawBg = config.theme?.background_mode as string | undefined;
   const bgMode: BackgroundMode =
-    rawBg === 'wallpaper_blur' || rawBg === 'black' ? rawBg : 'glass';
+    rawBg === 'glass' || rawBg === 'color' || rawBg === 'black' ? rawBg : 'wallpaper_blur';
 
   const getOffset = (id: string): WidgetOffset =>
     config.window.widget_positions?.[id] || { x: 0, y: 0 };
@@ -537,6 +537,7 @@ export const App: React.FC = () => {
     >
       <SlideshowBackground
         backgroundMode={bgMode}
+        customBgColor={config.theme?.custom_bg_color || '#090b10'}
         blurPx={config.theme?.wallpaper_blur_px ?? 14}
         intervalSec={config.modules.slideshow?.interval_sec ?? 30}
         useWindowsWallpaper={true}

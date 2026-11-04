@@ -3,6 +3,7 @@ import { BackgroundMode, MonitorInfo, WindowConfig } from '../types';
 
 interface SlideshowBackgroundProps {
   backgroundMode: BackgroundMode;
+  customBgColor?: string;
   blurPx: number;
   intervalSec: number;
   useWindowsWallpaper: boolean;
@@ -14,18 +15,31 @@ interface SlideshowBackgroundProps {
 
 export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
   backgroundMode,
+  customBgColor = '#090b10',
   blurPx,
   windowsWallpaperUrl,
   wallpapers,
   windowConfig,
   monitors,
 }) => {
-  if (backgroundMode === 'black') {
-    return null;
+  // Option: Feste Farbe
+  if (backgroundMode === 'color' || backgroundMode === 'black') {
+    return (
+      <div
+        className="slideshow-layer"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 0,
+          overflow: 'hidden',
+          backgroundColor: customBgColor,
+          pointerEvents: 'none',
+        }}
+      />
+    );
   }
 
-  // Priority: If user uploaded custom wallpapers, prefer the uploaded wallpaper!
-  // Otherwise use the Windows desktop wallpaper for this monitor.
+  // Option: Hintergrundbild (Geblurrt oder Klar)
   const wallpaperSrc =
     wallpapers.length > 0
       ? wallpapers[0]
@@ -72,7 +86,7 @@ export const SlideshowBackground: React.FC<SlideshowBackgroundProps> = ({
           pointerEvents: 'none',
           filter: isBlurred ? `blur(${blurPx || 14}px)` : 'none',
           transform: isBlurred ? 'scale(1.05)' : 'none',
-          opacity: 0.95,
+          opacity: 0.96,
           transition: 'filter 0.3s ease, opacity 0.3s ease',
         }}
       />
