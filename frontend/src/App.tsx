@@ -295,6 +295,8 @@ export const App: React.FC = () => {
       '--font-sans': fontFam,
       '--font-mono': fontFam,
       '--widget-blur-px': `${blurPx}px`,
+      '--custom-widget-bg': config.theme?.custom_widget_bg_color || '#141824',
+      '--custom-bg-color': config.theme?.custom_bg_color || '#090b10',
       fontFamily: fontFam,
     };
 

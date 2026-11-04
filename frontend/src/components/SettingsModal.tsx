@@ -729,123 +729,169 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           )}
 
           {(currentBgMode === 'color' || currentBgMode === 'black') && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-                Hintergrundfarbe wählen:
-              </span>
-              <input
-                type="color"
-                value={config.theme?.custom_bg_color || '#090b10'}
-                onChange={(e) =>
-                  onUpdateConfig({
-                    ...config,
-                    theme: {
-                      ...config.theme,
-                      custom_bg_color: e.target.value,
-                    },
-                  })
-                }
-                style={{ width: 34, height: 26, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: 'transparent' }}
-              />
-              <span className="widget-badge">{config.theme?.custom_bg_color || '#090b10'}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 12 }}>
+              {/* 1. Hintergrundfarbe */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', color: '#cbd5e1', width: 140 }}>
+                  1. Hintergrundfarbe:
+                </span>
+                <input
+                  type="color"
+                  value={config.theme?.custom_bg_color || '#090b10'}
+                  onChange={(e) =>
+                    onUpdateConfig({
+                      ...config,
+                      theme: {
+                        ...config.theme,
+                        custom_bg_color: e.target.value,
+                      },
+                    })
+                  }
+                  style={{ width: 34, height: 26, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: 'transparent' }}
+                />
+                <span className="widget-badge">{config.theme?.custom_bg_color || '#090b10'}</span>
 
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                {[
-                  { label: 'Tiefschwarz', color: '#090b10' },
-                  { label: 'Mitternachtsblau', color: '#0f172a' },
-                  { label: 'Dunkelgrau', color: '#18181b' },
-                  { label: 'Tiefviolett', color: '#1e102a' },
-                  { label: 'Dunkelgrün', color: '#052e16' },
-                ].map((sw) => (
-                  <button
-                    key={sw.color}
-                    type="button"
-                    onClick={() =>
-                      onUpdateConfig({
-                        ...config,
-                        theme: {
-                          ...config.theme,
-                          custom_bg_color: sw.color,
-                        },
-                      })
-                    }
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 4,
-                      background: sw.color,
-                      border: config.theme?.custom_bg_color === sw.color ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.25)',
-                      cursor: 'pointer',
-                    }}
-                    title={sw.label}
-                  />
-                ))}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {[
+                    { label: 'Tiefschwarz', color: '#090b10' },
+                    { label: 'Mitternachtsblau', color: '#0f172a' },
+                    { label: 'Dunkelgrau', color: '#18181b' },
+                    { label: 'Tiefviolett', color: '#1e102a' },
+                    { label: 'Dunkelgrün', color: '#052e16' },
+                  ].map((sw) => (
+                    <button
+                      key={sw.color}
+                      type="button"
+                      onClick={() =>
+                        onUpdateConfig({
+                          ...config,
+                          theme: {
+                            ...config.theme,
+                            custom_bg_color: sw.color,
+                          },
+                        })
+                      }
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 4,
+                        background: sw.color,
+                        border: config.theme?.custom_bg_color === sw.color ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.25)',
+                        cursor: 'pointer',
+                      }}
+                      title={sw.label}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Widget-Farbe */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.75rem', color: '#cbd5e1', width: 140 }}>
+                  2. Widget-Kartenfarbe:
+                </span>
+                <input
+                  type="color"
+                  value={config.theme?.custom_widget_bg_color || '#141824'}
+                  onChange={(e) =>
+                    onUpdateConfig({
+                      ...config,
+                      theme: {
+                        ...config.theme,
+                        custom_widget_bg_color: e.target.value,
+                      },
+                    })
+                  }
+                  style={{ width: 34, height: 26, padding: 0, border: 'none', borderRadius: 4, cursor: 'pointer', background: 'transparent' }}
+                />
+                <span className="widget-badge">{config.theme?.custom_widget_bg_color || '#141824'}</span>
+
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {[
+                    { label: 'Dunkles Blau', color: '#141824' },
+                    { label: 'Anthrazit', color: '#1f2430' },
+                    { label: 'Tiefviolett', color: '#261a35' },
+                    { label: 'Schiefergrau', color: '#27272a' },
+                    { label: 'Mattschwarz', color: '#121214' },
+                  ].map((sw) => (
+                    <button
+                      key={sw.color}
+                      type="button"
+                      onClick={() =>
+                        onUpdateConfig({
+                          ...config,
+                          theme: {
+                            ...config.theme,
+                            custom_widget_bg_color: sw.color,
+                          },
+                        })
+                      }
+                      style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: 4,
+                        background: sw.color,
+                        border: config.theme?.custom_widget_bg_color === sw.color ? '2px solid #34d399' : '1px solid rgba(255,255,255,0.25)',
+                        cursor: 'pointer',
+                      }}
+                      title={sw.label}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* Hintergrundbild Steuerung (Eigenes Bild hochladen oder Windows-Hintergrund nutzen) */}
-          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 600 }}>
-              Hintergrundbild (scheint im Quer- & Hochformat transparent durch):
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="icon-btn"
-                style={{
-                  flex: 1,
-                  padding: '7px 12px',
-                  background: 'rgba(56, 189, 248, 0.15)',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
-                  color: '#38bdf8',
-                  fontWeight: 600,
-                  fontSize: '0.75rem',
-                }}
-                onClick={() => {
-                  Bridge.pickWallpaperFile();
-                  setStatusBanner('Dateiauswahl geöffnet — wähle dein Hintergrundbild aus!');
-                  setTimeout(() => setStatusBanner(''), 4000);
-                }}
-                title="Wähle ein eigenes Bild von deinem PC aus, das im Quer- oder Hochformat als Hintergrund angezeigt wird."
-              >
-                <Upload size={13} />
-                <span>🖼️ Eigenes Hintergrundbild hochladen / auswählen</span>
-              </button>
+          {/* Hintergrundbild Steuerung (Nur wenn nicht Feste Farben gewählt ist) */}
+          {currentBgMode !== 'color' && currentBgMode !== 'black' && (
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ fontSize: '0.74rem', color: '#cbd5e1', fontWeight: 600 }}>
+                Hintergrundbild (wird direkt im Programmordner gespeichert):
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid rgba(56, 189, 248, 0.4)',
+                    color: '#38bdf8',
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                  }}
+                  onClick={() => {
+                    Bridge.pickWallpaperFile();
+                    setStatusBanner('Dateiauswahl geöffnet — wähle dein Bild aus!');
+                    setTimeout(() => setStatusBanner(''), 4000);
+                  }}
+                  title="Wähle ein Bild von deinem PC aus. Es wird direkt in den Programmordner kopiert und gespeichert."
+                >
+                  <Upload size={13} />
+                  <span>🖼️ Eigenes Hintergrundbild hochladen</span>
+                </button>
 
-              <button
-                type="button"
-                className="icon-btn"
-                style={{
-                  flex: 1,
-                  padding: '7px 12px',
-                  fontSize: '0.75rem',
-                }}
-                onClick={() => {
-                  Bridge.resetToWindowsWallpaper();
-                  setStatusBanner('Windows-Desktophintergrund für diesen Monitor wird verwendet!');
-                  setTimeout(() => setStatusBanner(''), 4000);
-                }}
-                title="Verwendet automatisch das aktuelle Desktop-Hintergrundbild dieses Windows-Monitors."
-              >
-                <span>🪟 Windows-Desktop Hintergrund nutzen</span>
-              </button>
-
-              <button
-                type="button"
-                className="icon-btn"
-                style={{
-                  padding: '7px 10px',
-                  fontSize: '0.75rem',
-                }}
-                onClick={() => Bridge.openWallpapersFolder()}
-                title="Öffnet den Ordner mit den gespeicherten Hintergrundbildern im Windows Explorer."
-              >
-                <FolderOpen size={13} />
-                <span>Ordner öffnen</span>
-              </button>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    fontSize: '0.75rem',
+                  }}
+                  onClick={() => {
+                    Bridge.resetToWindowsWallpaper();
+                    setStatusBanner('Windows-Desktop Hintergrund wurde in den Programmordner gespeichert!');
+                    setTimeout(() => setStatusBanner(''), 4000);
+                  }}
+                  title="Kopiert das aktuelle Desktop-Hintergrundbild deines Windows-Monitors und speichert es im Programmordner."
+                >
+                  <span>🪟 Windows-Desktop Hintergrund übernehmen</span>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 2. Monitor, Freie Fenstergröße, Ausrichtung (Hochkant / Quer) & Vorder-/Hintergrund */}

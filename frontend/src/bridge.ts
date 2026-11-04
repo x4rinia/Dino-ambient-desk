@@ -183,6 +183,7 @@ export const Bridge = {
   openWallpapersFolder: () => sendToBackend('open_wallpapers_folder'),
   pickWallpaperFile: () => sendToBackend('pick_wallpaper_file'),
   resetToWindowsWallpaper: () => sendToBackend('reset_to_windows_wallpaper'),
+  deleteWallpaper: () => sendToBackend('delete_wallpaper'),
   addCalendarEvent: (title: string, startIso: string) =>
     sendToBackend('add_event', { title, start_iso: startIso }),
   saveManualEvents: (events: CalendarEvent[]) =>

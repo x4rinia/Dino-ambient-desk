@@ -130,70 +130,6 @@ public class StorageService
         {
             File.WriteAllText(EventsJsonPath, JsonSerializer.Serialize(new List<CalendarEvent>(), JsonOptions));
         }
-
-        if (!Directory.EnumerateFiles(DefaultWallpapersFolder).Any())
-        {
-            File.WriteAllText(
-                Path.Combine(DefaultWallpapersFolder, "01-midnight-aurora.svg"),
-                """
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
-                  <defs>
-                    <radialGradient id="bg" cx="25%" cy="20%" r="80%">
-                      <stop offset="0%" stop-color="#0d2b45"/>
-                      <stop offset="50%" stop-color="#091326"/>
-                      <stop offset="100%" stop-color="#04070f"/>
-                    </radialGradient>
-                    <radialGradient id="glow" cx="75%" cy="70%" r="50%">
-                      <stop offset="0%" stop-color="#10b981" stop-opacity="0.24"/>
-                      <stop offset="100%" stop-color="#04070f" stop-opacity="0"/>
-                    </radialGradient>
-                  </defs>
-                  <rect width="1920" height="1080" fill="url(#bg)"/>
-                  <rect width="1920" height="1080" fill="url(#glow)"/>
-                  <circle cx="1480" cy="220" r="320" fill="#38bdf8" opacity="0.07"/>
-                  <path d="M0,820 Q480,710 960,800 T1920,730 L1920,1080 L0,1080 Z" fill="#071020" opacity="0.78"/>
-                  <path d="M0,900 Q600,820 1200,890 T1920,840 L1920,1080 L0,1080 Z" fill="#03060d" opacity="0.92"/>
-                </svg>
-                """
-            );
-
-            File.WriteAllText(
-                Path.Combine(DefaultWallpapersFolder, "02-cyber-nebula.svg"),
-                """
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
-                  <defs>
-                    <radialGradient id="neb" cx="70%" cy="25%" r="85%">
-                      <stop offset="0%" stop-color="#1e1b4b"/>
-                      <stop offset="55%" stop-color="#0f172a"/>
-                      <stop offset="100%" stop-color="#05070d"/>
-                    </radialGradient>
-                  </defs>
-                  <rect width="1920" height="1080" fill="url(#neb)"/>
-                  <circle cx="420" cy="320" r="340" fill="#38bdf8" opacity="0.06"/>
-                  <circle cx="1520" cy="680" r="380" fill="#f59e0b" opacity="0.05"/>
-                  <path d="M0,830 Q540,730 1080,820 T1920,750 L1920,1080 L0,1080 Z" fill="#080d1a" opacity="0.82"/>
-                </svg>
-                """
-            );
-
-            File.WriteAllText(
-                Path.Combine(DefaultWallpapersFolder, "03-emerald-horizon.svg"),
-                """
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
-                  <defs>
-                    <radialGradient id="em" cx="45%" cy="15%" r="85%">
-                      <stop offset="0%" stop-color="#063932"/>
-                      <stop offset="55%" stop-color="#081824"/>
-                      <stop offset="100%" stop-color="#04070d"/>
-                    </radialGradient>
-                  </defs>
-                  <rect width="1920" height="1080" fill="url(#em)"/>
-                  <circle cx="960" cy="260" r="360" fill="#34d399" opacity="0.06"/>
-                  <path d="M0,810 Q480,740 960,810 T1920,760 L1920,1080 L0,1080 Z" fill="#061019" opacity="0.85"/>
-                </svg>
-                """
-            );
-        }
     }
 
     public AmbientDeckConfig LoadConfig(List<MonitorInfo> monitors)
@@ -410,10 +346,10 @@ public class StorageService
             {
                 string folder = ResolveWallpaperDirectory(configuredPath);
                 Directory.CreateDirectory(folder);
-                string dstFile = Path.Combine(folder, $"_windows_desktop_wallpaper_mon{monitorId}.jpg");
+                string dstFile = Path.Combine(folder, "windows_wallpaper.jpg");
                 File.Copy(srcFile, dstFile, overwrite: true);
                 long ticks = File.GetLastWriteTimeUtc(srcFile).Ticks;
-                return $"https://wallpapers.ambientdeck.local/_windows_desktop_wallpaper_mon{monitorId}.jpg?v={ticks}";
+                return $"https://wallpapers.ambientdeck.local/windows_wallpaper.jpg?v={ticks}";
             }
         }
         catch
@@ -430,15 +366,14 @@ public class StorageService
 
         var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            ".jpg", ".jpeg", ".png", ".webp", ".svg", ".gif"
+            ".jpg", ".jpeg", ".png", ".webp", ".gif"
         };
 
         return Directory
             .EnumerateFiles(folder)
-            .Where(f => allowed.Contains(Path.GetExtension(f)) &&
-                        !Path.GetFileName(f).StartsWith("_windows_desktop_wallpaper", StringComparison.OrdinalIgnoreCase))
-            .OrderBy(f => f)
-            .Select(f => $"https://wallpapers.ambientdeck.local/{Uri.EscapeDataString(Path.GetFileName(f))}")
+            .Where(f => allowed.Contains(Path.GetExtension(f)))
+            .OrderByDescending(f => File.GetLastWriteTimeUtc(f))
+            .Select(f => $"https://wallpapers.ambientdeck.local/{Uri.EscapeDataString(Path.GetFileName(f))}?v={File.GetLastWriteTimeUtc(f).Ticks}")
             .ToList();
     }
 

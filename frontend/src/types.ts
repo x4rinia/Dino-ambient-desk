@@ -68,6 +68,7 @@ export interface ThemeConfig {
   color_mode: ColorThemeMode;
   background_mode: BackgroundMode;
   custom_bg_color?: string;
+  custom_widget_bg_color?: string;
   wallpaper_blur_px: number;
   custom_primary: string;
   custom_secondary: string;

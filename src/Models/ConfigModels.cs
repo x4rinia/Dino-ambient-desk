@@ -70,6 +70,9 @@ public class ThemeConfig
     [JsonPropertyName("custom_bg_color")]
     public string CustomBgColor { get; set; } = "#090b10";
 
+    [JsonPropertyName("custom_widget_bg_color")]
+    public string CustomWidgetBgColor { get; set; } = "#141824";
+
     [JsonPropertyName("wallpaper_blur_px")]
     public int WallpaperBlurPx { get; set; } = 16;
 
