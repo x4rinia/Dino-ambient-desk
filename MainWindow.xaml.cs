@@ -458,7 +458,9 @@ public partial class MainWindow : Window
                 _hasUncommittedWallpaper = false;
                 if (_configSnapshotBeforeSettings != null)
                 {
+                    var livePositions = _config.Window.WidgetPositions;
                     _config = _configSnapshotBeforeSettings;
+                    _config.Window.WidgetPositions = livePositions;
                     _storage.SaveConfig(_config);
                 }
                 UpdateWallpapersVirtualHostMapping();
@@ -964,11 +966,20 @@ public partial class MainWindow : Window
         try
         {
             string json = JsonSerializer.Serialize(new { type, payload }, JsonOptions);
-            if (_webViewReady && DashboardWebView.CoreWebView2 != null)
+            Dispatcher.InvokeAsync(() =>
             {
-                DashboardWebView.CoreWebView2.PostWebMessageAsJson(json);
-            }
-            _settingsWindow?.PostJsonMessage(json);
+                try
+                {
+                    if (_webViewReady && DashboardWebView.CoreWebView2 != null)
+                    {
+                        DashboardWebView.CoreWebView2.PostWebMessageAsJson(json);
+                    }
+                    _settingsWindow?.PostJsonMessage(json);
+                }
+                catch
+                {
+                }
+            });
         }
         catch
         {

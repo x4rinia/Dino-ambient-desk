@@ -44,12 +44,17 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
-  const [liveOffset, setLiveOffset] = useState<WidgetOffset>(() => ({
-    x: Number(offset?.x) || 0,
-    y: Number(offset?.y) || 0,
-    scale: Math.max(0.75, Math.min(1.35, Number(offset?.scale) || 1)),
-    width: offset?.width,
-  }));
+  const [liveOffset, setLiveOffset] = useState<WidgetOffset>(() => {
+    const rawX = Number(offset?.x) || 0;
+    const rawY = Number(offset?.y) || 0;
+    const isOut = rawX < -200 || rawX > 2500 || rawY < -200 || rawY > 2000;
+    return {
+      x: isOut ? 0 : rawX,
+      y: isOut ? 0 : rawY,
+      scale: Math.max(0.75, Math.min(1.35, Number(offset?.scale) || 1)),
+      width: offset?.width,
+    };
+  });
 
   const startRef = useRef<{
     mouseX: number;
@@ -65,9 +70,12 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
   // Synchronize when positions are reset or updated externally
   useEffect(() => {
     if (!dragging && !resizing) {
+      const rawX = Number(offset?.x) || 0;
+      const rawY = Number(offset?.y) || 0;
+      const isOut = rawX < -200 || rawX > 2500 || rawY < -200 || rawY > 2000;
       setLiveOffset({
-        x: Number(offset?.x) || 0,
-        y: Number(offset?.y) || 0,
+        x: isOut ? 0 : rawX,
+        y: isOut ? 0 : rawY,
         scale: Math.max(0.75, Math.min(1.35, Number(offset?.scale) || 1)),
         width: offset?.width,
       });
@@ -117,10 +125,13 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
       const clampedDx = clampedLeft - startRef.current.rectLeft;
       const clampedDy = clampedTop - startRef.current.rectTop;
 
+      const nextX = Math.max(-200, Math.min(2500, Math.round(startRef.current.baseX + clampedDx)));
+      const nextY = Math.max(-200, Math.min(2000, Math.round(startRef.current.baseY + clampedDy)));
+
       setLiveOffset((prev) => ({
         ...prev,
-        x: Math.round(startRef.current!.baseX + clampedDx),
-        y: Math.round(startRef.current!.baseY + clampedDy),
+        x: nextX,
+        y: nextY,
       }));
     };
 
@@ -146,10 +157,13 @@ const DraggableWidgetBox: React.FC<DraggableWidgetBoxProps> = ({
         const clampedDx = clampedLeft - startRef.current.rectLeft;
         const clampedDy = clampedTop - startRef.current.rectTop;
 
+        const nextX = Math.max(-200, Math.min(2500, Math.round(startRef.current.baseX + clampedDx)));
+        const nextY = Math.max(-200, Math.min(2000, Math.round(startRef.current.baseY + clampedDy)));
+
         const finalPos = {
           ...liveOffset,
-          x: Math.round(startRef.current.baseX + clampedDx),
-          y: Math.round(startRef.current.baseY + clampedDy),
+          x: nextX,
+          y: nextY,
           scale: Math.max(0.75, Math.min(1.35, Number(liveOffset.scale) || 1)),
         };
         setLiveOffset(finalPos);
@@ -612,11 +626,11 @@ export const App: React.FC = () => {
   const handleWidgetOffsetChange = useCallback(
     (widgetId: string, nextOffset: WidgetOffset) => {
       const sanitized: WidgetOffset = {
-        x: Math.round(Number(nextOffset.x) || 0),
-        y: Math.round(Number(nextOffset.y) || 0),
+        x: Math.max(-200, Math.min(2500, Math.round(Number(nextOffset.x) || 0))),
+        y: Math.max(-200, Math.min(2000, Math.round(Number(nextOffset.y) || 0))),
         scale:
           typeof nextOffset.scale === 'number' && !isNaN(nextOffset.scale)
-            ? Math.round(nextOffset.scale * 100) / 100
+            ? Math.max(0.75, Math.min(1.35, Math.round(nextOffset.scale * 100) / 100))
             : 1,
         width:
           typeof nextOffset.width === 'number' && !isNaN(nextOffset.width)
@@ -624,37 +638,36 @@ export const App: React.FC = () => {
             : undefined,
       };
 
+      let latestPositions: Record<string, WidgetOffset> = {};
       setConfig((prev) => {
-        const nextPositions = {
+        latestPositions = {
           ...(prev.window.widget_positions || {}),
           [widgetId]: sanitized,
         };
-        const updated: AmbientDeckConfig = {
+        return {
           ...prev,
           window: {
             ...prev.window,
-            widget_positions: nextPositions,
+            widget_positions: latestPositions,
           },
         };
-        Bridge.saveWidgetPositions(nextPositions);
-        return updated;
       });
+
+      // Send to backend outside setConfig to avoid React state updater side-effects
+      Bridge.saveWidgetPositions(latestPositions);
     },
     []
   );
 
   const handleResetWidgetPositions = useCallback(() => {
-    setConfig((prev) => {
-      const updated: AmbientDeckConfig = {
-        ...prev,
-        window: {
-          ...prev.window,
-          widget_positions: {},
-        },
-      };
-      Bridge.saveWidgetPositions({});
-      return updated;
-    });
+    setConfig((prev) => ({
+      ...prev,
+      window: {
+        ...prev.window,
+        widget_positions: {},
+      },
+    }));
+    Bridge.saveWidgetPositions({});
   }, []);
 
   const handleSelectMonitor = (monitorId: number) => {
@@ -709,6 +722,11 @@ export const App: React.FC = () => {
       typeof saved.y === 'number' &&
       !isNaN(saved.y)
     ) {
+      // Automatic safety clamp: if an offset is out of bounds, return default 0 so widget never vanishes
+      const isOutOfBounds = saved.x < -200 || saved.x > 2500 || saved.y < -200 || saved.y > 2000;
+      if (isOutOfBounds) {
+        return { x: 0, y: 0, scale: 1 };
+      }
       return {
         x: saved.x,
         y: saved.y,

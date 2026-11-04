@@ -675,6 +675,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             className="icon-btn active-blue"
             onClick={() => {
               onResetWidgetPositions();
+              onUpdateConfig({
+                ...config,
+                window: {
+                  ...config.window,
+                  widget_positions: {},
+                },
+              });
               setStatusBanner('Alle Widgets wurden wieder automatisch angeordnet!');
               setTimeout(() => setStatusBanner(''), 3000);
             }}

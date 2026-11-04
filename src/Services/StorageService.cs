@@ -205,6 +205,21 @@ public class StorageService
             config.Modules.OneThing.LastDate = today;
         }
 
+        if (config.Window.WidgetPositions != null)
+        {
+            foreach (var kvp in config.Window.WidgetPositions.ToList())
+            {
+                var pos = kvp.Value;
+                // If position is pushed far outside screen bounds, reset to default 0 to prevent widgets vanishing
+                if (pos.X < -200 || pos.X > 2500 || pos.Y < -200 || pos.Y > 2000)
+                {
+                    pos.X = 0;
+                    pos.Y = 0;
+                }
+                pos.Scale = Math.Clamp(pos.Scale ?? 1.0, 0.75, 1.35);
+            }
+        }
+
         SaveConfig(config);
         return config;
     }
