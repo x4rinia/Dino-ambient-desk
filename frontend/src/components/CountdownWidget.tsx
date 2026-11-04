@@ -32,7 +32,7 @@ export const CountdownWidget: React.FC<CountdownWidgetProps> = ({
   const isDone = diffMs <= 0;
 
   return (
-    <section className="glass-panel countdown-panel" style={{ width: 'max-content', minWidth: 205, maxWidth: 260 }}>
+    <section className="glass-panel countdown-panel">
       <div className="widget-header" style={{ marginBottom: 6 }}>
         <div className="widget-title" style={{ fontSize: '0.74rem' }}>
           <Compass size={12} color="var(--accent-blue)" />

@@ -210,13 +210,9 @@ public class StorageService
             foreach (var kvp in config.Window.WidgetPositions.ToList())
             {
                 var pos = kvp.Value;
-                // If position is pushed far outside screen bounds, reset to default 0 to prevent widgets vanishing
-                if (pos.X < -200 || pos.X > 2500 || pos.Y < -200 || pos.Y > 2000)
-                {
-                    pos.X = 0;
-                    pos.Y = 0;
-                }
-                pos.Scale = Math.Clamp(pos.Scale ?? 1.0, 0.75, 1.35);
+                if (double.IsNaN(pos.X) || double.IsInfinity(pos.X)) pos.X = 0;
+                if (double.IsNaN(pos.Y) || double.IsInfinity(pos.Y)) pos.Y = 0;
+                pos.Scale = Math.Clamp(pos.Scale ?? 1.0, 0.70, 1.40);
             }
         }
 

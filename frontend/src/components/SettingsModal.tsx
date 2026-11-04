@@ -35,6 +35,7 @@ import {
   DinoVariant,
   MonitorInfo,
   OrientationMode,
+  WidgetShape,
   WindowLayerMode,
 } from '../types';
 import { Bridge, DEFAULT_CONFIG } from '../bridge';
@@ -170,6 +171,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       },
     };
     onUpdateConfig(nextConfig);
+  };
+
+  const getWidgetShape = (id: string, defaultShape: WidgetShape = 'square'): WidgetShape => {
+    return (config.window.widget_positions?.[id]?.shape as WidgetShape) || defaultShape;
+  };
+
+  const setWidgetShape = (id: string, shape: WidgetShape) => {
+    const cur = config.window.widget_positions?.[id] || { x: 0, y: 0, scale: 1 };
+    onUpdateConfig({
+      ...config,
+      window: {
+        ...config.window,
+        widget_positions: {
+          ...(config.window.widget_positions || {}),
+          [id]: {
+            ...cur,
+            shape,
+          },
+        },
+      },
+    });
   };
 
   const handleLayerChange = (layerMode: WindowLayerMode) => {
@@ -2098,52 +2120,120 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           <div className="settings-grid">
-            <label className="setting-toggle-card">
-              <span>🏷️ Überschrift oben anzeigen (Standard: „Dino“)</span>
-              <input
-                type="checkbox"
-                checked={config.modules.header_title?.enabled ?? true}
-                onChange={() => toggleModule('header_title')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>🏷️ Überschrift oben (Standard: „Dino“)</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.header_title?.enabled ?? true}
+                  onChange={() => toggleModule('header_title')}
+                />
+              </label>
+              {(config.modules.header_title?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('header_title', 'landscape') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('header_title', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>⏰ Uhrzeit & Datum</span>
-              <input
-                type="checkbox"
-                checked={config.modules.clock_calendar.enabled}
-                onChange={() => toggleModule('clock_calendar')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>⏰ Uhrzeit & Datum</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.clock_calendar.enabled}
+                  onChange={() => toggleModule('clock_calendar')}
+                />
+              </label>
+              {config.modules.clock_calendar.enabled && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('clock', 'landscape') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('clock', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>📅 Nächste Termine (Agenda)</span>
-              <input
-                type="checkbox"
-                checked={config.modules.next_up_agenda.enabled}
-                onChange={() => toggleModule('next_up_agenda')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>📅 Nächste Termine (Agenda)</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.next_up_agenda.enabled}
+                  onChange={() => toggleModule('next_up_agenda')}
+                />
+              </label>
+              {config.modules.next_up_agenda.enabled && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('agenda', 'square') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('agenda', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>🗓️ Monatskalender</span>
-              <input
-                type="checkbox"
-                checked={config.modules.clock_calendar.compact_calendar ?? true}
-                onChange={(e) =>
-                  onUpdateConfig({
-                    ...config,
-                    modules: {
-                      ...config.modules,
-                      clock_calendar: {
-                        ...config.modules.clock_calendar,
-                        compact_calendar: e.target.checked,
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>🗓️ Monatskalender</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.clock_calendar.compact_calendar ?? true}
+                  onChange={(e) =>
+                    onUpdateConfig({
+                      ...config,
+                      modules: {
+                        ...config.modules,
+                        clock_calendar: {
+                          ...config.modules.clock_calendar,
+                          compact_calendar: e.target.checked,
+                        },
                       },
-                    },
-                  })
-                }
-              />
-            </label>
+                    })
+                  }
+                />
+              </label>
+              {(config.modules.clock_calendar.compact_calendar ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('calendar', 'square') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('calendar', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <label className="setting-toggle-card">
               <span>⏱️ Sekunden in der Uhr anzeigen</span>
@@ -2165,50 +2255,135 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               />
             </label>
 
-            <label className="setting-toggle-card">
-              <span>🌸 Zyklus-Kalender (Frauen-Zyklus) anzeigen</span>
-              <input
-                type="checkbox"
-                checked={config.modules.cycle_tracker?.enabled ?? true}
-                onChange={() => toggleModule('cycle_tracker')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>🌸 Zyklus-Kalender anzeigen</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.cycle_tracker?.enabled ?? true}
+                  onChange={() => toggleModule('cycle_tracker')}
+                />
+              </label>
+              {(config.modules.cycle_tracker?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('cycle_tracker', 'square') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('cycle_tracker', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>🌙 Mondkalender (Mondphasen) anzeigen</span>
-              <input
-                type="checkbox"
-                checked={config.modules.moon_calendar?.enabled ?? true}
-                onChange={() => toggleModule('moon_calendar')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>🌙 Mondkalender anzeigen</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.moon_calendar?.enabled ?? true}
+                  onChange={() => toggleModule('moon_calendar')}
+                />
+              </label>
+              {(config.modules.moon_calendar?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('moon_calendar', 'square') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('moon_calendar', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>📊 System-Vitalwerte (CPU / RAM / GPU)</span>
-              <input
-                type="checkbox"
-                checked={config.modules.system_vitals?.enabled ?? true}
-                onChange={() => toggleModule('system_vitals')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>📊 System-Vitalwerte (CPU / RAM / GPU)</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.system_vitals?.enabled ?? true}
+                  onChange={() => toggleModule('system_vitals')}
+                />
+              </label>
+              {(config.modules.system_vitals?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('system_vitals', 'landscape') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('system_vitals', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>⏳ Countdown anzeigen</span>
-              <input
-                type="checkbox"
-                checked={config.modules.countdown?.enabled ?? true}
-                onChange={() => toggleModule('countdown')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>⏳ Countdown anzeigen</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.countdown?.enabled ?? true}
+                  onChange={() => toggleModule('countdown')}
+                />
+              </label>
+              {(config.modules.countdown?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('countdown', 'landscape') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('countdown', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            <label className="setting-toggle-card">
-              <span>📝 Notizen-Karte anzeigen</span>
-              <input
-                type="checkbox"
-                checked={config.modules.notes?.enabled ?? true}
-                onChange={() => toggleModule('notes')}
-              />
-            </label>
+            <div className="setting-module-control-card">
+              <label className="setting-toggle-row">
+                <span>📝 Notizen-Karte anzeigen</span>
+                <input
+                  type="checkbox"
+                  checked={config.modules.notes?.enabled ?? true}
+                  onChange={() => toggleModule('notes')}
+                />
+              </label>
+              {(config.modules.notes?.enabled ?? true) && (
+                <div className="setting-format-selector-row">
+                  <span className="setting-format-tag">Format:</span>
+                  {(['square', 'portrait', 'landscape'] as WidgetShape[]).map((sh) => (
+                    <button
+                      key={sh}
+                      type="button"
+                      className={`widget-shape-btn ${getWidgetShape('notes', 'square') === sh ? 'active' : ''}`}
+                      onClick={() => setWidgetShape('notes', sh)}
+                    >
+                      {sh === 'square' ? '⬚ Quadrat' : sh === 'portrait' ? '▯ Hoch' : '▭ Quer'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

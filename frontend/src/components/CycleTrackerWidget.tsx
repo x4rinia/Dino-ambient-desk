@@ -46,7 +46,7 @@ export const CycleTrackerWidget: React.FC<CycleTrackerWidgetProps> = ({ config }
   const periodZonePercent = Math.min(100, (periodLen / cycleLen) * 100);
 
   return (
-    <section className="glass-panel pomodoro-panel">
+    <section className="glass-panel pomodoro-panel cycle-tracker-card">
       <div className="widget-header" style={{ marginBottom: 6 }}>
         <div className="widget-title">
           <Heart size={13} color={statusColor} />

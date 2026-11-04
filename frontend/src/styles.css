@@ -535,6 +535,258 @@ body,
   text-decoration: underline;
 }
 
+/* Widget Shape Controls on Drag Handle Pill: ⬚ Quadrat | ▯ Hochkant | ▭ Quer */
+.widget-shape-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  padding-left: 6px;
+  border-left: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.widget-shape-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.widget-shape-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+
+.widget-shape-btn.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #090b10;
+  font-weight: 800;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   SETTINGS MODAL: Module Control Cards & Format Selector Rows
+   ────────────────────────────────────────────────────────────────────────── */
+.setting-module-control-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.setting-module-control-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.setting-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  user-select: none;
+}
+
+.setting-format-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.setting-format-tag {
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+/* ⬚ 1. FORMAT: QUADRAT (Square) */
+.draggable-widget-item.widget-shape-square .clock-widget-card {
+  width: 195px !important;
+  min-width: 195px !important;
+  max-width: 195px !important;
+  min-height: 165px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+.draggable-widget-item.widget-shape-square .clock-widget-card .digital-time {
+  font-size: 2.15rem;
+  line-height: 1.1;
+  margin: 6px 0;
+}
+
+.draggable-widget-item.widget-shape-square .agenda-widget-card {
+  width: 185px !important;
+  height: 165px !important;
+}
+
+.draggable-widget-item.widget-shape-square .calendar-widget-card {
+  width: 250px !important;
+}
+
+.draggable-widget-item.widget-shape-square .countdown-panel {
+  width: 195px !important;
+  min-width: 195px !important;
+  max-width: 195px !important;
+}
+.draggable-widget-item.widget-shape-square .countdown-units {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 5px !important;
+}
+
+.draggable-widget-item.widget-shape-square .vitals-panel {
+  width: 195px !important;
+  min-width: 195px !important;
+  max-width: 195px !important;
+}
+
+.draggable-widget-item.widget-shape-square .notes-card {
+  width: 195px !important;
+  min-height: 165px !important;
+}
+
+.draggable-widget-item.widget-shape-square .cycle-tracker-card {
+  width: 195px !important;
+  min-height: 165px !important;
+}
+
+.draggable-widget-item.widget-shape-square .moon-calendar-card {
+  width: 195px !important;
+  min-height: 165px !important;
+}
+
+/* ▯ 2. FORMAT: HOCHKANT (Portrait / Vertikal) */
+.draggable-widget-item.widget-shape-portrait .clock-widget-card {
+  width: 155px !important;
+  min-width: 155px !important;
+  max-width: 155px !important;
+  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  text-align: center;
+}
+.draggable-widget-item.widget-shape-portrait .clock-widget-card .digital-time {
+  font-size: 2.2rem !important;
+  line-height: 1.05;
+}
+
+.draggable-widget-item.widget-shape-portrait .agenda-widget-card {
+  width: 170px !important;
+  height: 240px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .calendar-widget-card {
+  width: 210px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .countdown-panel {
+  width: 160px !important;
+  min-width: 160px !important;
+  max-width: 160px !important;
+}
+.draggable-widget-item.widget-shape-portrait .countdown-units {
+  grid-template-columns: 1fr !important;
+  gap: 4px !important;
+}
+.draggable-widget-item.widget-shape-portrait .countdown-unit {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .vitals-panel {
+  width: 165px !important;
+  min-width: 165px !important;
+  max-width: 165px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .notes-card {
+  width: 165px !important;
+  min-height: 240px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .cycle-tracker-card {
+  width: 165px !important;
+  min-height: 240px !important;
+}
+
+.draggable-widget-item.widget-shape-portrait .moon-calendar-card {
+  width: 165px !important;
+  min-height: 240px !important;
+}
+
+/* ▭ 3. FORMAT: QUER (Landscape / Horizontal) */
+.draggable-widget-item.widget-shape-landscape .clock-widget-card {
+  width: 320px !important;
+  min-width: 300px !important;
+  max-width: 360px !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px !important;
+}
+.draggable-widget-item.widget-shape-landscape .clock-widget-card .digital-time {
+  font-size: 2.2rem;
+  margin-bottom: 0;
+}
+
+.draggable-widget-item.widget-shape-landscape .agenda-widget-card {
+  width: 320px !important;
+  height: 115px !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .calendar-widget-card {
+  width: 330px !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .countdown-panel {
+  width: 320px !important;
+  min-width: 300px !important;
+  max-width: 360px !important;
+}
+.draggable-widget-item.widget-shape-landscape .countdown-units {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .vitals-panel {
+  width: 320px !important;
+  min-width: 300px !important;
+  max-width: 360px !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .notes-card {
+  width: 320px !important;
+  min-height: 110px !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .cycle-tracker-card {
+  width: 320px !important;
+}
+
+.draggable-widget-item.widget-shape-landscape .moon-calendar-card {
+  width: 320px !important;
+}
+
 .widget-resize-grip {
   position: absolute;
   bottom: 2px;

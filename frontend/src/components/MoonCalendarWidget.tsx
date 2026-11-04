@@ -66,7 +66,7 @@ export const MoonCalendarWidget: React.FC<MoonCalendarWidgetProps> = ({ enabled 
   const nextNewDate = new Date(now.getTime() + daysToNewMoon * 86400000);
 
   return (
-    <section className="glass-panel" style={{ padding: '12px 16px' }}>
+    <section className="glass-panel moon-calendar-card" style={{ padding: '12px 16px' }}>
       <div className="widget-header" style={{ marginBottom: 6 }}>
         <div className="widget-title">
           <Moon size={13} color="var(--accent-amber)" />

@@ -45,11 +45,14 @@ export interface AddonCompanionInfo {
   is_flying?: boolean;
 }
 
+export type WidgetShape = 'square' | 'portrait' | 'landscape';
+
 export interface WidgetOffset {
   x: number;
   y: number;
   scale?: number;
   width?: number;
+  shape?: WidgetShape;
 }
 
 export interface WindowConfig {

@@ -63,6 +63,9 @@ public class WidgetOffset
 
     [JsonPropertyName("width")]
     public double? Width { get; set; }
+
+    [JsonPropertyName("shape")]
+    public string? Shape { get; set; }
 }
 
 public class ThemeConfig
