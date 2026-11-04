@@ -422,13 +422,13 @@ body,
 }
 
 .agenda-widget-card {
-  width: 220px;
-  height: 200px;
+  width: 185px;
+  height: 160px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
-  padding: 13px 15px;
+  padding: 9px 12px;
 }
 
 /* Calendar Widget: Snug Fit */

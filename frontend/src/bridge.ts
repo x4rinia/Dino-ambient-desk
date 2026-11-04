@@ -5,6 +5,7 @@ import {
   DailyQuote,
   MonitorInfo,
   OrientationMode,
+  WidgetOffset,
   WindowLayerMode,
 } from './types';
 
@@ -163,6 +164,8 @@ export const Bridge = {
   requestInit: () => sendToBackend('init'),
   closeSettings: () => sendToBackend('close_settings'),
   saveConfig: (config: AmbientDeckConfig) => sendToBackend('save_config', { config }),
+  saveWidgetPositions: (widgetPositions: Record<string, WidgetOffset>) =>
+    sendToBackend('save_widget_positions', { widget_positions: widgetPositions }),
   setLayerMode: (layerMode: WindowLayerMode) =>
     sendToBackend('set_layer_mode', { layer_mode: layerMode }),
   setOrientationMode: (orientationMode: OrientationMode, applyWindowResize = false) =>

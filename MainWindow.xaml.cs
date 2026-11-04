@@ -560,31 +560,57 @@ public partial class MainWindow : Window
                     break;
                 }
 
+                case "save_widget_positions":
+                {
+                    try
+                    {
+                        if (root.TryGetProperty("widget_positions", out JsonElement wpEl))
+                        {
+                            var positions = JsonSerializer.Deserialize<Dictionary<string, WidgetOffset>>(wpEl.GetRawText(), JsonOptions);
+                            if (positions != null)
+                            {
+                                _config.Window.WidgetPositions = positions;
+                                _storage.SaveConfig(_config);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                    break;
+                }
+
                 case "save_config":
                 {
-                    if (root.TryGetProperty("config", out JsonElement cfgEl))
+                    try
                     {
-                        var updated = JsonSerializer.Deserialize<AmbientDeckConfig>(cfgEl.GetRawText(), JsonOptions);
-                        if (updated != null)
+                        if (root.TryGetProperty("config", out JsonElement cfgEl))
                         {
-                            if ((updated.Window.WidgetPositions == null || updated.Window.WidgetPositions.Count == 0) &&
-                                _config.Window.WidgetPositions != null && _config.Window.WidgetPositions.Count > 0)
+                            var updated = JsonSerializer.Deserialize<AmbientDeckConfig>(cfgEl.GetRawText(), JsonOptions);
+                            if (updated != null)
                             {
-                                updated.Window.WidgetPositions = _config.Window.WidgetPositions;
+                                if ((updated.Window.WidgetPositions == null || updated.Window.WidgetPositions.Count == 0) &&
+                                    _config.Window.WidgetPositions != null && _config.Window.WidgetPositions.Count > 0)
+                                {
+                                    updated.Window.WidgetPositions = _config.Window.WidgetPositions;
+                                }
+                                _config = updated;
+                                ApplyWindowLayerState(_config.Window.LayerMode);
+                                _storage.SaveConfig(_config);
+                                _vitalsTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(500, _config.Modules.SystemVitals.RefreshMs));
+                                UpdateWallpapersVirtualHostMapping();
+                                string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
+                                SendToFrontend("config_updated", new { config = _config });
+                                SendToFrontend("wallpapers_updated", new
+                                {
+                                    wallpapers = _storage.GetWallpaperUrls(_config.Modules.Slideshow.FolderPath),
+                                    windows_wallpaper_url = winWp
+                                });
                             }
-                            _config = updated;
-                            ApplyWindowLayerState(_config.Window.LayerMode);
-                            _storage.SaveConfig(_config);
-                            _vitalsTimer.Interval = TimeSpan.FromMilliseconds(Math.Max(500, _config.Modules.SystemVitals.RefreshMs));
-                            UpdateWallpapersVirtualHostMapping();
-                            string winWp = _storage.SyncWindowsDesktopWallpaper(_config.Modules.Slideshow.FolderPath, _config.Window.MonitorId) ?? "";
-                            SendToFrontend("config_updated", new { config = _config });
-                            SendToFrontend("wallpapers_updated", new
-                            {
-                                wallpapers = _storage.GetWallpaperUrls(_config.Modules.Slideshow.FolderPath),
-                                windows_wallpaper_url = winWp
-                            });
                         }
+                    }
+                    catch
+                    {
                     }
                     break;
                 }

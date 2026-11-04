@@ -561,10 +561,23 @@ export const App: React.FC = () => {
 
   const handleWidgetOffsetChange = useCallback(
     (widgetId: string, nextOffset: WidgetOffset) => {
+      const sanitized: WidgetOffset = {
+        x: Math.round(Number(nextOffset.x) || 0),
+        y: Math.round(Number(nextOffset.y) || 0),
+        scale:
+          typeof nextOffset.scale === 'number' && !isNaN(nextOffset.scale)
+            ? Math.round(nextOffset.scale * 100) / 100
+            : 1,
+        width:
+          typeof nextOffset.width === 'number' && !isNaN(nextOffset.width)
+            ? Math.round(nextOffset.width)
+            : undefined,
+      };
+
       setConfig((prev) => {
         const nextPositions = {
           ...(prev.window.widget_positions || {}),
-          [widgetId]: nextOffset,
+          [widgetId]: sanitized,
         };
         const updated: AmbientDeckConfig = {
           ...prev,
@@ -573,7 +586,7 @@ export const App: React.FC = () => {
             widget_positions: nextPositions,
           },
         };
-        Bridge.saveConfig(updated);
+        Bridge.saveWidgetPositions(nextPositions);
         return updated;
       });
     },
@@ -589,7 +602,7 @@ export const App: React.FC = () => {
           widget_positions: {},
         },
       };
-      Bridge.saveConfig(updated);
+      Bridge.saveWidgetPositions({});
       return updated;
     });
   }, []);

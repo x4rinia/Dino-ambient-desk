@@ -95,20 +95,20 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
   return (
     <section className="glass-panel agenda-widget-card">
       {/* Header */}
-      <div className="widget-header" style={{ marginBottom: 8 }}>
-        <div className="widget-title">
-          <CalendarClock size={13} color="var(--accent-emerald)" />
-          <span>Nächste Termine</span>
+      <div className="widget-header" style={{ marginBottom: 6 }}>
+        <div className="widget-title" style={{ fontSize: '0.72rem' }}>
+          <CalendarClock size={11} color="var(--accent-emerald)" />
+          <span>Termine</span>
         </div>
         {count > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             <span
               className="widget-badge"
               style={{
                 color: 'var(--accent-emerald)',
                 fontWeight: 700,
-                fontSize: '0.68rem',
-                padding: '2px 6px',
+                fontSize: '0.62rem',
+                padding: '1px 5px',
               }}
             >
               {activeIndex + 1}/{count}
@@ -121,16 +121,16 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
                   style={{
                     background: 'rgba(255,255,255,0.08)',
                     border: 'none',
-                    borderRadius: 4,
+                    borderRadius: 3,
                     color: '#cbd5e1',
                     cursor: 'pointer',
-                    padding: '2px',
+                    padding: '1px 2px',
                     display: 'flex',
                     alignItems: 'center',
                   }}
                   title="Vorheriger Termin"
                 >
-                  <ChevronLeft size={11} />
+                  <ChevronLeft size={10} />
                 </button>
                 <button
                   type="button"
@@ -138,16 +138,16 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
                   style={{
                     background: 'rgba(255,255,255,0.08)',
                     border: 'none',
-                    borderRadius: 4,
+                    borderRadius: 3,
                     color: '#cbd5e1',
                     cursor: 'pointer',
-                    padding: '2px',
+                    padding: '1px 2px',
                     display: 'flex',
                     alignItems: 'center',
                   }}
                   title="Nächster Termin"
                 >
-                  <ChevronRight size={11} />
+                  <ChevronRight size={10} />
                 </button>
               </div>
             )}
@@ -163,11 +163,11 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            gap: 6,
+            gap: 4,
           }}
         >
           {/* Top: Countdown Pill */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <span
               style={{
                 background: currentEvent.isImminent
@@ -177,19 +177,19 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
                   ? '1px solid rgba(245,158,11,0.45)'
                   : '1px solid rgba(56, 189, 248, 0.35)',
                 color: currentEvent.isImminent ? '#fbbf24' : '#38bdf8',
-                fontSize: '0.74rem',
+                fontSize: '0.68rem',
                 fontWeight: 700,
-                padding: '3px 8px',
-                borderRadius: '6px',
+                padding: '2px 6px',
+                borderRadius: '5px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 4,
+                gap: 3,
                 boxShadow: currentEvent.isImminent
-                  ? '0 2px 8px rgba(251,191,36,0.25)'
+                  ? '0 2px 6px rgba(251,191,36,0.2)'
                   : 'none',
               }}
             >
-              <Clock size={11} />
+              <Clock size={10} />
               <span>{currentEvent.countdownText}</span>
             </span>
           </div>
@@ -197,15 +197,15 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
           {/* Middle: Title */}
           <div
             style={{
-              fontSize: '0.96rem',
+              fontSize: '0.86rem',
               fontWeight: 700,
               color: 'var(--text-primary)',
-              lineHeight: 1.35,
+              lineHeight: 1.25,
               wordBreak: 'break-word',
               textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
               overflow: 'hidden',
               display: '-webkit-box',
-              WebkitLineClamp: 3,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
             }}
           >
@@ -215,7 +215,7 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
           {/* Bottom: Date & Time details */}
           <div
             style={{
-              paddingTop: 6,
+              paddingTop: 4,
               borderTop: '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               flexDirection: 'column',
@@ -226,27 +226,27 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 5,
-                fontSize: '0.74rem',
+                gap: 4,
+                fontSize: '0.68rem',
                 color: '#cbd5e1',
                 fontWeight: 600,
               }}
             >
-              <CalIcon size={12} color="var(--accent-blue)" />
+              <CalIcon size={10} color="var(--accent-blue)" />
               <span>{currentEvent.dateLabel}</span>
               <span style={{ color: 'var(--text-muted)' }}>•</span>
-              <span style={{ color: 'var(--text-primary)' }}>{currentEvent.timeLabel} Uhr</span>
+              <span style={{ color: 'var(--text-primary)' }}>{currentEvent.timeLabel}</span>
             </div>
 
             {count > 1 && (
               <div
                 style={{
-                  fontSize: '0.67rem',
+                  fontSize: '0.62rem',
                   color: 'var(--text-muted)',
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  marginTop: 2,
+                  marginTop: 1,
                 }}
               >
                 Danach: {upcomingEventsList[(activeIndex + 1) % count].title}
@@ -263,17 +263,14 @@ export const NextUpAgendaWidget: React.FC<NextUpAgendaWidgetProps> = ({ events }
             alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
-            gap: 8,
-            padding: '12px 6px',
+            gap: 6,
+            padding: '8px 4px',
             color: 'var(--text-muted)',
           }}
         >
-          <CalendarClock size={28} opacity={0.35} />
-          <div style={{ fontSize: '0.78rem', fontWeight: 600, color: '#94a3b8' }}>
-            Keine anstehenden Termine
-          </div>
-          <div style={{ fontSize: '0.68rem', lineHeight: 1.3 }}>
-            Sobald ein Termin eingetragen ist, wird er hier angezeigt.
+          <CalendarClock size={22} opacity={0.35} />
+          <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#94a3b8' }}>
+            Keine Termine
           </div>
         </div>
       )}

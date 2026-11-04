@@ -53,16 +53,16 @@ public class WindowConfig
 public class WidgetOffset
 {
     [JsonPropertyName("x")]
-    public int X { get; set; } = 0;
+    public double X { get; set; } = 0;
 
     [JsonPropertyName("y")]
-    public int Y { get; set; } = 0;
+    public double Y { get; set; } = 0;
 
     [JsonPropertyName("scale")]
     public double? Scale { get; set; } = 1.0;
 
     [JsonPropertyName("width")]
-    public int? Width { get; set; }
+    public double? Width { get; set; }
 }
 
 public class ThemeConfig
