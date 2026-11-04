@@ -398,12 +398,6 @@ body,
   }
 }
 
-@media (min-width: 900px) {
-  .main-workspace.widgets-flow-grid.layout-landscape [data-widget-id="clock_calendar"] {
-    grid-column: span 2;
-  }
-}
-
 .main-workspace.widgets-flow-grid.layout-portrait {
   display: flex;
   flex-direction: column;

@@ -11,7 +11,9 @@ import {
 } from './types';
 import { Bridge, DEFAULT_CONFIG, onBackendMessage } from './bridge';
 import { SlideshowBackground } from './components/SlideshowBackground';
-import { ClockCalendarWidget } from './components/ClockCalendarWidget';
+import { ClockWidget } from './components/ClockWidget';
+import { CalendarWidget } from './components/CalendarWidget';
+import { NextUpAgendaWidget } from './components/NextUpAgendaWidget';
 import { SystemVitalsWidget } from './components/SystemVitalsWidget';
 import { CountdownWidget } from './components/CountdownWidget';
 import { AmbientNotesWidget } from './components/QuickNotesFlyout';
@@ -636,7 +638,9 @@ export const App: React.FC = () => {
     rawBg === 'glass' || rawBg === 'color' || rawBg === 'black' ? rawBg : 'wallpaper_blur';
 
   const getOffset = (id: string): WidgetOffset =>
-    config.window.widget_positions?.[id] || { x: 0, y: 0 };
+    config.window.widget_positions?.[id] ||
+    (id === 'clock' ? config.window.widget_positions?.['clock_calendar'] : undefined) ||
+    { x: 0, y: 0 };
 
   // Separate Settings Window on Primary Monitor: Neutral styling
   if (isSettingsWindow) {
@@ -762,18 +766,40 @@ export const App: React.FC = () => {
 
         {config.modules.clock_calendar.enabled && (
           <DraggableWidgetBox
-            id="clock_calendar"
-            label="Uhr & Kalender"
+            id="clock"
+            label="Uhrzeit & Datum"
             isEditable={isSettingsOpen}
-            offset={getOffset('clock_calendar')}
+            offset={getOffset('clock')}
             fontScaleRatio={fontScaleRatio}
             onOffsetChange={handleWidgetOffsetChange}
           >
-            <ClockCalendarWidget
-              showSeconds={config.modules.clock_calendar.show_seconds}
-              showNextEvent={config.modules.next_up_agenda?.enabled ?? true}
-              events={events}
-            />
+            <ClockWidget showSeconds={config.modules.clock_calendar.show_seconds} />
+          </DraggableWidgetBox>
+        )}
+
+        {(config.modules.next_up_agenda?.enabled ?? true) && (
+          <DraggableWidgetBox
+            id="agenda"
+            label="Nächste Termine"
+            isEditable={isSettingsOpen}
+            offset={getOffset('agenda')}
+            fontScaleRatio={fontScaleRatio}
+            onOffsetChange={handleWidgetOffsetChange}
+          >
+            <NextUpAgendaWidget events={events} />
+          </DraggableWidgetBox>
+        )}
+
+        {(config.modules.clock_calendar.compact_calendar ?? true) && (
+          <DraggableWidgetBox
+            id="calendar"
+            label="Monatskalender"
+            isEditable={isSettingsOpen}
+            offset={getOffset('calendar')}
+            fontScaleRatio={fontScaleRatio}
+            onOffsetChange={handleWidgetOffsetChange}
+          >
+            <CalendarWidget events={events} />
           </DraggableWidgetBox>
         )}
 
