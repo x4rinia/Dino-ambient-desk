@@ -398,6 +398,53 @@ body,
   }
 }
 
+/* Individual Widget Card Proportions & Fit */
+.main-workspace [data-widget-id="clock"] {
+  width: max-content;
+  max-width: 100%;
+  justify-self: start;
+  align-self: start;
+}
+
+.clock-widget-card {
+  width: max-content;
+  min-width: 210px;
+  max-width: 275px;
+  box-sizing: border-box;
+}
+
+/* Agenda / Next Appointments Widget: Compact & Square */
+.main-workspace [data-widget-id="agenda"] {
+  width: max-content;
+  max-width: 100%;
+  justify-self: start;
+  align-self: start;
+}
+
+.agenda-widget-card {
+  width: 220px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 13px 15px;
+}
+
+/* Calendar Widget: Snug Fit */
+.main-workspace [data-widget-id="calendar"] {
+  width: max-content;
+  max-width: 100%;
+  justify-self: start;
+  align-self: start;
+}
+
+.calendar-widget-card {
+  width: 260px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .main-workspace.widgets-flow-grid.layout-portrait {
   display: flex;
   flex-direction: column;

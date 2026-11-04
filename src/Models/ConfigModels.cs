@@ -279,6 +279,9 @@ public class HeaderTitleModuleConfig
 
     [JsonPropertyName("text")]
     public string Text { get; set; } = "";
+
+    [JsonPropertyName("icon")]
+    public string Icon { get; set; } = "trex";
 }
 
 public class DinoCompanionModuleConfig

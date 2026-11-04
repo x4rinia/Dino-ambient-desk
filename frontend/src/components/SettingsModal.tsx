@@ -1317,6 +1317,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     header_title: {
                       enabled: config.modules.header_title?.enabled ?? true,
                       text: e.target.value,
+                      icon: config.modules.header_title?.icon ?? 'trex',
                     },
                   },
                 })
@@ -1332,6 +1333,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 userSelect: 'text',
               }}
             />
+
+            <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Icon vor Überschrift:</span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[
+                  { id: 'trex', label: '🦖 T-Rex' },
+                  { id: 'sauropod', label: '🦕 Sauropode' },
+                  { id: 'none', label: '🚫 Kein Icon' },
+                ].map((item) => {
+                  const currentIcon = config.modules.header_title?.icon ?? 'trex';
+                  const isActive = currentIcon === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`icon-btn ${isActive ? 'active-emerald' : ''}`}
+                      style={{
+                        padding: '4px 10px',
+                        fontSize: '0.72rem',
+                        fontWeight: isActive ? 700 : 500,
+                      }}
+                      onClick={() =>
+                        onUpdateConfig({
+                          ...config,
+                          modules: {
+                            ...config.modules,
+                            header_title: {
+                              enabled: config.modules.header_title?.enabled ?? true,
+                              text: config.modules.header_title?.text || '',
+                              icon: item.id as 'trex' | 'sauropod' | 'none',
+                            },
+                          },
+                        })
+                      }
+                    >
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           <div className="settings-grid">

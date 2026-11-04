@@ -146,3 +146,4 @@ export const CalendarWidget: React.FC<CalendarWidgetProps> = ({ events }) => {
     </section>
   );
 };
+

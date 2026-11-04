@@ -40,3 +40,4 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({ showSeconds = true }) 
     </section>
   );
 };
+

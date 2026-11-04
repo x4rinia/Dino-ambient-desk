@@ -70,6 +70,7 @@ export const DEFAULT_CONFIG: AmbientDeckConfig = {
     header_title: {
       enabled: true,
       text: '',
+      icon: 'trex',
     },
     slideshow: {
       enabled: true,

@@ -742,20 +742,26 @@ export const App: React.FC = () => {
                   textAlign: 'center',
                 }}
               >
-                <span style={{ color: 'var(--accent-emerald)' }}>🦖</span>
+                {(config.modules.header_title?.icon ?? 'trex') !== 'none' && (
+                  <span style={{ color: 'var(--accent-emerald)', fontSize: '1.1rem' }}>
+                    {(config.modules.header_title?.icon ?? 'trex') === 'sauropod' ? '🦕' : '🦖'}
+                  </span>
+                )}
                 <span>{config.modules.header_title?.text?.trim() || 'Dino'}</span>
               </div>
               <span
                 style={{
                   position: 'absolute',
-                  right: '14px',
-                  bottom: '6px',
-                  fontSize: '0.66rem',
-                  fontWeight: 600,
+                  right: '12px',
+                  bottom: '4px',
+                  fontSize: '0.54rem',
+                  fontWeight: 400,
+                  fontStyle: 'italic',
                   letterSpacing: '0.04em',
-                  color: 'var(--text-muted)',
-                  textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
+                  color: 'rgba(226, 232, 240, 0.42)',
+                  textShadow: '0 1px 2px rgba(0, 0, 0, 0.7)',
                   userSelect: 'none',
+                  pointerEvents: 'none',
                 }}
               >
                 by X4rinia

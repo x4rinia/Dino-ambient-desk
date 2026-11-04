@@ -131,9 +131,12 @@ export interface CommsModuleConfig {
   email_url: string;
 }
 
+export type HeaderTitleIcon = 'trex' | 'sauropod' | 'none';
+
 export interface HeaderTitleModuleConfig {
   enabled: boolean;
   text: string;
+  icon?: HeaderTitleIcon;
 }
 
 export interface DinoCompanionModuleConfig {
